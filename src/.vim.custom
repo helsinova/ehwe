@@ -1,0 +1,31 @@
+
+"let $LIB_DYNAMIC = "y"
+"let $LD_LIBRARY_PATH = expand('$HOME/lib')
+
+"Put this is ~/.bash_profile to fix where kdbg X-window is put
+"export KDBG_GEOMETRY="-geometry 1105x1383-6--5"
+
+"Or remove remark below to adjust per project
+
+" KDBG_GEOMETRY
+" =============
+" Measure the actual geometry on a placed X-window with the 'xwininfo'
+" command-line utility to tune the line above.
+" For example: Put this is ~/.bash_profile to fix where kdbg X-window is put
+" export KDBG_GEOMETRY="-geometry 1105x1383-6--5"
+"
+" Presidency rules:
+"
+" 1. Set explicitly to empty string. kdbg uses it's own defaults, usually
+"    last geometry.
+" 2. Set an explicit value which will be local per project, per directory
+" 3. Don't set at all (usually the best). Instead relay on environment
+"    variable to be set in users current machines setting in ~/.bash_profile
+
+" Local overloads. Note the syntax for setting environment variables is
+" similar to shell, but *NOT* the same.
+
+" Workplace H
+let $KDBG_GEOMETRY = "-geometry 1035x1385+1523--2"
+
+nmap <silent> <leader>d :!emb.openocd.cmd.exp halt; kdbg $KDBG_GEOMETRY "-r :3333" "template" &<CR>

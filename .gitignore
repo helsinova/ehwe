@@ -1,0 +1,15 @@
+*.d
+*.o
+*.hi
+gitit.log
+gitit-users
+cache/
+BUILD*/
+tags
+c-tags
+template
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+config.h
+Makefile

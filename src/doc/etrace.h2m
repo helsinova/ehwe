@@ -1,0 +1,21 @@
+[NAME]
+etrace - command line ftrace-events harvest utility
+
+[DESCRIPTION]
+The \fBetrace\fP utility is used as a companion to Linux ftrace to set-up
+events/filters per process involving also it's threads. Then start ftrace and
+harvest during a specific period of time before delivering output\&.
+
+[EXAMPLES]
+.PP
+$ etrace -T 1000
+.IP
+Arms ftrace with event & filter. After 1000mS it delivers it's harvest.
+
+\fBNote\fP: Time is relative-time during non hibernation.
+
+
+[INTERACTIVE COMMANDS]
+etrace supports a scriptable interactive mode.  Run \fBetrace --interactive\fP
+to enter this mode.  Type "\fBhelp\fP" for a listing of all commands, or
+"\fBhelp <command>\fP" for more information about <command>.
