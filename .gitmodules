@@ -1,12 +1,12 @@
-[submodule "src/lib/liblog"]
-	path = src/lib/log
-	url = https://github.com/mambrus/liblog
-[submodule "src/lib/libmlist"]
-	path = src/lib/mlist
-	url = https://github.com/mambrus/libmlist
-[submodule "src/lib/libmtime"]
-	path = src/lib/mtime
-	url = https://github.com/mambrus/libmtime
 [submodule "wiki/wikidata"]
 	path = wiki/wikidata
 	url = /home/mambrus/minirepos/EMBEDDED/template_wiki
+[submodule "src/lib/log"]
+	path = src/lib/log
+	url = https://github.com/mambrus/liblog.git
+[submodule "src/lib/mlist"]
+	path = src/lib/mlist
+	url = https://github.com/mambrus/libmlist.git
+[submodule "src/lib/mtime"]
+	path = src/lib/mtime
+	url = https://github.com/mambrus/libmtime.git
