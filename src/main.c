@@ -44,7 +44,7 @@ struct opts opts = {
 /* *INDENT-ON* */
 };
 
-struct template template = {
+struct ehwe ehwe = {
 /* *INDENT-OFF* */
     .opts           = &opts,
     .list           = 1
@@ -52,9 +52,9 @@ struct template template = {
 };
 
 /* Cleanup before exit even if exit-with-error */
-void template_exit(int status)
+void ehwe_exit(int status)
 {
-    LOGD("template_exit initiated\n");
+    LOGD("ehwe_exit initiated\n");
 
     free(opts.req_opts);
     exit(status);
@@ -63,7 +63,7 @@ void template_exit(int status)
 int main(int argc, char **argv)
 {
     int rc;
-    LOGI("\"template\" version v%s \n", VERSION);
+    LOGI("\"ehwe\" version v%s \n", VERSION);
 
     opts_init();
     /* Any zeroing here (begin) */
@@ -74,9 +74,9 @@ int main(int argc, char **argv)
     ASSURE_E(opts_check(&opts) == OPT_OK, goto err);
     LOGI("Option passed rule-check OK\n", rc);
 
-    template_exit(0);
+    ehwe_exit(0);
 err:
-    template_exit(1);
+    ehwe_exit(1);
     /* GCC, please shut up! */
     return 0;
 }

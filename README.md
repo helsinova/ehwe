@@ -1,11 +1,12 @@
-README TEMPLATE
-===============
+README EHWE
+===========
 
-Bla bla...
+ehwe (Embedded HW Emulator) is a soft work-bench for embedded software
+development on a normal Linux desktop.
+
 
 Get documentation below. Build-system is CMake-based. Please read
 more about it in the [wiki](wiki/README.md).
-
 
 Simplified build-instructions are available under [src/README.md](src/README.md).
 

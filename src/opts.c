@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 /*
- * Parse single options for template
+ * Parse single options for ehwe
  */
 #include <stdio.h>
 #include <limits.h>
@@ -47,7 +47,7 @@
 
 static struct req_opt *_req_opt(int val);
 
-extern struct template etrace;
+extern struct ehwe etrace;
 
 /* Parse a single option. */
 static int opts_parse_opt(const char *cmd,
@@ -82,7 +82,7 @@ static int opts_parse_opt(const char *cmd,
         case 'D':
             _req_opt('D')->cnt++;
             doc_print();
-            template_exit(0);
+            ehwe_exit(0);
             break;
         case '?':
             /* getopt_long already printed an error message. */
@@ -99,7 +99,7 @@ static int opts_parse_opt(const char *cmd,
             opts_help(stdout, HELP_VERSION | HELP_EXIT);
             break;
         default:
-            fprintf(stderr, "template: unrecognized option '-%c'\n", (char)key);
+            fprintf(stderr, "ehwe: unrecognized option '-%c'\n", (char)key);
             opts_help(stderr, HELP_TRY | HELP_EXIT_ERR);
             break;
     }
@@ -281,7 +281,7 @@ int opts_parse(int argc, char **argv, struct opts *opts)
 
     /* Handle any remaining command line arguments (not options). */
     if (optind < argc) {
-        perror("template: Too many arguments, \"template\" takes only options.\n");
+        perror("ehwe: Too many arguments, \"ehwe\" takes only options.\n");
         fflush(stderr);
         opts_help(stderr, HELP_TRY | HELP_EXIT_ERR);
 		return -1;

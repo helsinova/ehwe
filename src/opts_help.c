@@ -31,13 +31,13 @@
 #include "main.h"
 #include "config.h"
 
-const char *program_version = "template " VERSION;
+const char *program_version = "ehwe " VERSION;
 
 void opts_help(FILE *file, int flags)
 {
     if (file && flags & HELP_USAGE) {
         fprintf(file, "%s",
-                "Usage: template [-zDuhV]\n"
+                "Usage: ehwe [-zDuhV]\n"
                 "            [-v level] [--verbosity=level] \n"
                 "            [--documentation]\n"
                 "            [--help] [--usage] [--version]\n");
@@ -45,8 +45,8 @@ void opts_help(FILE *file, int flags)
     }
     if (file && flags & HELP_LONG) {
         fprintf(file, "%s",
-                "Usage: template [OPTION...] \n"
-                "template command line bla bla (short description here) (" VERSION ").\n"
+                "Usage: ehwe [OPTION...] \n"
+                "ehwe command line bla bla (short description here) (" VERSION ").\n"
                 "\n"
                 "Normal options:\n"
                 "  (Document options here TBD)\n"
@@ -73,13 +73,13 @@ void opts_help(FILE *file, int flags)
 
     if (file && flags & HELP_TRY) {
         fprintf(file, "%s",
-                "Try `template --help' or `etrace --usage' for more information.\n");
+                "Try `ehwe --help' or `etrace --usage' for more information.\n");
         fflush(file);
     }
 
     if (file && flags & HELP_EXIT)
-        template_exit(0);
+        ehwe_exit(0);
 
     if (file && flags & HELP_EXIT_ERR)
-        template_exit(1);
+        ehwe_exit(1);
 }

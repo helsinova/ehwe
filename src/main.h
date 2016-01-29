@@ -17,16 +17,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef template_h
-#define template_h
+#ifndef ehwe_h
+#define ehwe_h
 
 #include <mlist.h>
 
-struct template {
+struct ehwe {
     struct opts *opts;
     handle_t list;
 };
 
-void template_exit(int status);
+void ehwe_exit(int status);
 
-#endif                          /* template_h */
+#endif                          /* ehwe_h */

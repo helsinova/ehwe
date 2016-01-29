@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project (template C)
+project (ehwe C)
 
 ################################################################################
 # Configuration options
@@ -111,5 +111,5 @@ set(TEMPLATE_SOURCE
 
 install(PROGRAMS ${PROJECT_BINARY_DIR}/src DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-add_executable(template ${TEMPLATE_SOURCE})
-target_link_libraries (template ${EXTRA_LIBS})
+add_executable(ehwe ${TEMPLATE_SOURCE})
+target_link_libraries (ehwe ${EXTRA_LIBS})

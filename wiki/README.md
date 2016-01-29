@@ -1,10 +1,6 @@
 WIKI
 ====
 
-This subdirectory is a container for the wiki, which in turn is a
-git-sub-module to allow flexibility when creating new projects from
-template.
-
 Documentation:
 --------------
 
