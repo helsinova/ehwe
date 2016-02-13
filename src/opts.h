@@ -39,16 +39,6 @@
 #define E_OPT_REQ     -1        /* User breaks option requirement rule */
 #define E_OPT_USAGE   -2        /* User breaks usage of option  */
 
-#ifndef DEF_PTIME
-#define DEF_PTIME           1000
-#endif
-#ifndef DEF_DEBUGFS_PATH
-#define DEF_DEBUGFS_PATH    "/sys/kernel/debug"
-#endif
-#ifndef DEF_WORKDIR
-#define DEF_WORKDIR         "./"
-#endif
-
 #define xstr(S) str(S)
 #define str(S) #S
 
