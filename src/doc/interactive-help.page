@@ -1,57 +1,62 @@
-[INTERACTIVE COMMANDS]
+[CLU USAGE]
 
-calibrate
----------
+ehwe
+----
 
-Usage: `calibrate <operation> [options]`
+Usage: `ehwe [options] [arguments]`
 
-Perform the specified transceiver calibration operation.
+Run embedded program on host as it would on target using host buses.
 
-Available operations:
+## Options
 
- * LMS internal DC offset auto-calibrations
+Options are categorized in:
 
-     * `calibrate lms [show]`
-     * `calibrate lms tuning [value]`
-     * `calibrate lms txlpf [<I filter> <Q filter>]`
-     * `calibrate lms rxlpf [<I filter> <Q filter>]`
-     * `calibrate lms rxvga2 [<DC ref> <I1> <Q1> <I2> <Q2>]`
+* Optional
+    * System
+	* Debugging
+	* Program
+* Mandatory
 
-    Perform the specified auto-calibration, or all of them if none are
-    provided. When values are provided, these are used instead of the
-    results of the auto-calibration procedure. Use `lms show` to read and
-    print the current LMS calibration values.
+### Mandatory options
 
-    For `rxvga2`, `I1` and `Q1` are the Stage 1 I and Q components
-    respectively, and `I2` and `Q2` are the Stage 2 I and Q components.
+#### -d STR, --device STR
 
- * RX and TX I/Q DC offset correction parameter calibration
+Specifies local device(s) to use. STR describes the host-device to be used.
+Format is specific to each supported host-device. This option can be given
+multiple times.
 
-     * `calibrate dc <rx|tx> [<I> <Q>]`
-     * `calibrate dc <rxtx> dc`
+STR contains a description of how a local device should act in the emulation
+and arguments for it. It's general format is as follows:
 
-    Calibrate the DC offset correction parameters for the current frequency
-    and gain settings. If a I/Q values are provided, they are applied
-    directly. `cal rxtx` is shorthand for `cal rx` followed by
-    `cal tx`.
+ARG1:ARG2:ARG3:ARG4....:ARGN
 
- * RX and TX I/Q balance correction parameter calibration
+It's partly device specific, the first 4 arguments belong to ehwe and the rest
+to the device-drive according to the following meaning:
 
-     * `calibrate iq <rx|tx> <gain|phase> <value>`
+ROLE:NUMBER:DEVICE:DIRECTION:`<device_arguments>`
 
-    Set the specified IQ gain or phase balance parameters.
+`<device_arguments>`-part follows the same layout but number of arguments and
+their meaning is up to the device-driver.
 
- * Generate RX or TX I/Q DC correction parameter tables
+The first three arguments are mandatory and have the following defined meaning:
 
-     * `calibrate table dc <rx|tx> [<f_min> <f_max> [f_inc]]`
+* **role:** What kind of bus-device this local device should be. I.e.:
+    * i2c
+    * spi
+* **number:** Which device number the API should bind to this device. I.e.: 
+    * `spi1()`
+    * `spi2()`
+    * `spiN()`
+* **device:** The hosts understanding of what the device is called:
+    * bp - Bus Pirate
+    * pp - Parallel port. I.e. old-school Centronix printer-port
+* **direction:** For devices that can have have a direction, otherwise empty:
+    * master
+    * slave
 
-    Generate and write an I/Q correction parameter table to the current
-    working directory, in a file named `<serial>_dc_<rx|tx>.tbl`.
-    `f_min` and `f_max` are min and max frequencies to include in the
-    table. `f_inc` is the frequency increment.
-
-    By default, tables are generated over the entire frequency range, in
-    2 MHz steps.
+**Note** That all local devices can't take all the roles or can be
+restricted/limited in some way, for example **pp** host-device may not be able
+to be a bus-slave when having the role as an i2c-device.
 
 
 clear

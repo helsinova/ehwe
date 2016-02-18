@@ -26,7 +26,9 @@
 #include <sys/types.h>
 
 #include <log.h>
+#include <mlist.h>
 #include "config.h"
+#include "main.h"
 
 #define HELP_USAGE     1
 #define HELP_LONG      2
@@ -42,21 +44,43 @@
 #define xstr(S) str(S)
 #define str(S) #S
 
-/* opt validator, one per opt */
+/* opt presence validation rules, one per opt. Useful one ore more options
+ * are not optional but when we don't want to treat them as arguments (i.e.
+ * we want to benefit from the rules offered by option parsing).
+ *
+ * The presence of each opt, identified by it's short-opt identifier <opt>,
+ * is checked against <req> and <max>. <cnt> is just an internal counter,
+ * but needs to be initialized with the value 0 if <req> and <max> should
+ * retain the meaning above.
+ *
+ * <req> and <max> have, besides holding min and max number of visibility
+ * times, the following extended meaning:
+ *
+ * <req> can have the special values 0 and 1, meaning not required and
+ * required. Convenience names are defined accordingly: "not_req" and
+ * "mandatory"
+ *
+ * <max> is used to further refine the rule when <req> is "mandatory" with
+ * the special values 0 and -1. If 0, there is no upper limit. If -1, it
+ * means option must have been seen exactly <req> (i.e. minimum) times.
+ * Convenience names are defined accordingly: "at_least" and "precisely".
+*/
 struct req_opt {
-    int val;                    /* Flag value (option letter) */
-    int req;                    /* Times required to be seen at least */
-    int max;                    /* Seen no more than */
-    int cnt;                    /* Seen number of times */
+    int val;                    /* Flag value (i.e. short-option letter) */
+    int req;                    /* Required to be present at least <req> times */
+    int max;                    /* Presence must not exceed <max> times */
+    int cnt;                    /* Counter which counts presence. Should be
+                                   initialized with 0 */
 };
 
-/* General opts */
+/* Options struct used while command-line options are parsed. */
 struct opts {
     log_level *loglevel;        /* Verbosity level */
     int daemon;                 /* If to become a daemon or not */
+    handle_t dev_strs;  		/* Device specifications list. */
 
-    struct req_opt *req_opts;   /* Deep copy of the req_opts list. Can be used to
-                                   extend logic. */
+    struct req_opt *req_opts;   /* Deep copy of the req_opts list. Used to
+                                   extend logic with presence validation. */
 };
 
 #include <stdio.h>

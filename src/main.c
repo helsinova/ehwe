@@ -44,10 +44,10 @@ struct opts opts = {
 /* *INDENT-ON* */
 };
 
+/* Static initialization (fields possible to initialize) */
 struct ehwe ehwe = {
 /* *INDENT-OFF* */
-    .opts           = &opts,
-    .list           = 1
+    .opts           = &opts
 /* *INDENT-ON* */
 };
 
@@ -65,14 +65,29 @@ int main(int argc, char **argv)
     int rc;
     LOGI("\"ehwe\" version v%s \n", VERSION);
 
+	/* Storage for device-specification strings */
+    assert_ext((rc =
+                mlist_opencreate(sizeof(char*), NULL,
+                                 &opts.dev_strs)) == 0);
+
     opts_init();
-    /* Any zeroing here (begin) */
-    /* Any zeroing here (done) */
+    /* /begin/ zeroing of opt vars */
+    /* /end/   zeroing of opt vars */
 
     ASSURE_E((rc = opts_parse(argc, argv, &opts)) >= 0, goto err);
     LOGI("Parsed %d options.\n", rc);
     ASSURE_E(opts_check(&opts) == OPT_OK, goto err);
     LOGI("Option passed rule-check OK\n", rc);
+
+	/* Diagnostic print-out of device strings*/
+    LOGD("List of device definition strings:\n");
+    for (mlist_head(opts.dev_strs);
+         mlist_curr(opts.dev_strs);
+         mlist_next(opts.dev_strs)) {
+
+		char **dev_str=mdata_curr(opts.dev_strs);
+		LOGD("  %s\n",*dev_str);
+    }
 
     ehwe_exit(0);
 err:

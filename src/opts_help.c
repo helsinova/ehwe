@@ -46,13 +46,16 @@ void opts_help(FILE *file, int flags)
     if (file && flags & HELP_LONG) {
         fprintf(file, "%s",
                 "Usage: ehwe [OPTION...] \n"
-                "ehwe command line bla bla (short description here) (" VERSION ").\n"
-                "\n"
-                "Normal options:\n"
-                "  (Document options here TBD)\n"
+                "ehwe command line bla bla (short description here) (" VERSION
+                ").\n" "\n" "Mandatory options:\n"
+                "  -d STR, --device STR:      Mandatory option specifying device(s) to use.\n"
+				"                             STR describes the host-device to be used in\n"
+				"                             the emulation. Format is specific to each\n"
+				"                             supported host-device. This option can be given\n"
+				"                             multiple times.\n"
                 "Generic options:\n"
                 "  -D, --documentation        Output full documentation, then exit\n"
-				"  -v, --verbosity            Set the verbosity level.\n"
+                "  -v, --verbosity            Set the verbosity level.\n"
                 "                             Levels, listed in increasing verbosity, are:\n"
                 "                             critical, error, warning, info, debug, verbose\n"
                 "Special:\n" "  -z, --daemon               Run as a daemon\n"

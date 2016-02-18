@@ -38,7 +38,6 @@
 #include <log.h>
 #include "opts.h"
 #include "doc.h"
-#include "main.h"
 
 #define not_req    0
 #define mandatory  1
@@ -79,6 +78,10 @@ static int opts_parse_opt(const char *cmd,
             _req_opt('h')->cnt++;
             opts_help(stdout, HELP_LONG | HELP_EXIT);
             break;
+        case 'd':
+            _req_opt('d')->cnt++;
+			ASSURE(mlist_add_last(opts->dev_strs, &arg));
+            break;
         case 'D':
             _req_opt('D')->cnt++;
             doc_print();
@@ -106,11 +109,15 @@ static int opts_parse_opt(const char *cmd,
     return OPT_OK;
 }
 
+/* GNU log-opt structure. For more info, see:
+ * http://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Options.html
+ * */
 static struct option long_options[] = {
 /* *INDENT-OFF* */
     {"verbosity",      required_argument,  0,  'v'},
 
     {"daemon",         no_argument,        0,  'z'},
+    {"device",         required_argument,  0,  'd'},
     {"documentation",  no_argument,        0,  'D'},
     {"help",           no_argument,        0,  'h'},
     {"usage",          no_argument,        0,  'u'},
@@ -127,6 +134,7 @@ static struct req_opt req_opts[] = {
     {'v',  not_req,    at_least,   0},
 
     {'z',  not_req,    precisely,  0},
+    {'d',  mandatory,  at_least,   0},
     {'D',  not_req,    at_least,   0},
     {'h',  not_req,    at_least,   0},
     {'u',  not_req,    at_least,   0},
@@ -267,7 +275,7 @@ int opts_parse(int argc, char **argv, struct opts *opts)
     while (1) {
         int option_index = 0;
         int c = getopt_long(argc, argv,
-                            "v:zDuhV",
+                            "v:zd:DuhV",
                             long_options,
                             &option_index);
         /* Detect the end of the options. */
