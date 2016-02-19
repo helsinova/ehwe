@@ -6,4 +6,6 @@
 #cmakedefine ENABLE_LOGGING
 #cmakedefine ENABLE_SYSLOG
 #cmakedefine INITFINI_SHOW
+#cmakedefine DEVICE_PARAPORT
+#cmakedefine DEVICE_BUSPIRATE
 #define DEF_MAX_DEVICES @DEF_MAX_DEVICES@

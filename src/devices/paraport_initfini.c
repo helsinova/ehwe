@@ -17,46 +17,28 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <sys/types.h>
-#include <regex.h>
-#include <log.h>
-#include "devices.h"
+#include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#include <config.h>
+#include <syslog.h>
+#include <log.h>
+#define __init __attribute__((constructor))
+#define __fini __attribute__((destructor))
 
-static regex_t preg;            /* Compiled regular expression for generic
-                                   part of device-string parsing */
-
-#define DEVSTR_PATT \
-	"(" ROLES "):(" "[0-9]" "):(" DEVICES "):(" DIRECTIONS "):(.*)"
-
-int devices_init()
+void __init __paraport_init(void)
 {
-    int rc;
-    char err_str[80];
-    static int is_init = 0;
-
-    if (is_init) {
-        LOGW("No need to run %s twice, CTOR _init has run it?", __func__);
-        return 0;
-    }
-    is_init = 1;
-
-    rc = regcomp(&preg, DEVSTR_PATT, REG_EXTENDED);
-    if (rc) {
-        regerror(rc, &preg, err_str, 80);
-        LOGE("Regexec compilation error: %s", err_str);
-        return rc;
-    }
-    return 0;
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism ====\n");
+#endif
 }
 
-/*
- * Takes devstr and makes initial parsing to detect which driver it should
- * send each description to for further refinement. Result is a struct
- * device,
- *
- * */
-int devices_parse(const char *devstr, struct device *device)
+void __fini __paraport_fini(void)
 {
-    return 0;
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism\n");
+#endif
 }

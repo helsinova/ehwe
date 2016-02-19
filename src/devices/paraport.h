@@ -17,46 +17,14 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <sys/types.h>
-#include <regex.h>
-#include <log.h>
-#include "devices.h"
-#include <stdio.h>
+#ifndef paraport_h
+#define paraport_h
 
-static regex_t preg;            /* Compiled regular expression for generic
-                                   part of device-string parsing */
+struct paraport {
+    int dummy;
+    /* TBD */
+};
 
-#define DEVSTR_PATT \
-	"(" ROLES "):(" "[0-9]" "):(" DEVICES "):(" DIRECTIONS "):(.*)"
+int paraports_pars(const char *devstr, struct device *device);
 
-int devices_init()
-{
-    int rc;
-    char err_str[80];
-    static int is_init = 0;
-
-    if (is_init) {
-        LOGW("No need to run %s twice, CTOR _init has run it?", __func__);
-        return 0;
-    }
-    is_init = 1;
-
-    rc = regcomp(&preg, DEVSTR_PATT, REG_EXTENDED);
-    if (rc) {
-        regerror(rc, &preg, err_str, 80);
-        LOGE("Regexec compilation error: %s", err_str);
-        return rc;
-    }
-    return 0;
-}
-
-/*
- * Takes devstr and makes initial parsing to detect which driver it should
- * send each description to for further refinement. Result is a struct
- * device,
- *
- * */
-int devices_parse(const char *devstr, struct device *device)
-{
-    return 0;
-}
+#endif                          //paraport_h

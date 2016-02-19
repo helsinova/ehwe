@@ -34,6 +34,7 @@
 #include "opts.h"
 #include "main.h"
 #include <mlist.h>
+#include <devices.h>
 
 extern log_level log_filter_level;
 
@@ -65,10 +66,9 @@ int main(int argc, char **argv)
     int rc;
     LOGI("\"ehwe\" version v%s \n", VERSION);
 
-	/* Storage for device-specification strings */
+    /* Storage for device-specification strings */
     assert_ext((rc =
-                mlist_opencreate(sizeof(char*), NULL,
-                                 &opts.dev_strs)) == 0);
+                mlist_opencreate(sizeof(char *), NULL, &opts.dev_strs)) == 0);
 
     opts_init();
     /* /begin/ zeroing of opt vars */
@@ -79,15 +79,20 @@ int main(int argc, char **argv)
     ASSURE_E(opts_check(&opts) == OPT_OK, goto err);
     LOGI("Option passed rule-check OK\n", rc);
 
-	/* Diagnostic print-out of device strings*/
+    /* Convert device strings to devices */
     LOGD("List of device definition strings:\n");
     for (mlist_head(opts.dev_strs);
-         mlist_curr(opts.dev_strs);
-         mlist_next(opts.dev_strs)) {
+         mlist_curr(opts.dev_strs); mlist_next(opts.dev_strs)) {
 
-		char **dev_str=mdata_curr(opts.dev_strs);
-		LOGD("  %s\n",*dev_str);
+        struct device device;
+
+        char **dev_str = mdata_curr(opts.dev_strs);
+        LOGD("  %s\n", *dev_str);
+        devices_parse(*dev_str, &device);
     }
+
+    /* Close storage of device-specification strings */
+    assert_ext((rc = mlist_close(opts.dev_strs)) == 0);
 
     ehwe_exit(0);
 err:

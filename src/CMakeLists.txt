@@ -12,8 +12,12 @@ set(DEF_MAX_DEVICES
 	"Maximum number of devices")
 
 # Device bus-pirate
-option(ENABLE_BUSPIRATE
+option(DEVICE_BUSPIRATE
     "Enable device BUSPIRATE." YES)
+
+# Device paraport
+option(DEVICE_PARAPORT
+    "Enable device PARAPORT (requires special kernel-driver)." NO)
 
 #-------------------------------------------------------------------------------
 # X buildtool options (gcc)
@@ -81,10 +85,14 @@ endif (ENABLE_LOGGING)
 include_directories ("${PROJECT_SOURCE_DIR}/devices")
 add_subdirectory (devices)
 set (EXTRA_LIBS ${EXTRA_LIBS} devices)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__devices_init")
 
-if (ENABLE_BUSPIRATE)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__bp_init")
-endif (ENABLE_BUSPIRATE)
+if (DEVICE_BUSPIRATE)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__buspirate_init")
+endif (DEVICE_BUSPIRATE)
+if (DEVICE_PARAPORT)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__paraport_init")
+endif (DEVICE_PARAPORT)
 
 #-------------------------------------------------------------------------------
 # -Lists-
