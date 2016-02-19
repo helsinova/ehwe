@@ -34,6 +34,9 @@ option(ENABLE_LOGGING
 option(ENABLE_SYSLOG
     "Enable log to syslog (Linux/OSX)" OFF)
 
+option(INITFINI_SHOW
+    "Show init/fini execution using CTORS/DTORS mechanism" OFF)
+
 #-------------------------------------------------------------------------------
 # Build-tool options (gcc)
 #-------------------------------------------------------------------------------
