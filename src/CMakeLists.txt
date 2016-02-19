@@ -6,10 +6,14 @@ project (ehwe C)
 ################################################################################
 # Normal project options (src defines)
 #-------------------------------------------------------------------------------
-set(DEF_PTIME
-	"1000"
+set(DEF_MAX_DEVICES
+	"30"
 	CACHE STRING
-	"Default period-time (uS)")
+	"Maximum number of devices")
+
+# Device bus-pirate
+option(ENABLE_BUSPIRATE
+    "Enable device BUSPIRATE." YES)
 
 #-------------------------------------------------------------------------------
 # X buildtool options (gcc)
@@ -67,6 +71,17 @@ if (ENABLE_LOGGING)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__liblog_init")
 	set (EXTRA_LIBS ${EXTRA_LIBS} liblog)
 endif (ENABLE_LOGGING)
+
+#-------------------------------------------------------------------------------
+# Devices - i.e. the real stuff behind this project
+#-------------------------------------------------------------------------------
+include_directories ("${PROJECT_SOURCE_DIR}/devices")
+add_subdirectory (devices)
+set (EXTRA_LIBS ${EXTRA_LIBS} devices)
+
+if (ENABLE_BUSPIRATE)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__bp_init")
+endif (ENABLE_BUSPIRATE)
 
 #-------------------------------------------------------------------------------
 # -Lists-
