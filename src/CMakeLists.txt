@@ -88,9 +88,9 @@ set (EXTRA_LIBS ${EXTRA_LIBS} libmtime)
 # Project
 ################################################################################
 # The version number.
-set (TEMPLATE_VERSION_MAJOR 0)
-set (TEMPLATE_VERSION_MINOR 0)
-set (TEMPLATE_VERSION_PATCH 1)
+set (EHWE_VERSION_MAJOR 0)
+set (EHWE_VERSION_MINOR 0)
+set (EHWE_VERSION_PATCH 1)
 
 # configure a header file to pass some of the CMake settings
 # to the source code
@@ -103,7 +103,7 @@ configure_file (
 # so that we will find Config.h
 include_directories("${PROJECT_BINARY_DIR}")
 
-set(TEMPLATE_SOURCE
+set(EHWE_SOURCE
 	main.c
 	opts.c
 	opts_help.c
@@ -111,5 +111,5 @@ set(TEMPLATE_SOURCE
 
 install(PROGRAMS ${PROJECT_BINARY_DIR}/src DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-add_executable(ehwe ${TEMPLATE_SOURCE})
+add_executable(ehwe ${EHWE_SOURCE})
 target_link_libraries (ehwe ${EXTRA_LIBS})
