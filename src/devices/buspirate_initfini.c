@@ -24,15 +24,21 @@
 #include <config.h>
 #include <syslog.h>
 #include <log.h>
+#include "buspirate.h"
 #define __init __attribute__((constructor))
 #define __fini __attribute__((destructor))
 
 void __init __buspirate_init(void)
 {
+	int rc;
 #ifdef INITFINI_SHOW
     fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism ====\n");
 #endif
+    if ((rc = buspirate_init())) {
+        fprintf(stderr, "Fatal error: buspirate_init() failed\n");
+        exit(rc);
+    }
 }
 
 void __fini __buspirate_fini(void)

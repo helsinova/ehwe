@@ -21,17 +21,23 @@
 #include <regex.h>
 #include <log.h>
 #include "devices.h"
+#include "buspirate.h"
 #include <string.h>
 #include <stdlib.h>
 #include <assure.h>
 
+struct buspirate buspirate;
 static regex_t preg;            /* Compiled regular expression for generic
                                    part of device-string parsing */
 
 #define REGEX_PATT \
-	"(" ROLES "):(" "[0-9]" "):(" DEVICES "):(" DIRECTIONS "):(.*)"
+	"(" ROLES \
+	"):(" INDEX \
+	"):(" DEVICES \
+	"):(" ANYTHING \
+")"
 
-#define REGEX_NSUB (5+1)
+#define REGEX_NSUB (4+1)
 
 int devices_init()
 {
@@ -40,7 +46,7 @@ int devices_init()
     static int is_init = 0;
 
     if (is_init) {
-        LOGW("No need to run %s twice, CTOR _init has run it?", __func__);
+        LOGW("No need to run %s twice, CTOR _init has run it?\n", __func__);
         return 0;
     }
     is_init = 1;
@@ -48,7 +54,7 @@ int devices_init()
     rc = regcomp(&preg, REGEX_PATT, REG_EXTENDED | REG_ICASE);
     if (rc) {
         regerror(rc, &preg, err_str, REXP_ESTRSZ);
-        LOGE("Regexec compilation error: %s", err_str);
+        LOGE("Regexec compilation error: %s\n", err_str);
         return rc;
     }
     return 0;
@@ -69,12 +75,13 @@ int devices_parse(const char *devstr, struct device *device)
     char *role_str;
     char *index_str;
     char *device_str;
-    char *direction_str;
+
+    device->devid = DEV_INVALID;
 
     rc = regexec(&preg, devstr_cpy, REGEX_NSUB, mtch_idxs, 0);
     if (rc) {
         regerror(rc, &preg, err_str, REXP_ESTRSZ);
-        LOGE("Regexec match error: %s", err_str);
+        LOGE("Regexec match error: %s\n", err_str);
         free(devstr_cpy);
         return rc;
     }
@@ -87,20 +94,18 @@ int devices_parse(const char *devstr, struct device *device)
     role_str = &devstr_cpy[mtch_idxs[1].rm_so];
     index_str = &devstr_cpy[mtch_idxs[2].rm_so];
     device_str = &devstr_cpy[mtch_idxs[3].rm_so];
-    direction_str = &devstr_cpy[mtch_idxs[4].rm_so];
 
-    LOGD("First level device-string parsing:\n");
-    LOGD("  role=%s\n", role_str);
-    LOGD("  index=%s\n", index_str);
-    LOGD("  device=%s\n", device_str);
-    LOGD("  direction=%s\n", direction_str);
+    LOGD("  First level device-string parsing:\n");
+    LOGD("    role=%s\n", role_str);
+    LOGD("    index=%s\n", index_str);
+    LOGD("    device=%s\n", device_str);
 
-#ifdef PARAPORT
-    if (strcasecmp(device_str, "pp"))
+#ifdef DEVICE_PARAPORT
+    if (strcasecmp(device_str, "pp") == 0)
         rc = paraport_parse(devstr, device);
 #endif
-#ifdef BUSPIRATE
-    if (strcasecmp(device_str, "bp"))
+#ifdef DEVICE_BUSPIRATE
+    if (strcasecmp(device_str, "bp") == 0)
         rc = buspirate_parse(devstr, device);
 #endif
 

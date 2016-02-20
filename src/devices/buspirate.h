@@ -20,10 +20,29 @@
 #ifndef buspirate_h
 #define buspirate_h
 
+typedef enum {
+    CLKOWNR_UNDEFINED = 0,
+    CLKOWNR_INVALID = 1,        /* Invalid, unknown or parse failure */
+    MASTER = 100,
+    SLAVE = 101
+} clkownr_t;
+
 struct buspirate {
+    clkownr_t clckownr;
     char path;                  /* Local hosts device name */
 };
 
+/* Valid regex-i role patterns for buspirate */
+#define BP_ROLES "SPI|I2C"
+
+/* Valid regex-i clock-owner patterns for buspirate */
+#define BP_CLKOWNER "MASTER|SLAVE"
+
+/* Forward declaration of 'struct device' required to avoid mutual header
+ * inclusion */
+struct device;
+
+int buspirate_init();
 int buspirate_parse(const char *devstr, struct device *device);
 
 #endif                          //buspirate_h

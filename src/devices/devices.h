@@ -19,16 +19,18 @@
  ***************************************************************************/
 #ifndef devices_h
 #define devices_h
-#ifdef PARAPORT
-#  include "paraport.h"
-#endif
-#ifdef BUSPIRATE
-#  include "buspirate.h"
-#endif
+#include <config.h>
 
 #define REXP_ESTRSZ 80
 
+// Some generic regex-i patterns
+#define INDEX "[0-9]+"
+#define ANYTHING ".*"
+#define FILENAME "[[:alnum:] _/,.:-]*"
+
 typedef enum {
+    ROLE_UNDEFINED = 0,
+    ROLE_INVALID = 1,           /* Invalid, unknown or parse failure */
     SPI,
     DSPI,
     QSPI,
@@ -42,10 +44,10 @@ typedef enum {
 typedef enum {
     DEV_UNDEFINED = 0,
     DEV_INVALID = 1,            /* Invalid, unknown or parse failure */
-#ifdef PARAPORT
+#ifdef DEVICE_PARAPORT
     PARAPORT = 100,
 #endif
-#ifdef BUSPIRATE
+#ifdef DEVICE_BUSPIRATE
     BUSPIRATE = 101,
 #endif
 } devid_t;
@@ -53,26 +55,25 @@ typedef enum {
 // Valid regex-i patterns for devices
 #define DEVICES "PP|BP"
 
-typedef enum {
-    DIR_UNDEFINED = 0,
-    DIR_INVALID = 1,            /* Invalid, unknown or parse failure */
-    MASTER = 100,
-    SLAVE = 101
-} dir_t;
-
 // Valid regex-i patterns for "direction"
 #define DIRECTIONS "MASTER|SLAVE"
+
+#ifdef DEVICE_PARAPORT
+#  include "paraport.h"
+#endif
+#ifdef DEVICE_BUSPIRATE
+#  include "buspirate.h"
+#endif
 
 struct device {
     devid_t devid;
     role_t role;
-    int number;
-    dir_t direction;
+    int index;
     union {
-#ifdef PARAPORT
+#ifdef DEVICE_PARAPORT
         struct paraport paraport;
 #endif
-#ifdef BUSPIRATE
+#ifdef DEVICE_BUSPIRATE
         struct buspirate buspirate;
 #endif
     };
