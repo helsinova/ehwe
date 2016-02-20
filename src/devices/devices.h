@@ -20,11 +20,13 @@
 #ifndef devices_h
 #define devices_h
 #ifdef PARAPORT
-#include "paraport.h"
+#  include "paraport.h"
 #endif
 #ifdef BUSPIRATE
-#include "buspirate.h"
+#  include "buspirate.h"
 #endif
+
+#define REXP_ESTRSZ 80
 
 typedef enum {
     SPI,
@@ -34,10 +36,8 @@ typedef enum {
     CAN
 } role_t;
 
-// Valid patterns for roles
-#define _ROLES "SPI|DSPI|QSPI|I2C|CAN"
-#define _roles "spi|dspi|qspi|i2c|can"
-#define ROLES _ROLES "|" _roles
+// Valid regex-i patterns for roles
+#define ROLES "SPI|DSPI|QSPI|I2C|CAN"
 
 typedef enum {
     DEV_UNDEFINED = 0,
@@ -50,10 +50,8 @@ typedef enum {
 #endif
 } devid_t;
 
-// Valid patterns for devices
-#define _DEVICES "PP|BP"
-#define _devices "pp|bp"
-#define DEVICES _DEVICES "|" _devices
+// Valid regex-i patterns for devices
+#define DEVICES "PP|BP"
 
 typedef enum {
     DIR_UNDEFINED = 0,
@@ -62,10 +60,8 @@ typedef enum {
     SLAVE = 101
 } dir_t;
 
-// Valid patterns for "direction"
-#define _DIRECTIONS "MASTER|SLAVE"
-#define _directions "master|slave"
-#define DIRECTIONS _DIRECTIONS "|" _directions
+// Valid regex-i patterns for "direction"
+#define DIRECTIONS "MASTER|SLAVE"
 
 struct device {
     devid_t devid;

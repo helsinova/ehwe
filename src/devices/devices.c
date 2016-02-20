@@ -21,18 +21,22 @@
 #include <regex.h>
 #include <log.h>
 #include "devices.h"
-#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assure.h>
 
 static regex_t preg;            /* Compiled regular expression for generic
                                    part of device-string parsing */
 
-#define DEVSTR_PATT \
+#define REGEX_PATT \
 	"(" ROLES "):(" "[0-9]" "):(" DEVICES "):(" DIRECTIONS "):(.*)"
+
+#define REGEX_NSUB (5+1)
 
 int devices_init()
 {
     int rc;
-    char err_str[80];
+    char err_str[REXP_ESTRSZ];
     static int is_init = 0;
 
     if (is_init) {
@@ -41,9 +45,9 @@ int devices_init()
     }
     is_init = 1;
 
-    rc = regcomp(&preg, DEVSTR_PATT, REG_EXTENDED);
+    rc = regcomp(&preg, REGEX_PATT, REG_EXTENDED | REG_ICASE);
     if (rc) {
-        regerror(rc, &preg, err_str, 80);
+        regerror(rc, &preg, err_str, REXP_ESTRSZ);
         LOGE("Regexec compilation error: %s", err_str);
         return rc;
     }
@@ -58,5 +62,51 @@ int devices_init()
  * */
 int devices_parse(const char *devstr, struct device *device)
 {
+    int rc, i;
+    char err_str[REXP_ESTRSZ];
+    regmatch_t mtch_idxs[REGEX_NSUB];
+    char *devstr_cpy = strdup(devstr);
+    char *role_str;
+    char *index_str;
+    char *device_str;
+    char *direction_str;
+
+    rc = regexec(&preg, devstr_cpy, REGEX_NSUB, mtch_idxs, 0);
+    if (rc) {
+        regerror(rc, &preg, err_str, REXP_ESTRSZ);
+        LOGE("Regexec match error: %s", err_str);
+        free(devstr_cpy);
+        return rc;
+    }
+    /* Add string terminators in substrings */
+    for (i = 1; i < REGEX_NSUB; i++) {
+        ASSURE_E(mtch_idxs[i].rm_so != -1, goto devices_parse_err);
+        devstr_cpy[mtch_idxs[i].rm_eo] = 0;
+    }
+
+    role_str = &devstr_cpy[mtch_idxs[1].rm_so];
+    index_str = &devstr_cpy[mtch_idxs[2].rm_so];
+    device_str = &devstr_cpy[mtch_idxs[3].rm_so];
+    direction_str = &devstr_cpy[mtch_idxs[4].rm_so];
+
+    LOGD("First level device-string parsing:\n");
+    LOGD("  role=%s\n", role_str);
+    LOGD("  index=%s\n", index_str);
+    LOGD("  device=%s\n", device_str);
+    LOGD("  direction=%s\n", direction_str);
+
+#ifdef PARAPORT
+    if (strcasecmp(device_str, "pp"))
+        rc = paraport_parse(devstr, device);
+#endif
+#ifdef BUSPIRATE
+    if (strcasecmp(device_str, "bp"))
+        rc = buspirate_parse(devstr, device);
+#endif
+
+    free(devstr_cpy);
     return 0;
+devices_parse_err:
+    free(devstr_cpy);
+    return -1;
 }
