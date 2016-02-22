@@ -129,8 +129,9 @@ int buspirate_parse(const char *devstr, struct device *device)
     }
 
     /* Avoid need to strdup by using original which happens to terminate
-     * correctly as well */
-    device->buspirate.path = &devstr[mtch_idxs[5].rm_so];
+     * correctly as well. Ignore const as this string belongs to
+     * environment with process-long lifetime */
+    device->buspirate.path = (char *)(&devstr[mtch_idxs[5].rm_so]);
 
     free(devstr_cpy);
     return 0;
