@@ -1,0 +1,6 @@
+TCP_TAP_FIRST_PORT=4471
+TCP_TAP_NICNAME='localhost'
+#TCP_TAP_CMD=gdb
+TAP_LOG_NAME=/tmp/gdb.tap_ehwe.sh.log
+TAP_LOG=yes
+TAP_SIDE_SESSION=yes
