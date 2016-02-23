@@ -115,3 +115,7 @@ devices_parse_err:
     free(devstr_cpy);
     return -1;
 }
+
+int devices_init_device(const struct device *device){
+    return 0;
+}

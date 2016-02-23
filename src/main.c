@@ -67,8 +67,7 @@ int main(int argc, char **argv)
     LOGI("\"ehwe\" version v%s \n", VERSION);
 
     /* Storage for device-specification strings */
-    assert_ext((rc =
-                mlist_opencreate(sizeof(char *), NULL, &opts.dev_strs)) == 0);
+    ASSURE((rc = mlist_opencreate(sizeof(char *), NULL, &opts.dev_strs)) == 0);
 
     opts_init();
     /* /begin/ zeroing of opt vars */
@@ -79,20 +78,39 @@ int main(int argc, char **argv)
     ASSURE_E(opts_check(&opts) == OPT_OK, goto err);
     LOGI("Option passed rule-check OK\n", rc);
 
+    /* Storage for device-specification strings */
+    ASSURE((rc =
+            mlist_opencreate(sizeof(struct device), NULL, &ehwe.devices)) == 0);
+
     /* Convert device strings to devices */
     LOGD("List of device definition strings:\n");
-    for (mlist_head(opts.dev_strs);
-         mlist_curr(opts.dev_strs); mlist_next(opts.dev_strs)) {
-
+#undef LDATA
+#define LDATA char *
+    ITERATE(opts.dev_strs) {
         struct device device;
 
-        char **dev_str = mdata_curr(opts.dev_strs);
-        LOGD("  %s\n", *dev_str);
-        devices_parse(*dev_str, &device);
+        LOGD("  %s\n", CDATA(opts.dev_strs));
+        devices_parse(CDATA(opts.dev_strs), &device);
+        /* OK to add stack-variable as deep-copy to new location occurs. */
+        ASSURE(mlist_add_last(ehwe.devices, &device));
     }
+#undef LDATA
 
     /* Close storage of device-specification strings */
-    assert_ext((rc = mlist_close(opts.dev_strs)) == 0);
+    ASSURE((rc = mlist_close(opts.dev_strs)) == 0);
+
+    LOGD("Initialize device:\n");
+#undef LDATA
+#define LDATA struct device
+    ITERATE(ehwe.devices) {
+        LOGD("  %d\n", CDATA( ehwe.devices ).devid);
+        devices_init_device(CREF(ehwe.devices));
+    }
+#undef LDATA
+
+    /* Close storage of device-list. OK as payload is also freed, as long
+     * struct device does not contain any 2:nd level heap variable */
+    ASSURE((rc = mlist_close(ehwe.devices)) == 0);
 
     ehwe_exit(0);
 err:

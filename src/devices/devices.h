@@ -81,5 +81,6 @@ struct device {
 
 int devices_init();
 int devices_parse(const char *devstr, struct device *device);
+int devices_init_device(const struct device *device);
 
 #endif                          //devices_h
