@@ -31,7 +31,7 @@ static regex_t preg;            /* Compiled regular expression for generic
                                    part of device-string parsing */
 
 #define REGEX_PATT \
-	"(" ROLES \
+	"^(" ROLES \
 	"):(" INDEX \
 	"):(" DEVICES \
 	"):(" ANYTHING \

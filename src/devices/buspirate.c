@@ -30,7 +30,7 @@ static regex_t preg;            /* Compiled regular expression for full
                                    device-string parsing */
 
 #define REGEX_PATT \
-	"(" BP_ROLES \
+	"^(" BP_ROLES \
 	"):(" INDEX \
 	"):(" DEVICES \
 	"):(" BP_CLKOWNER \

@@ -103,17 +103,19 @@ int main(int argc, char **argv)
 #undef LDATA
 #define LDATA struct device
     ITERATE(ehwe.devices) {
-        LOGD("  %d\n", CDATA( ehwe.devices ).devid);
+        LOGD("  %d\n", CDATA(ehwe.devices).devid);
         devices_init_device(CREF(ehwe.devices));
     }
 #undef LDATA
 
-    /* Close storage of device-list. OK as payload is also freed, as long
-     * struct device does not contain any 2:nd level heap variable */
+    /* Close storage of device-list. OK as all of payload is also freed,
+     * as long struct device does not contain any 2:nd depth-level heap
+     * variable. */
     ASSURE((rc = mlist_close(ehwe.devices)) == 0);
 
     ehwe_exit(0);
 err:
+    LOGE("Current rc: %d\n", rc);
     ehwe_exit(1);
     /* GCC, please shut up! */
     return 0;
