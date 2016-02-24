@@ -116,6 +116,22 @@ devices_parse_err:
     return -1;
 }
 
-int devices_init_device(const struct device *device){
-    return 0;
+int devices_init_device(const struct device *device)
+{
+    int rc = 0;
+    switch (device->devid) {
+#ifdef DEVICE_PARAPORT
+        case PARAPORT:
+            rc = paraport_init_device(device);
+            break;
+#endif
+#ifdef DEVICE_BUSPIRATE
+        case BUSPIRATE:
+            rc = buspirate_init_device(device);
+            break;
+#endif
+        default:
+            LOGE("Unsupported device [%d]\n", device->devid);
+    }
+    return rc;
 }

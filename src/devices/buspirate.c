@@ -139,3 +139,10 @@ buspirate_parse_err:
     free(devstr_cpy);
     return -1;
 }
+
+int buspirate_init_device(const struct device *device)
+{
+    LOGE("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
+         device->devid);
+    return -1;
+}

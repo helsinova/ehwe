@@ -26,5 +26,6 @@ struct paraport {
 };
 
 int paraports_pars(const char *devstr, struct device *device);
+int paraport_init_device(const struct device *device);
 
 #endif                          //paraport_h

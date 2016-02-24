@@ -44,5 +44,6 @@ struct device;
 
 int buspirate_init();
 int buspirate_parse(const char *devstr, struct device *device);
+int buspirate_init_device(const struct device *device);
 
 #endif                          //buspirate_h
