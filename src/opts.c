@@ -80,7 +80,7 @@ static int opts_parse_opt(const char *cmd,
             break;
         case 'd':
             _req_opt('d')->cnt++;
-			ASSURE(mlist_add_last(opts->dev_strs, &arg));
+            ASSURE(mlist_add_last(opts->dev_strs, &arg));
             break;
         case 'D':
             _req_opt('D')->cnt++;
@@ -292,7 +292,7 @@ int opts_parse(int argc, char **argv, struct opts *opts)
         perror("ehwe: Too many arguments, \"ehwe\" takes only options.\n");
         fflush(stderr);
         opts_help(stderr, HELP_TRY | HELP_EXIT_ERR);
-		return -1;
+        return -1;
     }
 
     if (opts->daemon) {
