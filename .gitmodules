@@ -10,3 +10,6 @@
 [submodule "src/lib/mtime"]
 	path = src/lib/mtime
 	url = https://github.com/mambrus/libmtime.git
+[submodule "src/embedded"]
+	path = src/embedded
+	url = /home/mambrus/Dropbox/minirepos/EMBEDDED/ehwe_SPIRAM
