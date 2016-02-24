@@ -31,7 +31,7 @@ set(LIBDEVICES_SOURCE
 	devices_initfini.c
 )
 
-if (ENABLE_BUSPIRATE)
+if (DEVICE_BUSPIRATE)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__buspirate_init")
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--undefined=__buspirate_init")
 	# Device-specific sources
@@ -40,9 +40,9 @@ if (ENABLE_BUSPIRATE)
 		buspirate_initfini.c
 		buspirate.c
 	)
-endif (ENABLE_BUSPIRATE)
+endif (DEVICE_BUSPIRATE)
 
-if (ENABLE_PARAPORT)
+if (DEVICE_PARAPORT)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__paraport_init")
 	set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--undefined=__paraport_init")
 	# Device-specific sources
@@ -51,6 +51,6 @@ if (ENABLE_PARAPORT)
 		paraport_initfini.c
 		paraprt.c
 	)
-endif (ENABLE_PARAPORT)
+endif (DEVICE_PARAPORT)
 
 add_library(devices ${LIBDEVICES_SOURCE})
