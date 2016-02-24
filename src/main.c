@@ -113,6 +113,9 @@ int main(int argc, char **argv)
      * variable. */
     ASSURE((rc = mlist_close(ehwe.devices)) == 0);
 
+	/* Call the work-bench */
+	embedded_main(argc, argv);
+
     ehwe_exit(0);
 err:
     LOGE("Current rc: %d\n", rc);

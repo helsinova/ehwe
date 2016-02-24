@@ -29,5 +29,6 @@ struct ehwe {
 };
 
 void ehwe_exit(int status);
+int embedded_main(int argc, char **argv);
 
 #endif                          /* ehwe_h */
