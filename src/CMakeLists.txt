@@ -6,18 +6,6 @@ project (ehwe C)
 ################################################################################
 # Normal project options (src defines)
 #-------------------------------------------------------------------------------
-set(DEF_MAX_DEVICES
-	"30"
-	CACHE STRING
-	"Maximum number of devices")
-
-# Device bus-pirate
-option(DEVICE_BUSPIRATE
-    "Enable device BUSPIRATE." YES)
-
-# Device paraport
-option(DEVICE_PARAPORT
-    "Enable device PARAPORT (requires special kernel-driver)." NO)
 
 #-------------------------------------------------------------------------------
 # X buildtool options (gcc)
