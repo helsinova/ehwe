@@ -37,5 +37,10 @@ CMakeFiles/
 cmake_install.cmake
 Makefile
 
+# Workbench is a git submodule that's a standalone program and that's
+# supposed to be changed easily. Therefore don't monitor this directory
+# for changes.
+embedded/
+
 #Final binary
 ehwe

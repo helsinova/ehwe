@@ -13,3 +13,4 @@
 [submodule "src/embedded"]
 	path = src/embedded
 	url = /home/mambrus/Dropbox/minirepos/EMBEDDED/ehwe_SPIRAM/
+	ignore = all
