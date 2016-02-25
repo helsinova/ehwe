@@ -63,7 +63,8 @@ void ehwe_exit(int status)
 
 int main(int argc, char **argv)
 {
-    int rc;
+    int rc, new_argc = argc;
+    char **new_argv = argv;
     LOGI("\"ehwe\" version v%s \n", VERSION);
 
     /* Storage for device-specification strings */
@@ -73,7 +74,7 @@ int main(int argc, char **argv)
     /* /begin/ zeroing of opt vars */
     /* /end/   zeroing of opt vars */
 
-    ASSURE_E((rc = opts_parse(argc, argv, &opts)) >= 0, goto err);
+    ASSURE_E((rc = opts_parse(&new_argc, &new_argv, &opts)) >= 0, goto err);
     LOGI("Parsed %d options.\n", rc);
     ASSURE_E(opts_check(&opts) == OPT_OK, goto err);
     LOGI("Option passed rule-check OK\n", rc);
@@ -113,10 +114,10 @@ int main(int argc, char **argv)
      * variable. */
     ASSURE((rc = mlist_close(ehwe.devices)) == 0);
 
-	/* Call the work-bench */
-	embedded_main(argc, argv);
+    /* Call the workbench */
+    rc=embedded_main(new_argc, new_argv);
 
-    ehwe_exit(0);
+    ehwe_exit(rc);
 err:
     LOGE("Current rc: %d\n", rc);
     ehwe_exit(1);

@@ -267,14 +267,24 @@ int opts_check(struct opts *opts)
  * Returns number of options parsed.
  * Negative return-value indicate error.
  *
+ * Affects input arguments pargc and argv so that they can be used for
+ * cascading further options after a '--' marker, which by convention is
+ * used and recognized by GNU opt-parsers as an end-of-arguments marker.
+ * This way severer option parsers can be cascades after each other, as
+ * long as they don't use the same options.
+ *
+ * You can use &argc and &argv as input arguments. But if these for some
+ * reason need to be preserved, copies must be used instead.
+ *
  * */
-int opts_parse(int argc, char **argv, struct opts *opts)
+int opts_parse(int *pargc, char ***pargv, struct opts *opts)
 {
     int rc, parsed_options = 0;
+    int old_optind = optind;
 
     while (1) {
         int option_index = 0;
-        int c = getopt_long(argc, argv,
+        int c = getopt_long(*pargc, *pargv,
                             "v:zd:DuhV",
                             long_options,
                             &option_index);
@@ -282,21 +292,30 @@ int opts_parse(int argc, char **argv, struct opts *opts)
         if (c == -1)
             break;
         ASSURE_E((rc =
-                  opts_parse_opt(argv[0], c, optarg, opts)) == OPT_OK,
+                  opts_parse_opt((*pargv)[0], c, optarg, opts)) == OPT_OK,
                  return rc);
         parsed_options++;
     }
 
     /* Handle any remaining command line arguments (not options). */
-    if (optind < argc) {
-        perror("ehwe: Too many arguments, \"ehwe\" takes only options.\n");
-        fflush(stderr);
-        opts_help(stderr, HELP_TRY | HELP_EXIT_ERR);
-        return -1;
+    if (optind < *pargc) {
+        if (strcmp("--", (*pargv)[optind - 1]) != 0) {
+            perror("ehwe: Too many arguments, \"ehwe\" takes only options.\n");
+            fflush(stderr);
+            opts_help(stderr, HELP_TRY | HELP_EXIT_ERR);
+            return -1;
+        }
     }
+    /* Side-effect handling */
+    *pargc = *pargc - optind + 1;
+    *pargv = &(*pargv)[optind - 1];
+
+    /* Restore parser global variable(s) */
+    optind = old_optind;
 
     if (opts->daemon) {
         become_daemon();
     }
+
     return parsed_options;
 }

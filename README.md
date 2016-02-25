@@ -61,3 +61,29 @@ a file ``embedded/CMakeLists.txt`` defining the sources in a module called
 
 *See also template/example ``src/embedded/CMakeLists.txt``*
 
+
+### Runtime arguments
+``EHWE`` has it's own arguments which is documented in man-pages and
+else-where. But the workbench can have it's own arguments. As ``EHWE`` is
+workbench agnostic it can't know which these are and can't parse them.
+However, everything after the special option '-' is sent to the workbench
+as is.
+
+Note that not all, probably most, embedded targets will provide anything
+meaningful in argc & argv (because it requires an environment, which implies a
+process).
+
+Example:
+
+```bash
+./ehwe -v debug  \
+	-d "spi:1:bp:master:/dev/ttyUSB0"  \
+	-d "i2c:1:bp:slave:/dev/ttyUSB8" \
+	-d "spi:2:bp:master:/dev/ttyUSB9" \
+	-- \
+	-x 100 "XoXoXo"
+```
+
+The last line contains the ``argv`` handed to workbench's ``main()``, which
+for the template project SPI-RAM means: *"Write string \"XoXoXo\" 100 times
+in memory, then dump the contents of what was written"*

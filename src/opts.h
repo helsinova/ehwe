@@ -86,7 +86,7 @@ struct opts {
 #include <stdio.h>
 void opts_init();
 void opts_help(FILE *file, int flags);
-int opts_parse(int argc, char **argv, struct opts *);
+int opts_parse(int *argc, char ***argv, struct opts *);
 int opts_check(struct opts *);
 struct req_opt *req_opt(int val, struct req_opt *rop);
 
