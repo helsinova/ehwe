@@ -38,6 +38,14 @@ set(SYSROOT
 	"System path (--system=)")
 
 #-------------------------------------------------------------------------------
+# Build-tool options
+#-------------------------------------------------------------------------------
+set(CMAKE_EXTRA_C_FLAGS
+	"-DEHWE"
+	CACHE STRING
+	"Compiler options appended to CMAKE_C_FLAGS* (-DEHWE)")
+
+#-------------------------------------------------------------------------------
 # X build-tool options (this project's x-tool handling)
 #-------------------------------------------------------------------------------
 if (NOT SYSROOT STREQUAL "")
