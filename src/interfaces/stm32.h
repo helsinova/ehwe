@@ -19,6 +19,7 @@
  ***************************************************************************/
 #ifndef stm32_h
 #define stm32_h
+#include <stdint.h>
 
 struct stm32 {
     int dummy;
@@ -30,5 +31,18 @@ struct interface;
 
 int stm32_init();
 int stm32_init_interface(const struct device *device);
+
+/* STM32F10x_StdPeriph_Lib_V3.5.0 API */
+
+/* Stubbies */
+enum {SPI1, SPI2, SPI3} SPIn;
+
+/* Real API */
+typedef enum {RESET = 0, SET = !RESET} FlagStatus, ITStatus;
+typedef int SPI_TypeDef;
+
+void SPI_I2S_SendData(SPI_TypeDef * SPIx, uint16_t Data);
+uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx);
+FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG);
 
 #endif                          //stm32_h

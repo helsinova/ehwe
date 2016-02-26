@@ -18,7 +18,6 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <sys/types.h>
-#include <regex.h>
 #include <log.h>
 #include "interfaces.h"
 #include "stm32.h"
@@ -27,6 +26,9 @@
 #include <stdlib.h>
 #include <assure.h>
 
+/***************************************************************************
+ * Module stuff                                                            *
+ ***************************************************************************/
 int stm32_init()
 {
     static int is_init = 0;
@@ -42,8 +44,61 @@ int stm32_init()
 
 int stm32_init_interface(const struct device *device)
 {
-    LOGW("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,device->devid);
+    LOGW("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
+         device->devid);
     return 0;
+}
+
+/***************************************************************************
+ * STM32F10x_StdPeriph_Lib_V3.5.0 API                                      *
+ ***************************************************************************/
+
+/**
+  * @brief  Transmits a Data through the SPIx/I2Sx peripheral.
+  * @param  SPIx: where x can be
+  *   - 1, 2 or 3 in SPI mode
+  *   - 2 or 3 in I2S mode
+  * @param  Data : Data to be transmitted.
+  * @retval None
+  */
+void SPI_I2S_SendData(SPI_TypeDef * SPIx, uint16_t Data)
+{
+}
+
+/**
+  * @brief  Returns the most recent received data by the SPIx/I2Sx peripheral.
+  * @param  SPIx: where x can be
+  *   - 1, 2 or 3 in SPI mode
+  *   - 2 or 3 in I2S mode
+  * @retval The value of the received data.
+  */
+uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx)
+{
+
+    return 0;
+}
+
+/**
+  * @brief  Checks whether the specified SPI/I2S flag is set or not.
+  * @param  SPIx: where x can be
+  *   - 1, 2 or 3 in SPI mode
+  *   - 2 or 3 in I2S mode
+  * @param  SPI_I2S_FLAG: specifies the SPI/I2S flag to check.
+  *   This parameter can be one of the following values:
+  *     @arg SPI_I2S_FLAG_TXE: Transmit buffer empty flag.
+  *     @arg SPI_I2S_FLAG_RXNE: Receive buffer not empty flag.
+  *     @arg SPI_I2S_FLAG_BSY: Busy flag.
+  *     @arg SPI_I2S_FLAG_OVR: Overrun flag.
+  *     @arg SPI_FLAG_MODF: Mode Fault flag.
+  *     @arg SPI_FLAG_CRCERR: CRC Error flag.
+  *     @arg I2S_FLAG_UDR: Underrun Error flag.
+  *     @arg I2S_FLAG_CHSIDE: Channel Side flag.
+  * @retval The new state of SPI_I2S_FLAG (SET or RESET).
+  */
+FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG)
+{
+    FlagStatus bitstatus = RESET;
+    return bitstatus;
 }
 
 /***************************************************************************

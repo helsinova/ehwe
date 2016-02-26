@@ -47,9 +47,5 @@ struct interface {
 
 int interfaces_init();
 int interfaces_init_interface(const struct device *device);
-/*
-int interfaces_init_interface(const struct interface *interface,
-                              const struct device *device)
-*/
 
 #endif                          //interfaces_h
