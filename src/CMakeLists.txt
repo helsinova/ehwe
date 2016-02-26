@@ -81,14 +81,6 @@ endif (ENABLE_LOGGING)
 include_directories ("${PROJECT_SOURCE_DIR}/devices")
 add_subdirectory (devices)
 set (EXTRA_LIBS ${EXTRA_LIBS} devices)
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__devices_init")
-
-if (DEVICE_BUSPIRATE)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__buspirate_init")
-endif (DEVICE_BUSPIRATE)
-if (DEVICE_PARAPORT)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__paraport_init")
-endif (DEVICE_PARAPORT)
 
 #-------------------------------------------------------------------------------
 # Embedded code

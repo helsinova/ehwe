@@ -135,3 +135,30 @@ int devices_init_device(const struct device *device)
     }
     return rc;
 }
+
+/***************************************************************************
+ * INIT/FINI mechanism
+ ***************************************************************************/
+#define __init __attribute__((constructor))
+#define __fini __attribute__((destructor))
+
+void __init __devices_init(void)
+{
+    int rc;
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism ====\n");
+#endif
+    if ((rc = devices_init())) {
+        fprintf(stderr, "Fatal error: devices_init() failed\n");
+        exit(rc);
+    }
+}
+
+void __fini __devices_fini(void)
+{
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism\n");
+#endif
+}

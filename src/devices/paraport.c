@@ -41,3 +41,25 @@ int paraport_init_device(const struct device *device)
          device->devid);
     return -1;
 }
+
+/***************************************************************************
+ * INIT/FINI mechanism
+ ***************************************************************************/
+#define __init __attribute__((constructor))
+#define __fini __attribute__((destructor))
+
+void __init __paraport_init(void)
+{
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism ====\n");
+#endif
+}
+
+void __fini __paraport_fini(void)
+{
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism\n");
+#endif
+}

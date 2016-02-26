@@ -146,3 +146,30 @@ int buspirate_init_device(const struct device *device)
          device->devid);
     return -1;
 }
+
+/***************************************************************************
+ * INIT/FINI mechanism
+ ***************************************************************************/
+#define __init __attribute__((constructor))
+#define __fini __attribute__((destructor))
+
+void __init __buspirate_init(void)
+{
+	int rc;
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism ====\n");
+#endif
+    if ((rc = buspirate_init())) {
+        fprintf(stderr, "Fatal error: buspirate_init() failed\n");
+        exit(rc);
+    }
+}
+
+void __fini __buspirate_fini(void)
+{
+#ifdef INITFINI_SHOW
+    fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
+            ">>> using CTORS/DTORS mechanism\n");
+#endif
+}
