@@ -35,6 +35,7 @@
 #include "main.h"
 #include <mlist.h>
 #include <devices.h>
+#include <interfaces.h>
 
 extern log_level log_filter_level;
 
@@ -105,7 +106,11 @@ int main(int argc, char **argv)
 #define LDATA struct device
     ITERATE(ehwe.devices) {
         LOGD("  %d\n", CDATA(ehwe.devices).devid);
-        devices_init_device(CREF(ehwe.devices));
+        ASSURE_E((rc =
+                  devices_init_device(CREF(ehwe.devices))) == 0, goto err2);;
+        ASSURE_E((rc =
+                  interfaces_init_interface(CREF(ehwe.devices))) == 0,
+                 goto err2);
     }
 #undef LDATA
 
@@ -115,11 +120,18 @@ int main(int argc, char **argv)
     ASSURE((rc = mlist_close(ehwe.devices)) == 0);
 
     /* Call the workbench */
-    rc=embedded_main(new_argc, new_argv);
+    LOGI("Executing workbench\n");
+    rc = embedded_main(new_argc, new_argv);
+    LOGI("Workbench ended\n");
 
     ehwe_exit(rc);
+err2:
+    LOGE("Current rc: %d\n", rc);
+    ASSURE((rc = mlist_close(ehwe.devices)) == 0);
+    ehwe_exit(1);
 err:
     LOGE("Current rc: %d\n", rc);
+    ASSURE((rc = mlist_close(opts.dev_strs)) == 0);
     ehwe_exit(1);
     /* GCC, please shut up! */
     return 0;

@@ -77,7 +77,7 @@ struct req_opt {
 struct opts {
     log_level *loglevel;        /* Verbosity level */
     int daemon;                 /* If to become a daemon or not */
-    handle_t dev_strs;  		/* Device specifications list. */
+    handle_t dev_strs;          /* Device specifications list. */
 
     struct req_opt *req_opts;   /* Deep copy of the req_opts list. Used to
                                    extend logic with presence validation. */

@@ -83,6 +83,13 @@ add_subdirectory (devices)
 set (EXTRA_LIBS ${EXTRA_LIBS} devices)
 
 #-------------------------------------------------------------------------------
+# Interfaces - i.e. the other end of the real stuff behind this project
+#-------------------------------------------------------------------------------
+include_directories ("${PROJECT_SOURCE_DIR}/interfaces")
+add_subdirectory (interfaces)
+set (EXTRA_LIBS ${EXTRA_LIBS} interfaces)
+
+#-------------------------------------------------------------------------------
 # Embedded code
 #-------------------------------------------------------------------------------
 add_subdirectory (embedded)
