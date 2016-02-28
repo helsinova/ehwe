@@ -17,21 +17,38 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef stm32_h
-#define stm32_h
+#ifndef stm32f10x_h
+#define stm32f10x_h
 #include <stdint.h>
-#include <config.h>
 
-struct stm32 {
-    int dummy;
-};
+/* STM32F10x_StdPeriph_Lib_V3.5.0 API */
 
-/* Forward declaration of 'struct interface' required to avoid mutual header
- * inclusion */
-struct interface;
+/* Glue */
+#define MAX_SPI_DRIVERS 3
+#define MAX_I2C_DRIVERS 3
+struct driverAPI;
+typedef struct driverAPI SPI_TypeDef;
 
-int stm32_init();
-int stm32_init_interface(const struct device *device);
+extern SPI_TypeDef *SPI_stm32_drv[MAX_SPI_DRIVERS];
+#define SPI1 (SPI_stm32_drv[0])
+#define SPI2 (SPI_stm32_drv[1])
+#define SPI3 (SPI_stm32_drv[2])
 
+/* Real API */
 
-#endif                          //stm32_h
+#define SPI_I2S_FLAG_RXNE               ((uint16_t)0x0001)
+#define SPI_I2S_FLAG_TXE                ((uint16_t)0x0002)
+#define I2S_FLAG_CHSIDE                 ((uint16_t)0x0004)
+#define I2S_FLAG_UDR                    ((uint16_t)0x0008)
+#define SPI_FLAG_CRCERR                 ((uint16_t)0x0010)
+#define SPI_FLAG_MODF                   ((uint16_t)0x0020)
+#define SPI_I2S_FLAG_OVR                ((uint16_t)0x0040)
+#define SPI_I2S_FLAG_BSY                ((uint16_t)0x0080)
+
+typedef enum { RESET = 0, SET = !RESET } FlagStatus, ITStatus;
+
+void SPI_I2S_SendData(SPI_TypeDef * SPIx, uint16_t Data);
+uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx);
+FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG);
+
+#endif                          //stm32f10x_h

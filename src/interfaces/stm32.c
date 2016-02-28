@@ -21,16 +21,31 @@
 #include <log.h>
 #include "interfaces.h"
 #include "stm32.h"
+#include <stm32f10x.h>
 #include "devices.h"
+#include "driver.h"
 #include <string.h>
 #include <stdlib.h>
 #include <assure.h>
+
+SPI_TypeDef *SPI_stm32_drv[MAX_SPI_DRIVERS];
+
+static void nod_sendData(const uint8_t *data, int sz);
+static void nod_receiveData(uint8_t *data, int sz);
+static uint16_t nod_getStatus();
+
+struct driverAPI nodriverAPI = {
+    .sendData = nod_sendData,
+    .receiveData = nod_receiveData,
+    .getStatus = nod_getStatus
+};
 
 /***************************************************************************
  * Module stuff                                                            *
  ***************************************************************************/
 int stm32_init()
 {
+    int i;
     static int is_init = 0;
 
     if (is_init) {
@@ -38,6 +53,9 @@ int stm32_init()
         return 0;
     }
     is_init = 1;
+    for (i = 0; i < MAX_SPI_DRIVERS; i++) {
+        SPI_stm32_drv[i] = &nodriverAPI;
+    }
 
     return 0;
 }
@@ -63,6 +81,8 @@ int stm32_init_interface(const struct device *device)
   */
 void SPI_I2S_SendData(SPI_TypeDef * SPIx, uint16_t Data)
 {
+    uint8_t ldata = Data;       /*Intentional truncation to 8-bit */
+    SPIx->sendData(&ldata, 1);
 }
 
 /**
@@ -97,8 +117,37 @@ uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx)
   */
 FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG)
 {
-    FlagStatus bitstatus = RESET;
+    FlagStatus bitstatus = SET;
     return bitstatus;
+}
+
+/***************************************************************************
+ * No-driver stubs                                                         *
+ ***************************************************************************/
+static void nod_sendData(const uint8_t *data, int sz)
+{
+    int i;
+    char cbuf[512] = { '\0' };
+
+    LOGD("Interface-stub %s sending %d bytes \n", __func__, sz);
+    for (i = 0; i < sz; i++) {
+        if (data[i] > 31)
+            sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
+        else
+            sprintf(cbuf, "0x%02X %c,", data[i], " ");
+    }
+    LOGD("%s\n", cbuf);
+}
+
+static void nod_receiveData(uint8_t *data, int sz)
+{
+    LOGE("Interface %s is not supposed to run\n", __func__);
+}
+
+static uint16_t nod_getStatus()
+{
+    LOGE("Interface %s is not supposed to run\n", __func__);
+    return -1;
 }
 
 /***************************************************************************

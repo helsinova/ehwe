@@ -21,6 +21,7 @@ set(LIBINTERFACES_SOURCE
 
 if (INTERFACE_STM32)
 	# Interface-specific sources
+	include_directories ("${PROJECT_SOURCE_DIR}/interfaces/include")
 	set(LIBINTERFACES_SOURCE
 		${LIBINTERFACES_SOURCE}
 		stm32.c

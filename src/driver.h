@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2016 by Michael Ambrus                                  *
+ *   Copyright (C) 2015 by Michael Ambrus                                  *
  *   ambrmi09@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,21 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef stm32_h
-#define stm32_h
-#include <stdint.h>
-#include <config.h>
+#ifndef driver_h
+#define driver_h
 
-struct stm32 {
-    int dummy;
+#include <stdint.h>
+
+struct driverAPI {
+    void (*sendData) (const uint8_t *data, int sz);
+    void (*receiveData) (uint8_t *data, int sz);
+    uint16_t (*getStatus) ();
 };
 
-/* Forward declaration of 'struct interface' required to avoid mutual header
- * inclusion */
-struct interface;
-
-int stm32_init();
-int stm32_init_interface(const struct device *device);
-
-
-#endif                          //stm32_h
+#endif                          /* driver_h */
