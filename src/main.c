@@ -36,6 +36,7 @@
 #include <mlist.h>
 #include <devices.h>
 #include <interfaces.h>
+#include <stdlib.h>
 
 extern log_level log_filter_level;
 
@@ -101,7 +102,7 @@ int main(int argc, char **argv)
     /* Close storage of device-specification strings */
     ASSURE((rc = mlist_close(opts.dev_strs)) == 0);
 
-    LOGD("Initialize device:\n");
+    LOGD("Initialing devices:\n");
 #undef LDATA
 #define LDATA struct device
     ITERATE(ehwe.devices) {
@@ -114,15 +115,23 @@ int main(int argc, char **argv)
     }
 #undef LDATA
 
-    /* Close storage of device-list. OK as all of payload is also freed,
-     * as long struct device does not contain any 2:nd depth-level heap
-     * variable. */
-    ASSURE((rc = mlist_close(ehwe.devices)) == 0);
-
     /* Call the workbench */
     LOGI("Executing workbench\n");
     rc = embedded_main(new_argc, new_argv);
     LOGI("Workbench ended\n");
+
+    LOGD("De-initializing devices:\n");
+#define LDATA struct device
+    ITERATE(ehwe.devices) {
+        LOGD("  %d\n", CDATA(ehwe.devices).devid);
+        ASSURE_E((rc =
+                  devices_deinit_device(CREF(ehwe.devices))) == 0, goto err2);;
+    }
+#undef LDATA
+    /* Close storage of device-list. OK as all of payload is also freed,
+     * as long struct device does not contain any 2:nd depth-level heap
+     * variable. */
+    ASSURE((rc = mlist_close(ehwe.devices)) == 0);
 
     ehwe_exit(rc);
 err2:

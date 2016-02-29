@@ -25,7 +25,7 @@ struct device;
 
 typedef enum {
     IN_UNDEFINED = 0,
-    IN_INVALID = 1,            /* Invalid, unknown or parse failure */
+    IN_INVALID = 1,             /* Invalid, unknown or parse failure */
 #ifdef INTERFACE_STM32
     STM32 = 101,
 #endif

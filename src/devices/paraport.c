@@ -35,7 +35,14 @@ int paraport_parse(const char *devstr, struct device *device)
     return -1;
 }
 
-int paraport_init_device(const struct device *device)
+int paraport_init_device(struct device *device)
+{
+    LOGE("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
+         device->devid);
+    return -1;
+}
+
+int paraport_deinit_device(struct device *device)
 {
     LOGE("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
          device->devid);

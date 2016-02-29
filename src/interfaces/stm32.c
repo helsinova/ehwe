@@ -32,9 +32,10 @@ SPI_TypeDef *SPI_stm32_drv[MAX_SPI_DRIVERS];
 
 static void nod_sendData(const uint8_t *data, int sz);
 static void nod_receiveData(uint8_t *data, int sz);
-static uint16_t nod_getStatus();
+static uint16_t nod_getStatus(uint16_t);
 
-struct driverAPI nodriverAPI = {
+static struct driverAPI nodriverAPI = {
+    .ddata = NULL,
     .sendData = nod_sendData,
     .receiveData = nod_receiveData,
     .getStatus = nod_getStatus
@@ -117,7 +118,7 @@ uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx)
   */
 FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG)
 {
-    FlagStatus bitstatus = SET;
+    FlagStatus bitstatus = SPIx->getStatus(SPI_I2S_FLAG);
     return bitstatus;
 }
 
@@ -134,7 +135,7 @@ static void nod_sendData(const uint8_t *data, int sz)
         if (data[i] > 31)
             sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
         else
-            sprintf(cbuf, "0x%02X %c,", data[i], " ");
+            sprintf(cbuf, "0x%02X %s,", data[i], " ");
     }
     LOGD("%s\n", cbuf);
 }
@@ -144,9 +145,10 @@ static void nod_receiveData(uint8_t *data, int sz)
     LOGE("Interface %s is not supposed to run\n", __func__);
 }
 
-static uint16_t nod_getStatus()
+static uint16_t nod_getStatus(uint16_t flags)
 {
-    LOGE("Interface %s is not supposed to run\n", __func__);
+    LOGD("Interface-stub %s quired about flags 0x02X% bytes \n", __func__,
+         flags);
     return -1;
 }
 

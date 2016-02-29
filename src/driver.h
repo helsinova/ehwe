@@ -23,9 +23,10 @@
 #include <stdint.h>
 
 struct driverAPI {
+    void *ddata;                /* Device specific driver-data */
     void (*sendData) (const uint8_t *data, int sz);
     void (*receiveData) (uint8_t *data, int sz);
-    uint16_t (*getStatus) ();
+    uint16_t (*getStatus) (uint16_t);
 };
 
 #endif                          /* driver_h */

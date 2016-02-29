@@ -29,7 +29,7 @@ typedef enum {
 
 struct buspirate {
     clkownr_t clckownr;
-    char *path;                 /* Local hosts device name */
+    char *name;                 /* Local hosts device name/path */
 };
 
 /* Valid regex-i role patterns for buspirate */
@@ -44,6 +44,7 @@ struct device;
 
 int buspirate_init();
 int buspirate_parse(const char *devstr, struct device *device);
-int buspirate_init_device(const struct device *device);
+int buspirate_init_device(struct device *device);
+int buspirate_deinit_device(struct device *device);
 
 #endif                          //buspirate_h

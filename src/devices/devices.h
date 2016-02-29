@@ -65,6 +65,8 @@ typedef enum {
 #  include "buspirate.h"
 #endif
 
+struct driverAPI;
+
 struct device {
     devid_t devid;
     role_t role;
@@ -77,10 +79,12 @@ struct device {
         struct buspirate buspirate;
 #endif
     };
+    struct driverAPI *driver;
 };
 
 int devices_init();
 int devices_parse(const char *devstr, struct device *device);
-int devices_init_device(const struct device *device);
+int devices_init_device(struct device *device);
+int devices_deinit_device(struct device *device);
 
 #endif                          //devices_h
