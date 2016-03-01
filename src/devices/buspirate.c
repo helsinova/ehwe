@@ -59,7 +59,7 @@ typedef enum {
 /* Lookup-table: Expected replies for command */
 struct cmdrply_s {
     bpcmd_t command;
-    const char *reply;
+    const char *rply;
 };
 
 struct cmdrply_s cmdrply[] = {
@@ -84,6 +84,8 @@ struct ddata {
 static void bpspi_sendData(const uint8_t *data, int sz);
 static void bpspi_receiveData(uint8_t *data, int sz);
 static uint16_t bpspi_getStatus(uint16_t flags);
+static int rawMode_enter(int fd);
+static int rawMode_toMode(int fd, bpcmd_t bpcmd);
 
 /* Convenience variable: Bus-pirate provides one API. Variants communicated
  * through ddata */
@@ -208,6 +210,18 @@ int buspirate_init_device(struct device *device)
     ASSERT(ddata = malloc(sizeof(struct ddata)));
     ASSURE((ddata->fd = open(device->buspirate.name, O_RDWR)) != -1);
 
+    ASSURE(rawMode_enter(ddata->fd) == 0);
+
+    switch (device->role) {
+        case SPI:
+            ASSURE(rawMode_toMode(ddata->fd, ENTER_SPI) == 0);
+            break;
+        default:
+            LOGE("Device BusPirate can't handle role %d (yet)\n", device->role);
+            ASSURE("Bad device->role" == 0);
+    }
+    ASSURE(rawMode_toMode(ddata->fd, ENTER_SPI) == 0);
+
     driver->ddata = ddata;
     device->driver = driver;
 
@@ -220,7 +234,8 @@ int buspirate_deinit_device(struct device *device)
     struct ddata *ddata = driver->ddata;
 
     LOGI("BP: Destroying device ID [%d]\n", device->devid);
-    ddata = device->driver->ddata;
+    ASSURE(rawMode_toMode(ddata->fd, ENTER_RESET) == 0);
+    ASSURE(rawMode_toMode(ddata->fd, RESET_BUSPIRATE) == 0);
 
     close(ddata->fd);
     free(ddata);
@@ -237,7 +252,7 @@ int buspirate_deinit_device(struct device *device)
  ***************************************************************************/
 
 /* Enter binary mode from normal console-mode */
-static void rawMode_enter(int fd)
+static int rawMode_enter(int fd)
 {
     int ret;
     char tmp[100] = { '\0' };
@@ -246,16 +261,15 @@ static void rawMode_enter(int fd)
 
     LOGI("BusPirate entering binary mode...\n");
 
-    /* check that the passed serial port exists and is working */
-    if (fd == -1) {             /*added because the fd has already returned null */
-        printf("Port does not exist!");
-        return;
+    if (fd == -1) {
+        LOGE("Device isn't open\n");
+        return -1;
 
     }
     /*loop up to 25 times, send 0x00 each time and pause briefly for a reply (BBIO1) */
     while (!done) {
         tmp[0] = 0x00;
-        LOGD("Sending 0X%X to port\n", tmp[0]);
+        LOGD("Sending 0x%02X to port\n", tmp[0]);
         write(fd, tmp, 1);
         tries++;
         LOGD("tries: %i Ret %i\n", tries, ret);
@@ -263,38 +277,48 @@ static void rawMode_enter(int fd)
         ret = read(fd, tmp, 5);
         if (ret != 5 && tries > 20) {
             LOGE("Buspirate did not respond correctly (%i,%i) \n", ret, tries);
-            exit(-1);
+            return -1;
         } else if (strncmp(tmp, "BBIO1", 5) == 0) {
             done = 1;
         }
         if (tries > 25) {
             LOGE("Buspirate: Too many tries in serial read! -exiting \n");
             LOGE("Buspirate: - chip not detected, or not readable/writable\n");
-            exit(-1);
+            return -1;
         }
     }
-
+    return 0;
 }
 
-static void rawMode_toMode(int fd, bpcmd_t bpcmd)
+static int rawMode_toMode(int fd, bpcmd_t bpcmd)
 {
-    //int ret;
-    //char tmp[100] = {'\0'};
+    int ret, i, slen;
+    char tmp[100] = { '\0' };
+    char *expRply = NULL;
+    int tbllen = sizeof(cmdrply) / sizeof(struct cmdrply_s);
 
-/*
-    tmp[0] = bbmode;            //the mode to select
-    //printf("Sending 0X%X to port\n",tmp[0]);
-    serial_write(fd, tmp, 1);
-    usleep(1);
-    ret = serial_read(fd, tmp, 4);
-
-    if ((ret == 4) && (strncmp(tmp, "SPI1", 4) == 0)) { //check the reply
-
-    } else {
-        fprintf(stderr, "Buspirate did not respond correctly :( %i \n", ret);
-        exit(-1);
+    tmp[0] = bpcmd;
+    for (i = 0; i < tbllen; i++) {
+        if (cmdrply[i].command == bpcmd)
+            expRply = (char *)cmdrply[i].rply;
     }
-*/
+    if (expRply == NULL) {
+        LOGE("BusPirate drive doesn't know what response to expect for cmd %d",
+             bpcmd);
+        return -1;
+    }
+
+    LOGD("Sending 0x%02X to port. Expecting response %s\n", tmp[0], expRply);
+    write(fd, tmp, 1);
+    usleep(1);
+    slen = strlen(expRply);
+    ret = read(fd, tmp, slen);
+
+    if ((ret == strlen(expRply)) && strncmp(tmp, expRply, slen))
+        return 0;
+
+    LOGE("Buspirate did not respond correctly: (%i,%s) \n", ret, tmp);
+    return -1;
 }
 
 /***************************************************************************
