@@ -22,6 +22,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <log.h>
 #include "devices.h"
 #include "driver.h"
@@ -86,6 +87,7 @@ static void bpspi_receiveData(uint8_t *data, int sz);
 static uint16_t bpspi_getStatus(uint16_t flags);
 static int rawMode_enter(int fd);
 static int rawMode_toMode(int fd, bpcmd_t bpcmd);
+static void empty_inbuff(int fd);
 
 /* Convenience variable: Bus-pirate provides one API. Variants communicated
  * through ddata */
@@ -208,20 +210,22 @@ int buspirate_init_device(struct device *device)
     memcpy(driver, &bpspi_driver, sizeof(struct driverAPI));
 
     ASSERT(ddata = malloc(sizeof(struct ddata)));
-    ASSURE((ddata->fd = open(device->buspirate.name, O_RDWR)) != -1);
+    ASSURE((ddata->fd =
+            open(device->buspirate.name, O_RDWR | O_NONBLOCK)) != -1);
 
+    empty_inbuff(ddata->fd);
     ASSURE(rawMode_enter(ddata->fd) == 0);
+    ddata->state = ENTER_RESET;
 
     switch (device->role) {
         case SPI:
             ASSURE(rawMode_toMode(ddata->fd, ENTER_SPI) == 0);
+            ddata->state = ENTER_SPI;
             break;
         default:
             LOGE("Device BusPirate can't handle role %d (yet)\n", device->role);
             ASSURE("Bad device->role" == 0);
     }
-    ASSURE(rawMode_toMode(ddata->fd, ENTER_SPI) == 0);
-
     driver->ddata = ddata;
     device->driver = driver;
 
@@ -234,8 +238,11 @@ int buspirate_deinit_device(struct device *device)
     struct ddata *ddata = driver->ddata;
 
     LOGI("BP: Destroying device ID [%d]\n", device->devid);
+    empty_inbuff(ddata->fd);
     ASSURE(rawMode_toMode(ddata->fd, ENTER_RESET) == 0);
+    ddata->state = ENTER_RESET;
     ASSURE(rawMode_toMode(ddata->fd, RESET_BUSPIRATE) == 0);
+    ddata->state = RESET_BUSPIRATE;
 
     close(ddata->fd);
     free(ddata);
@@ -251,10 +258,46 @@ int buspirate_deinit_device(struct device *device)
  * http://dangerousprototypes.com/docs/Bus_Pirate:_Entering_binary_mode
  ***************************************************************************/
 
+static void log_ioerror(int ecode)
+{
+    char buff[120];
+
+    strerror_r(ecode, buff, 120);
+    LOGE("File I/O error: %s\n", buff);
+}
+
+/* Reads fd one character at a time until error occurs */
+static int read_2err(int fd, char *rbuff, int len)
+{
+    int rc, m_errno, idx = 0;
+    char tmp[5];
+
+    do {
+        rc = read(fd, tmp, 1);
+        m_errno = errno;
+        if (rc != -1)
+            rbuff[idx++] = tmp[0];
+    } while ((rc != -1) && (idx < len));
+    ASSURE_E(idx > 0, log_ioerror(m_errno));
+    if (idx > 0)
+        return idx;
+    return rc;
+}
+
+static void empty_inbuff(int fd)
+{
+    int ret, tries = 0;
+    char tmp[3];
+    do {
+        ASSURE_E((ret = read_2err(fd, tmp, 1)) != -1, log_ioerror(errno));
+        tries++;
+    } while (ret > 0);
+}
+
 /* Enter binary mode from normal console-mode */
 static int rawMode_enter(int fd)
 {
-    int ret;
+    int ret, i;
     char tmp[100] = { '\0' };
     int done = 0;
     int tries = 0;
@@ -264,21 +307,29 @@ static int rawMode_enter(int fd)
     if (fd == -1) {
         LOGE("Device isn't open\n");
         return -1;
-
     }
-    /*loop up to 25 times, send 0x00 each time and pause briefly for a reply (BBIO1) */
+
+    tmp[0] = 0x00;
+    for (i = 0; i < 20; i++) {
+        LOGD("Sending 0x%02X to port\n", tmp[0]);
+        ASSURE_E((ret = write(fd, tmp, 1)) != -1, log_ioerror(errno));
+    }
+
+    /*loop up to 25 more times, send 0x00 each time and pause briefly for a reply (BBIO1) */
     while (!done) {
         tmp[0] = 0x00;
         LOGD("Sending 0x%02X to port\n", tmp[0]);
-        write(fd, tmp, 1);
+        ASSURE_E((ret = write(fd, tmp, 1)) != -1, log_ioerror(errno));
         tries++;
         LOGD("tries: %i Ret %i\n", tries, ret);
         usleep(1);
-        ret = read(fd, tmp, 5);
-        if (ret != 5 && tries > 20) {
+        ASSURE_E((ret = read_2err(fd, tmp, 5)) != -1, log_ioerror(errno));
+        if (ret != 5 && tries > 22) {
             LOGE("Buspirate did not respond correctly (%i,%i) \n", ret, tries);
             return -1;
         } else if (strncmp(tmp, "BBIO1", 5) == 0) {
+            /*Empty any remains in buffer */
+            empty_inbuff(fd);
             done = 1;
         }
         if (tries > 25) {
@@ -314,7 +365,7 @@ static int rawMode_toMode(int fd, bpcmd_t bpcmd)
     slen = strlen(expRply);
     ret = read(fd, tmp, slen);
 
-    if ((ret == strlen(expRply)) && strncmp(tmp, expRply, slen))
+    if ((ret == strlen(expRply)) && (strncmp(tmp, expRply, slen) == 0))
         return 0;
 
     LOGE("Buspirate did not respond correctly: (%i,%s) \n", ret, tmp);
