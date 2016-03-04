@@ -74,6 +74,8 @@ struct cmdrply_s cmdrply[] = {
     {RESET_BUSPIRATE, (char[]){'\1', '\0'}}
 };
 
+#define TBL_LEN (sizeof(cmdrply) / sizeof(struct cmdrply_s))
+
 /* Driver companion - NOTE: unique for each driver. Must NOT be public */
 struct ddata {
     int fd;
@@ -85,9 +87,12 @@ struct ddata {
 static void bpspi_sendData(const uint8_t *data, int sz);
 static void bpspi_receiveData(uint8_t *data, int sz);
 static uint16_t bpspi_getStatus(uint16_t flags);
-static int rawMode_enter(int fd);
-static int rawMode_toMode(int fd, bpcmd_t bpcmd);
+
+static void log_ioerror(int ecode);
+static int rawMode_enter(struct device *);
+static int rawMode_toMode(struct device *, bpcmd_t bpcmd);
 static void empty_inbuff(int fd);
+static int read_2err(int fd, char *rbuff, int len);
 
 /* Convenience variable: Bus-pirate provides one API. Variants communicated
  * through ddata */
@@ -214,20 +219,19 @@ int buspirate_init_device(struct device *device)
             open(device->buspirate.name, O_RDWR | O_NONBLOCK)) != -1);
 
     empty_inbuff(ddata->fd);
-    ASSURE(rawMode_enter(ddata->fd) == 0);
-    ddata->state = ENTER_RESET;
+    driver->ddata = ddata;
+    device->driver = driver;
+
+    ASSURE(rawMode_enter(device) == 0);
 
     switch (device->role) {
         case SPI:
-            ASSURE(rawMode_toMode(ddata->fd, ENTER_SPI) == 0);
-            ddata->state = ENTER_SPI;
+            ASSURE(rawMode_toMode(device, ENTER_SPI) == 0);
             break;
         default:
             LOGE("Device BusPirate can't handle role %d (yet)\n", device->role);
             ASSURE("Bad device->role" == 0);
     }
-    driver->ddata = ddata;
-    device->driver = driver;
 
     return 0;
 }
@@ -239,10 +243,8 @@ int buspirate_deinit_device(struct device *device)
 
     LOGI("BP: Destroying device ID [%d]\n", device->devid);
     empty_inbuff(ddata->fd);
-    ASSURE(rawMode_toMode(ddata->fd, ENTER_RESET) == 0);
-    ddata->state = ENTER_RESET;
-    ASSURE(rawMode_toMode(ddata->fd, RESET_BUSPIRATE) == 0);
-    ddata->state = RESET_BUSPIRATE;
+    ASSURE(rawMode_toMode(device, ENTER_RESET) == 0);
+    ASSURE(rawMode_toMode(device, RESET_BUSPIRATE) == 0);
 
     close(ddata->fd);
     free(ddata);
@@ -295,16 +297,18 @@ static void empty_inbuff(int fd)
 }
 
 /* Enter binary mode from normal console-mode */
-static int rawMode_enter(int fd)
+static int rawMode_enter(struct device *device)
 {
     int ret, i;
     char tmp[100] = { '\0' };
     int done = 0;
     int tries = 0;
+    struct ddata *ddata = device->driver->ddata;
+    int *fd = &ddata->fd;
 
     LOGI("BusPirate entering binary mode...\n");
 
-    if (fd == -1) {
+    if (*fd == -1) {
         LOGE("Device isn't open\n");
         return -1;
     }
@@ -312,24 +316,24 @@ static int rawMode_enter(int fd)
     tmp[0] = 0x00;
     for (i = 0; i < 20; i++) {
         LOGD("Sending 0x%02X to port\n", tmp[0]);
-        ASSURE_E((ret = write(fd, tmp, 1)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, log_ioerror(errno));
     }
 
     /*loop up to 25 more times, send 0x00 each time and pause briefly for a reply (BBIO1) */
     while (!done) {
         tmp[0] = 0x00;
         LOGD("Sending 0x%02X to port\n", tmp[0]);
-        ASSURE_E((ret = write(fd, tmp, 1)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, log_ioerror(errno));
         tries++;
         LOGD("tries: %i Ret %i\n", tries, ret);
         usleep(1);
-        ASSURE_E((ret = read_2err(fd, tmp, 5)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = read_2err(*fd, tmp, 5)) != -1, log_ioerror(errno));
         if (ret != 5 && tries > 22) {
             LOGE("Buspirate did not respond correctly (%i,%i) \n", ret, tries);
             return -1;
         } else if (strncmp(tmp, "BBIO1", 5) == 0) {
             /*Empty any remains in buffer */
-            empty_inbuff(fd);
+            empty_inbuff(*fd);
             done = 1;
         }
         if (tries > 25) {
@@ -338,18 +342,21 @@ static int rawMode_enter(int fd)
             return -1;
         }
     }
+
+    ddata->state = ENTER_RESET;
     return 0;
 }
 
-static int rawMode_toMode(int fd, bpcmd_t bpcmd)
+static int rawMode_toMode(struct device *device, bpcmd_t bpcmd)
 {
     int ret, i, slen;
     char tmp[100] = { '\0' };
     char *expRply = NULL;
-    int tbllen = sizeof(cmdrply) / sizeof(struct cmdrply_s);
+    struct ddata *ddata = device->driver->ddata;
+    int *fd = &ddata->fd;
 
     tmp[0] = bpcmd;
-    for (i = 0; i < tbllen; i++) {
+    for (i = 0; i < TBL_LEN; i++) {
         if (cmdrply[i].command == bpcmd)
             expRply = (char *)cmdrply[i].rply;
     }
@@ -360,13 +367,15 @@ static int rawMode_toMode(int fd, bpcmd_t bpcmd)
     }
 
     LOGD("Sending 0x%02X to port. Expecting response %s\n", tmp[0], expRply);
-    write(fd, tmp, 1);
+    write(*fd, tmp, 1);
     usleep(1);
     slen = strlen(expRply);
-    ret = read(fd, tmp, slen);
+    ret = read(*fd, tmp, slen);
 
-    if ((ret == strlen(expRply)) && (strncmp(tmp, expRply, slen) == 0))
+    if ((ret == strlen(expRply)) && (strncmp(tmp, expRply, slen) == 0)) {
+        ddata->state = bpcmd;
         return 0;
+    }
 
     LOGE("Buspirate did not respond correctly: (%i,%s) \n", ret, tmp);
     return -1;
