@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <assure.h>
 
-SPI_TypeDef *SPI_stm32_drv[MAX_SPI_DRIVERS];
+SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
 
 static void nod_sendData(const uint8_t *data, int sz);
 static void nod_receiveData(uint8_t *data, int sz);
@@ -54,7 +54,7 @@ int stm32_init()
         return 0;
     }
     is_init = 1;
-    for (i = 0; i < MAX_SPI_DRIVERS; i++) {
+    for (i = 0; i < MAX_SPI_INTERFACES; i++) {
         SPI_stm32_drv[i] = &nodriverAPI;
     }
 
@@ -63,8 +63,10 @@ int stm32_init()
 
 int stm32_init_interface(const struct device *device)
 {
-    LOGW("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
-         device->devid);
+    ASSERT(device->role == SPI);
+    ASSERT(device->index > 0 && device->index <= MAX_SPI_INTERFACES);
+
+    SPI_stm32_drv[device->index - 1] = device->driver;
     return 0;
 }
 
@@ -130,24 +132,24 @@ static void nod_sendData(const uint8_t *data, int sz)
     int i;
     char cbuf[512] = { '\0' };
 
-    LOGD("Interface-stub %s sending %d bytes \n", __func__, sz);
+    LOGW("Interface-stub %s sending %d bytes \n", __func__, sz);
     for (i = 0; i < sz; i++) {
         if (data[i] > 31)
             sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
         else
             sprintf(cbuf, "0x%02X %s,", data[i], " ");
     }
-    LOGD("%s\n", cbuf);
+    LOGW("%s\n", cbuf);
 }
 
 static void nod_receiveData(uint8_t *data, int sz)
 {
-    LOGE("Interface %s is not supposed to run\n", __func__);
+    LOGW("Interface %s is not supposed to run\n", __func__);
 }
 
 static uint16_t nod_getStatus(uint16_t flags)
 {
-    LOGD("Interface-stub %s quired about flags 0x02X% bytes \n", __func__,
+    LOGW("Interface-stub %s quired about flags 0x02X% bytes \n", __func__,
          flags);
     return -1;
 }

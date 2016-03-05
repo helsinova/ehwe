@@ -81,16 +81,16 @@ struct cmdrply_s cmdrply[] = {
 #define BUF_SZ 100
 #define STATE_RETRIES 10
 #define US_CHAR_TIME 100        /* Time in uS to propagate one character over
-								 * the serial device. Note: Baud-rate
-								 * dependent  
+                                 * the serial device. Note: Baud-rate
+                                 * dependent
                                  */
 #define MAX_ONGOING_CHARS 6     /* Number of character possibly coming */
 #define US_DELAY_RETRY (MAX_ONGOING_CHARS * US_CHAR_TIME)
                                 /* Must be long enough to allow any ongoing
-                                 * replies to fully reach UART registers, 
+                                 * replies to fully reach UART registers,
                                  * including possible multiple strings. If
-								 * Baud-rate > 115kb make sure this doesn't
-								 * evaluate to 0.
+                                 * Baud-rate > 115kb make sure this doesn't
+                                 * evaluate to 0.
                                  */
 
 /* Driver companion - NOTE: unique for each driver. Must NOT be public */
@@ -245,6 +245,7 @@ int buspirate_init_device(struct device *device)
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
+    driver->device = device;
     device->driver = driver;
 
     ASSURE(rawMode_enter(device) == 0);
@@ -411,7 +412,8 @@ static int rawMode_enter(struct device *device)
         ASSURE_E((ret = read_2err(*fd, tmp, 5)) != -1, LOGE_IOERROR(errno));
         if (ret != 5 && tries > 22) {
             corr_cmd = lookup_cmd(tmp);
-            LOGE("Buspirate did not respond correctly in function [%s] (%i,%i)\n", __func__, ret, tries);
+            LOGE("Buspirate did not respond correctly in function "
+                 "[%s] (%i,%i)\n", __func__, ret, tries);
             LOGE("  Command requested: 0x%02X\n", 0x00);
             LOGE("  Reply matches:     0x%02X\n", corr_cmd);
             return -1;
@@ -488,6 +490,17 @@ static int rawMode_toMode(struct device *device, bpcmd_t bpcmd)
  ***************************************************************************/
 static void bpspi_sendData(const uint8_t *data, int sz)
 {
+    int i;
+    char cbuf[512] = { '\0' };
+
+    LOGW("BP: Interface %s sending %d bytes \n", __func__, sz);
+    for (i = 0; i < sz; i++) {
+        if (data[i] > 31)
+            sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
+        else
+            sprintf(cbuf, "0x%02X %s,", data[i], " ");
+    }
+    LOGW("BP: %s\n", cbuf);
 }
 
 static void bpspi_receiveData(uint8_t *data, int sz)

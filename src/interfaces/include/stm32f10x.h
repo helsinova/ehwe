@@ -24,12 +24,12 @@
 /* STM32F10x_StdPeriph_Lib_V3.5.0 API */
 
 /* Glue */
-#define MAX_SPI_DRIVERS 3
-#define MAX_I2C_DRIVERS 3
+#define MAX_SPI_INTERFACES 3
+#define MAX_I2C_INTERFACES 3
 struct driverAPI;
 typedef struct driverAPI SPI_TypeDef;
 
-extern SPI_TypeDef *SPI_stm32_drv[MAX_SPI_DRIVERS];
+extern SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
 #define SPI1 (SPI_stm32_drv[0])
 #define SPI2 (SPI_stm32_drv[1])
 #define SPI3 (SPI_stm32_drv[2])

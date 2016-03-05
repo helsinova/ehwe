@@ -22,7 +22,9 @@
 
 #include <stdint.h>
 
+struct device;
 struct driverAPI {
+    struct device *device;      /* Belongs to this device */
     void *ddata;                /* Device specific driver-data */
     void (*sendData) (const uint8_t *data, int sz);
     void (*receiveData) (uint8_t *data, int sz);
