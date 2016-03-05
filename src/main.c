@@ -93,7 +93,11 @@ int main(int argc, char **argv)
         struct device device;
 
         LOGD("  %s\n", CDATA(opts.dev_strs));
-        devices_parse(CDATA(opts.dev_strs), &device);
+        if (devices_parse(CDATA(opts.dev_strs), &device) != 0){
+			LOGE("Bad device option (-d): [%s] \n", CDATA(opts.dev_strs));
+			mlist_close(ehwe.devices);
+			goto err;
+		}
         /* OK to add stack-variable as deep-copy to new location occurs. */
         ASSURE(mlist_add_last(ehwe.devices, &device));
     }

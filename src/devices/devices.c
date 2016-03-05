@@ -19,12 +19,12 @@
  ***************************************************************************/
 #include <sys/types.h>
 #include <regex.h>
+#include <assure.h>
 #include <log.h>
 #include "devices.h"
 #include "buspirate.h"
 #include <string.h>
 #include <stdlib.h>
-#include <assure.h>
 
 struct buspirate buspirate;
 static regex_t preg;            /* Compiled regular expression for generic
@@ -68,7 +68,7 @@ int devices_init()
  * */
 int devices_parse(const char *devstr, struct device *device)
 {
-    int rc, i;
+    int rc = 0, i;
     char err_str[REXP_ESTRSZ];
     regmatch_t mtch_idxs[REGEX_NSUB];
     char *devstr_cpy = strdup(devstr);
@@ -102,15 +102,17 @@ int devices_parse(const char *devstr, struct device *device)
 
 #ifdef DEVICE_PARAPORT
     if (strcasecmp(device_str, "pp") == 0)
-        rc = paraport_parse(devstr, device);
+        ASSURE_E((rc =
+                  paraport_parse(devstr, device)) == 0, goto devices_parse_err);
 #endif
 #ifdef DEVICE_BUSPIRATE
     if (strcasecmp(device_str, "bp") == 0)
-        rc = buspirate_parse(devstr, device);
+        ASSURE_E((rc =
+                buspirate_parse(devstr, device)) == 0, goto devices_parse_err);
 #endif
 
     free(devstr_cpy);
-    return 0;
+    return rc;
 devices_parse_err:
     free(devstr_cpy);
     return -1;
@@ -119,6 +121,9 @@ devices_parse_err:
 int devices_init_device(struct device *device)
 {
     int rc = 0;
+
+    ASSURE(device);
+    LOGD("{%d,%d,%d}\n", device->devid, device->role, device->index);
     switch (device->devid) {
 #ifdef DEVICE_PARAPORT
         case PARAPORT:
@@ -131,7 +136,7 @@ int devices_init_device(struct device *device)
             break;
 #endif
         default:
-            LOGE("Unsupported device [%d]\n", device->devid);
+            LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
     }
     return rc;
 }
@@ -139,6 +144,10 @@ int devices_init_device(struct device *device)
 int devices_deinit_device(struct device *device)
 {
     int rc = 0;
+
+    ASSERT(device);
+    ASSERT(device->driver);
+    LOGD("{%d,%d,%d}\n", device->devid, device->role, device->index);
     switch (device->devid) {
 #ifdef DEVICE_PARAPORT
         case PARAPORT:
@@ -151,7 +160,7 @@ int devices_deinit_device(struct device *device)
             break;
 #endif
         default:
-            LOGE("Unsupported device [%d]\n", device->devid);
+            LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
     }
     return rc;
 }

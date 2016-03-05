@@ -94,13 +94,19 @@ static void bpspi_sendData(const uint8_t *data, int sz);
 static void bpspi_receiveData(uint8_t *data, int sz);
 static uint16_t bpspi_getStatus(uint16_t flags);
 
-static void log_ioerror(int ecode);
+static void log_ioerror(int ecode, log_level llevel);
 static int rawMode_enter(struct device *);
 static int rawMode_toMode(struct device *, bpcmd_t bpcmd);
 static void empty_inbuff(int fd);
 static int read_2err(int fd, char *rbuff, int len);
 static char *expected_rply(int cmd);
 static unsigned int lookup_cmd(char *rply);
+
+#define LOGV_IOERROR( X ) log_ioerror( X , LOG_LEVEL_VERBOSE )
+#define LOGD_IOERROR( X ) log_ioerror( X , LOG_LEVEL_DEBUG )
+#define LOGI_IOERROR( X ) log_ioerror( X , LOG_LEVEL_INFO )
+#define LOGW_IOERROR( X ) log_ioerror( X , LOG_LEVEL_WARNING )
+#define LOGE_IOERROR( X ) log_ioerror( X , LOG_LEVEL_ERROR )
 
 /* Convenience variable: Bus-pirate provides one API. Variants communicated
  * through ddata */
@@ -270,13 +276,32 @@ int buspirate_deinit_device(struct device *device)
  * Inspired from:
  * http://dangerousprototypes.com/docs/Bus_Pirate:_Entering_binary_mode
  ***************************************************************************/
-
-static void log_ioerror(int ecode)
+static void log_ioerror(int ecode, log_level llevel)
 {
     char buff[120];
 
     strerror_r(ecode, buff, 120);
-    LOGE("File I/O error: %s\n", buff);
+
+    switch (llevel) {
+        case LOG_LEVEL_VERBOSE:
+            LOGV("File I/O error: %s\n", buff);
+            break;
+        case LOG_LEVEL_DEBUG:
+            LOGD("File I/O error: %s\n", buff);
+            break;
+        case LOG_LEVEL_INFO:
+            LOGI("File I/O error: %s\n", buff);
+            break;
+        case LOG_LEVEL_WARNING:
+            LOGW("File I/O error: %s\n", buff);
+            break;
+        case LOG_LEVEL_ERROR:
+            LOGE("File I/O error: %s\n", buff);
+            break;
+        default:
+            LOGE("File I/O error: %s\n", buff);
+    }
+
 }
 
 /* Reads fd one character at a time until error occurs */
@@ -284,6 +309,7 @@ static int read_2err(int fd, char *rbuff, int len)
 {
     int rc, m_errno, idx = 0;
     char tmp[5];
+    log_level llevel;
 
     do {
         rc = read(fd, tmp, 1);
@@ -291,10 +317,17 @@ static int read_2err(int fd, char *rbuff, int len)
         if (rc != -1)
             rbuff[idx++] = tmp[0];
     } while ((rc != -1) && (idx < len));
-    ASSURE_E(idx > 0, log_ioerror(m_errno));
+
+    llevel = get_loglevel_assure();
+    set_loglevel_assure(LOG_LEVEL_DEBUG);
+    ASSURE_E(idx > 0, LOGD_IOERROR(m_errno));
+    set_loglevel_assure(llevel);
+
     if (idx > 0)
         return idx;
-    return rc;
+    if (m_errno != EAGAIN)
+        return rc;
+    return 0;
 }
 
 static void empty_inbuff(int fd)
@@ -304,7 +337,7 @@ static void empty_inbuff(int fd)
     do {
         ret = read_2err(fd, tmp, 1);
         if ((ret == -1) && (errno != EAGAIN))
-            log_ioerror(errno);
+            LOGE_IOERROR(errno);
         tries++;
     } while (ret > 0);
 }
@@ -353,18 +386,18 @@ static int rawMode_enter(struct device *device)
         tmp[0] = 0x00;
         LOGD("Sending 0x%02X to port\n", tmp[0]);
         usleep(1000);
-        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
     }
 
     /*loop up to 25 more times, send 0x00 each time and pause briefly for a reply (BBIO1) */
     while (!done) {
         tmp[0] = 0x00;
         LOGD("Sending 0x%02X to port\n", tmp[0]);
-        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
         tries++;
         LOGD("tries: %i Ret %i\n", tries, ret);
         usleep(1000);
-        ASSURE_E((ret = read_2err(*fd, tmp, 5)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = read_2err(*fd, tmp, 5)) != -1, LOGE_IOERROR(errno));
         if (ret != 5 && tries > 22) {
             corr_cmd = lookup_cmd(tmp);
             LOGE("Buspirate did not respond correctly in function [%s] (%i,%i)\n", __func__, ret, tries);
@@ -415,10 +448,10 @@ static int rawMode_toMode(struct device *device, bpcmd_t bpcmd)
         tmp[0] = bpcmd;
         LOGD("Sending 0x%02X to port. Expecting response %s\n", tmp[0],
              expRply);
-        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
         usleep(1000);
         slen = strlen(expRply);
-        ASSURE_E((ret = read_2err(*fd, tmp, slen)) != -1, log_ioerror(errno));
+        ASSURE_E((ret = read_2err(*fd, tmp, slen)) != -1, LOGE_IOERROR(errno));
 
         if ((ret == strlen(expRply)) && (strncmp(tmp, expRply, slen) == 0)) {
             ddata->state = bpcmd;
