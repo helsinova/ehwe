@@ -75,12 +75,23 @@ struct cmdrply_s cmdrply[] = {
     {RESET_BUSPIRATE, (char[]){'\1', '\0'}}
 };
 
+#define msleep( X ) \
+	usleep( (X) * 1000 )
 #define TBL_LEN (sizeof(cmdrply) / sizeof(struct cmdrply_s))
 #define BUF_SZ 100
 #define STATE_RETRIES 10
-#define US_DELAY_RETRY 10000    /* Must be long enough to allow any ongoing
-                                   replies to reach UART registers. I.e.
-                                   Baud-rate dependent. */
+#define US_CHAR_TIME 100        /* Time in uS to propagate one character over
+								 * the serial device. Note: Baud-rate
+								 * dependent  
+                                 */
+#define MAX_ONGOING_CHARS 6     /* Number of character possibly coming */
+#define US_DELAY_RETRY (MAX_ONGOING_CHARS * US_CHAR_TIME)
+                                /* Must be long enough to allow any ongoing
+                                 * replies to fully reach UART registers, 
+                                 * including possible multiple strings. If
+								 * Baud-rate > 115kb make sure this doesn't
+								 * evaluate to 0.
+                                 */
 
 /* Driver companion - NOTE: unique for each driver. Must NOT be public */
 struct ddata {
@@ -258,10 +269,10 @@ int buspirate_deinit_device(struct device *device)
     LOGI("BP: Destroying device ID [%d]\n", device->devid);
     empty_inbuff(ddata->fd);
     ASSURE(rawMode_toMode(device, ENTER_RESET) == 0);
-    usleep(10000);
+    msleep(1);
     empty_inbuff(ddata->fd);
     ASSURE(rawMode_toMode(device, RESET_BUSPIRATE) == 0);
-    usleep(100000);
+    msleep(100);
 
     close(ddata->fd);
     free(ddata);
@@ -385,7 +396,7 @@ static int rawMode_enter(struct device *device)
     for (i = 0; i < 20; i++) {
         tmp[0] = 0x00;
         LOGD("Sending 0x%02X to port\n", tmp[0]);
-        usleep(1000);
+        usleep(US_CHAR_TIME);
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
     }
 
@@ -396,7 +407,7 @@ static int rawMode_enter(struct device *device)
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
         tries++;
         LOGD("tries: %i Ret %i\n", tries, ret);
-        usleep(1000);
+        usleep(US_CHAR_TIME);
         ASSURE_E((ret = read_2err(*fd, tmp, 5)) != -1, LOGE_IOERROR(errno));
         if (ret != 5 && tries > 22) {
             corr_cmd = lookup_cmd(tmp);
@@ -449,7 +460,7 @@ static int rawMode_toMode(struct device *device, bpcmd_t bpcmd)
         LOGD("Sending 0x%02X to port. Expecting response %s\n", tmp[0],
              expRply);
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
-        usleep(1000);
+        msleep(1);
         slen = strlen(expRply);
         ASSURE_E((ret = read_2err(*fd, tmp, slen)) != -1, LOGE_IOERROR(errno));
 
