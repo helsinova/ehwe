@@ -1,6 +1,3 @@
-[submodule "wiki/wikidata"]
-	path = wiki/wikidata
-	url = /home/mambrus/minirepos/EMBEDDED/ehwe_wiki
 [submodule "src/lib/log"]
 	path = src/lib/log
 	url = https://github.com/mambrus/liblog.git
@@ -12,5 +9,8 @@
 	url = https://github.com/mambrus/libmtime.git
 [submodule "src/embedded"]
 	path = src/embedded
-	url = /home/mambrus/Dropbox/minirepos/EMBEDDED/ehwe_SPIRAM/
+	url = ../ehwe_SPIRAM/
 	ignore = all
+[submodule "wiki/wikidata"]
+	path = wiki/wikidata
+	url = ../ehwe_wiki/
