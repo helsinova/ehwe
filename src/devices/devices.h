@@ -58,14 +58,9 @@ typedef enum {
 // Valid regex-i patterns for "direction"
 #define DIRECTIONS "MASTER|SLAVE"
 
-#ifdef DEVICE_PARAPORT
-#  include "paraport.h"
-#endif
-#ifdef DEVICE_BUSPIRATE
-#  include "buspirate.h"
-#endif
-
 struct driverAPI;
+struct paraport;
+struct buspirate;
 
 struct device {
     devid_t devid;
@@ -73,10 +68,10 @@ struct device {
     int index;
     union {
 #ifdef DEVICE_PARAPORT
-        struct paraport paraport;
+        struct paraport *paraport;
 #endif
 #ifdef DEVICE_BUSPIRATE
-        struct buspirate buspirate;
+        struct buspirate *buspirate;
 #endif
     };
     struct driverAPI *driver;

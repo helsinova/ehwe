@@ -150,8 +150,8 @@ int buspirate_init()
 }
 
 /*
- * Refined parsing of devstring to complete buspirate dev_struct
- *
+ * Refined parsing of devstring to complete buspirate dev_struct & finalize
+ * device with allocation of buspirate structure.
  * */
 int buspirate_parse(const char *devstr, struct device *device)
 {
@@ -207,11 +207,12 @@ int buspirate_parse(const char *devstr, struct device *device)
 
     device->index = atoi(index_str);
     device->devid = BUSPIRATE;
+    device->buspirate = malloc(sizeof(struct buspirate));
 
     if (strcasecmp(clkownr_str, "master") == 0) {
-        device->buspirate.clckownr = MASTER;
+        device->buspirate->clckownr = MASTER;
     } else if (strcasecmp(clkownr_str, "slave") == 0) {
-        device->buspirate.clckownr = SLAVE;
+        device->buspirate->clckownr = SLAVE;
     } else {
         LOGE("Buspirate device driver can't handle clkownr: %s\n", clkownr_str);
         goto buspirate_parse_err;
@@ -220,7 +221,7 @@ int buspirate_parse(const char *devstr, struct device *device)
     /* Avoid need to strdup by using original which happens to terminate
      * correctly as well. Ignore const as this string belongs to
      * environment with process-long lifetime */
-    device->buspirate.name = (char *)(&devstr[mtch_idxs[5].rm_so]);
+    device->buspirate->name = (char *)(&devstr[mtch_idxs[5].rm_so]);
 
     free(devstr_cpy);
     return 0;
@@ -241,7 +242,7 @@ int buspirate_init_device(struct device *device)
 
     ASSERT(ddata = malloc(sizeof(struct ddata)));
     ASSURE((ddata->fd =
-            open(device->buspirate.name, O_RDWR | O_NONBLOCK)) != -1);
+            open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
@@ -266,6 +267,7 @@ int buspirate_deinit_device(struct device *device)
 {
     struct driverAPI *driver = device->driver;
     struct ddata *ddata = driver->ddata;
+    struct buspirate *buspirate = device->buspirate;
 
     LOGI("BP: Destroying device ID [%d]\n", device->devid);
     empty_inbuff(ddata->fd);
@@ -278,7 +280,9 @@ int buspirate_deinit_device(struct device *device)
     close(ddata->fd);
     free(ddata);
     free(driver);
+    free(buspirate);
 
+    device->buspirate = NULL;
     device->driver = NULL;
     return 0;
 }
