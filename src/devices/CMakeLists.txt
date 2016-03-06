@@ -1,47 +1,39 @@
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}")
 
-################################################################################
-# Configuration options for this module
-################################################################################
-# Normal project options (src defines)
-#-------------------------------------------------------------------------------
 set(DEF_MAX_DEVICES
-	"30"
-	CACHE STRING
-	"Maximum number of devices")
+    "30"
+    CACHE STRING
+    "Maximum number of devices")
 
-# Device bus-pirate
 option(DEVICE_BUSPIRATE
     "Enable device BUSPIRATE." YES)
 
-# Device paraport
 option(DEVICE_PARAPORT
     "Enable device PARAPORT (requires special kernel-driver)." NO)
 
-#-------------------------------------------------------------------------------
-# End of configuration options
-#-------------------------------------------------------------------------------
 
-#Top level sources
 set(LIBDEVICES_SOURCE
-	devices.c
+    devices.c
 )
 
 if (DEVICE_BUSPIRATE)
-	# Device-specific sources
-	set(LIBDEVICES_SOURCE
-		${LIBDEVICES_SOURCE}
-		buspirate.c
-	)
-endif (DEVICE_BUSPIRATE)
+    include_directories ("${PROJECT_SOURCE_DIR}/devices/buspirate/include")
+    add_subdirectory (buspirate)
+    set (DEVICES_LIBS ${DEVICES_LIBS} buspirate)
+else()
+    message(STATUS "Skipping BUSPIRATE directory")
+endif()
 
 if (DEVICE_PARAPORT)
-	# Device-specific sources
-	set(LIBDEVICES_SOURCE
-		${LIBDEVICES_SOURCE}
-		paraprt.c
-	)
-endif (DEVICE_PARAPORT)
+    set(LIBDEVICES_SOURCE
+        ${LIBDEVICES_SOURCE}
+        paraprt.c
+    )
+else()
+    message(STATUS "Skipping PARAPORT build")
+endif()
 
 add_library(devices ${LIBDEVICES_SOURCE})
+
+target_link_libraries (devices ${DEVICES_LIBS})

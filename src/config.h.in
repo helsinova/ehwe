@@ -10,3 +10,7 @@
 #cmakedefine DEVICE_BUSPIRATE
 #cmakedefine INTERFACE_STM32
 #define DEF_MAX_DEVICES @DEF_MAX_DEVICES@
+
+#cmakedefine BUSPIRATE_ENABLE_SPI
+#cmakedefine BUSPIRATE_ENABLE_I2C
+

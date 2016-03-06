@@ -108,7 +108,8 @@ int devices_parse(const char *devstr, struct device *device)
 #ifdef DEVICE_BUSPIRATE
     if (strcasecmp(device_str, "bp") == 0)
         ASSURE_E((rc =
-                buspirate_parse(devstr, device)) == 0, goto devices_parse_err);
+                  buspirate_parse(devstr, device)) == 0,
+                 goto devices_parse_err);
 #endif
 
     free(devstr_cpy);

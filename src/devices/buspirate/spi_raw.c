@@ -17,34 +17,44 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef buspirate_h
-#define buspirate_h
+#include <sys/types.h>
+#include <regex.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <log.h>
+#include <devices.h>
+#include <driver.h>
+#include <buspirate.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assure.h>
+#include "local.h"
 
-typedef enum {
-    CLKOWNR_UNDEFINED = 0,
-    CLKOWNR_INVALID = 1,        /* Invalid, unknown or parse failure */
-    MASTER = 100,
-    SLAVE = 101
-} clkownr_t;
+/***************************************************************************
+ * Driver interface SPI
+ ***************************************************************************/
+void bpi2c_sendData(const uint8_t *data, int sz)
+{
+    int i;
+    char cbuf[512] = { '\0' };
 
-struct buspirate {
-    clkownr_t clckownr;
-    char *name;                 /* Local hosts device name/path */
-};
+    LOGW("BP: Interface %s sending %d bytes \n", __func__, sz);
+    for (i = 0; i < sz; i++) {
+        if (data[i] > 31)
+            sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
+        else
+            sprintf(cbuf, "0x%02X %s,", data[i], " ");
+    }
+    LOGW("BP: %s\n", cbuf);
+}
 
-/* Valid regex-i role patterns for buspirate */
-#define BP_ROLES "SPI|I2C"
+void bpi2c_receiveData(uint8_t *data, int sz)
+{
+}
 
-/* Valid regex-i clock-owner patterns for buspirate */
-#define BP_CLKOWNER "MASTER|SLAVE"
-
-/* Forward declaration of 'struct device' required to avoid mutual header
- * inclusion */
-struct device;
-
-int buspirate_init();
-int buspirate_parse(const char *devstr, struct device *device);
-int buspirate_init_device(struct device *device);
-int buspirate_deinit_device(struct device *device);
-
-#endif                          //buspirate_h
+uint16_t bpi2c_getStatus(uint16_t flags)
+{
+    return flags;
+}
