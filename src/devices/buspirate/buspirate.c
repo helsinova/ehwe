@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "config.h"
+#include "buspirate_config.h"
 #include "local.h"
 #include <sys/types.h>
 #include <regex.h>
