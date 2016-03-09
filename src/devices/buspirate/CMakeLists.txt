@@ -13,41 +13,48 @@ set(LIBBUSPIRATE_SOURCE
 )
 
 if(BUSPIRATE_ENABLE_SPI)
-    set(BUSPIRATE_SPI_DFLT_SPEED_KHZ
-        "30"
+    set(BUSPIRATE_SPI_DFLT_SPEED
+        "SPISPEED_30kHz"
         CACHE STRING
-        "SPI-bus: Default clock speed (30=1,125=2,250=4,1000=4)")
+        "SPI-bus: Default clock speed (30kHz=0,125kHz=1,250kHz=2,1MHz=3,2MHz=4,2_6MHz=5,4MHz=6,8MHz=7)")
 
-    set(BUSPIRATE_SPI_DFLT_CLOCK_IDLE_POLARITY
+    set(BUSPIRATE_SPI_DFLT_CLK_IDLE_POLARITY
         "POL_LOW"
         CACHE STRING
-        "SPI-bus: Polarity of clock when idle (POL_LOW=1,POL_HI=2)")
+        "SPI-bus: Polarity of clock when idle (POL_LOW=0,POL_HIGH=1)")
 
-    set(BUSPIRATE_SPI_DFLT_CLOCK_EDGE
-        "IDLE_2_ACT"
+    set(BUSPIRATE_SPI_DFLT_CLK_EDGE
+        "EDGE_BACK"
         CACHE STRING
-        "SPI-bus: Output clock edge (IDLE_2_ACT=1, ACT_2_IDLE=2)")
+        "SPI-bus: Output clock edge (EDGE_FRONT=0, EDGE_BACK=1)")
 
     set(BUSPIRATE_SPI_DFLT_SAMPLE
-        "MIDDLE"
+        "PULSE_MIDDLE"
         CACHE STRING
-        "SPI-bus: Input sample phase (MIDDLE=1,END=2)")
+        "SPI-bus: Input sample phase (PULSE_MIDDLE=0,PULSE_END=1)")
 
     set(BUSPIRATE_SPI_DFLT_CS_POL
         "POL_LOW"
         CACHE STRING
         "SPI-bus: Chip-select polarity (POL_HI=1,POL_LOW=2)")
 
-    set(BUSPIRATE_SPI_DFLT_OUTPUT
+    set(BUSPIRATE_SPI_DFLT_OUTPUT_TYPE
         "OPEN_DRAIN"
         CACHE STRING
-        "SPI-bus: Pins output type: (OPEN_DRAIN=1,PUSH_PULL=2)")
+        "SPI-bus: Pins output type: (OPEN_DRAIN=0,PUSH_PULL=1)")
 
     option(BUSPIRATE_SPI_DFLT_PON
-        "Power supply output-pin active" yes)
+        "Power supply output-pin active" no)
+
+    option(BUSPIRATE_SPI_DFLT_ENABLE_PULLUPS
+        "Toggle on-board pull-up resistors" no)
 
     option(BUSPIRATE_SPI_DFLT_AUX_ON
-        "Auxaliary output-pin active" yes)
+        "Auxaliary output-pin active" no)
+
+    option(BUSPIRATE_SPI_DFLT_CS_ACTIVE
+        "Power supply output-pin active" no)
+
 
     set(LIBBUSPIRATE_SOURCE
         ${LIBBUSPIRATE_SOURCE}
@@ -69,6 +76,7 @@ else()
 endif()
 
 
+include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 configure_file (
   "${CMAKE_CURRENT_SOURCE_DIR}/buspirate_config.h.in"
   "${CMAKE_CURRENT_BINARY_DIR}/buspirate_config.h"

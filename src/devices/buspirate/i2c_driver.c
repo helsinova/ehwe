@@ -59,3 +59,8 @@ uint16_t bpi2c_getStatus(uint16_t flags)
 {
     return flags;
 }
+
+int bpi2c_config(struct ddata *ddata)
+{
+    return 0;
+}

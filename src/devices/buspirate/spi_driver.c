@@ -59,3 +59,33 @@ uint16_t bpspi_getStatus(uint16_t flags)
 {
     return flags;
 }
+
+int bpspi_config(struct ddata *ddata)
+{
+    int ret;
+    uint8_t tmp[8] = { 0 };
+
+    struct confspi_pereph *pereph = &(ddata->config.spi.pereph);
+    struct confspi_speed *speed = &(ddata->config.spi.speed);
+    struct confspi_bus *bus = &(ddata->config.spi.bus);
+
+    ASSURE_E((ret =
+              write(ddata->fd, speed, sizeof(struct confspi_speed))) != -1,
+             LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSURE(tmp[0] == 0x00);
+    tmp[0] = 0;
+    ASSURE_E((ret =
+              write(ddata->fd, bus, sizeof(struct confspi_bus))) != -1,
+             LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSURE(tmp[0] == 0x01);
+    tmp[0] = 0;
+    ASSURE_E((ret =
+              write(ddata->fd, pereph, sizeof(struct confspi_pereph))) != -1,
+             LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSURE(tmp[0] == 0x01);
+    tmp[0] = 0;
+    return 0;
+}

@@ -11,3 +11,5 @@
 #cmakedefine INTERFACE_STM32
 #define DEF_MAX_DEVICES @DEF_MAX_DEVICES@
 
+
+

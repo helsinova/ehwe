@@ -31,6 +31,35 @@
 #define LOGW_IOERROR( X ) log_ioerror( X , LOG_LEVEL_WARNING )
 #define LOGE_IOERROR( X ) log_ioerror( X , LOG_LEVEL_ERROR )
 
+/* electrical level */
+typedef enum {
+    POL_LOW = 0,
+    POL_HIGH = 1
+} pol_t;
+
+/* pulse edges (note, LOGIC - not electrical) */
+typedef enum {
+    EDGE_FRONT = 0,
+    EDGE_BACK = 1
+} edge_t;
+
+/* pulse phase */
+typedef enum {
+    PULSE_MIDDLE = 0,
+    PULSE_END = 1
+} phase_t;
+
+/* pin electrical output type */
+typedef enum {
+    OPEN_DRAIN = 0,
+    PUSH_PULL = 1
+} pinout_t;
+
+/* CMake built-ins*/
+#define OFF 0
+#define ON 1
+/* End */
+
 #define msleep( X ) \
 	usleep( (X) * 1000 )
 
@@ -48,12 +77,101 @@ typedef enum {
     ENTER_RAWWIRE = 0x05,
     ENTER_OPENOCD = 0x05,
     RESET_BUSPIRATE = 0x0F      /* Execute full reset cycle */
-} bpcmd_t;
+} bpcmd_raw_t;
+
+/* Commands while in SPI mode */
+typedef enum {
+    CONFIG_SPI_PEREPHERIALS = 0x04,
+    CONFIG_SPI_SPEED = 0x05,
+    CONFIG_SPI_BUS = 0x08
+} bpcmd_spi_t;
+
+/* Enable (1) and disable (0) Bus Pirate peripherals and pins. */
+struct confspi_pereph {
+    union {
+        struct {
+#if defined(_BIT_FIELDS_HTOL)
+            bpcmd_spi_t cmd:4;  /* When used as cmd, 0100 = 0x04 */
+            uint8_t power_on:1; /* Enable power on */
+            uint8_t pullups:1;  /* Enable pull-up resistors */
+            uint8_t aux:1;      /* Set AUX-pin */
+            uint8_t cs_active:1;    /* CS pin state */
+#else
+            uint8_t cs_active:1;
+            uint8_t aux:1;
+            uint8_t pullups:1;
+            uint8_t power_on:1;
+            bpcmd_spi_t cmd:4;
+#endif
+        } __attribute__ ((packed));
+        uint8_t raw;
+    };
+} __attribute__ ((packed));
+
+typedef enum {
+    SPISPEED_30kHz = 0x0,
+    SPISPEED_125kHz = 0x1,
+    SPISPEED_250kHz = 0x2,
+    SPISPEED_1MHz = 0x3,
+    SPISPEED_2MHz = 0x4,
+    SPISPEED_2_6MHz = 0x5,
+    SPISPEED_4MHz = 0x6,
+    SPISPEED_8MHz = 0x7
+} speed_t;
+
+struct confspi_speed {
+    union {
+        struct {
+#if defined(_BIT_FIELDS_HTOL)
+            bpcmd_spi_t cmd:5;  /* When used as cmd, 01100 = 0x05 */
+            speed_t speed:3;
+#else
+            speed_t speed:3;
+            bpcmd_spi_t cmd:5;
+#endif
+        } __attribute__ ((packed));
+        uint8_t raw;
+    };
+
+} __attribute__ ((packed));
+
+struct confspi_bus {
+    union {
+        struct {
+#if defined(_BIT_FIELDS_HTOL)
+            bpcmd_spi_t cmd:4;  /* When used as cmd, 1000 = 0x08 */
+            pinout_t active_output:1;   /* 0=HiZ, 1=3.3V */
+            pol_t clk_pol_idle:1;   /* Clock polarity on idle: 0=low, 1=high */
+            edge_t output_clk_edge:1;   /* MOSI on clock-edge: 0=front, 1=back */
+            phase_t input_sample_end:1; /* MISO sample where: 0=middle, 1=end */
+#else
+            phase_t input_sample_end:1;
+            edge_t output_clk_edge:1;
+            pol_t clk_pol_idle:1;
+            pinout_t active_output:1;
+            bpcmd_spi_t cmd:4;
+#endif
+        } __attribute__ ((packed));
+        uint8_t raw;
+    };
+
+} __attribute__ ((packed));
+
+struct config_SPI {
+    struct confspi_pereph pereph;
+    struct confspi_speed speed;
+    struct confspi_bus bus;
+};
 
 /* Driver companion - NOTE: unique for each driver. Must NOT be public */
+
 struct ddata {
     int fd;
-    bpcmd_t state;
+    bpcmd_raw_t state;
+    union {
+        struct config_SPI spi;
+    } config;
+    struct driverAPI *odriver;  /* Owned by driver */
 };
 
 struct device;
@@ -61,7 +179,7 @@ struct device;
 void log_ioerror(int ecode, log_level llevel);
 void empty_inbuff(int fd);
 int rawMode_enter(struct device *);
-int rawMode_toMode(struct device *, bpcmd_t bpcmd);
+int rawMode_toMode(struct device *, bpcmd_raw_t bpcmd);
 
 /***************************************************************************
  * Driver interfaces
@@ -69,9 +187,11 @@ int rawMode_toMode(struct device *, bpcmd_t bpcmd);
 void bpspi_sendData(const uint8_t *data, int sz);
 void bpspi_receiveData(uint8_t *data, int sz);
 uint16_t bpspi_getStatus(uint16_t flags);
+int bpspi_config(struct ddata *ddata);
 
 void bpi2c_sendData(const uint8_t *data, int sz);
 void bpi2c_receiveData(uint8_t *data, int sz);
 uint16_t bpi2c_getStatus(uint16_t flags);
+int bpi2c_config(struct ddata *ddata);
 
 #endif                          //buspirate_local_h

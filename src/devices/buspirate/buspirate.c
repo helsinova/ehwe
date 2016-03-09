@@ -57,7 +57,8 @@ static struct driverAPI bpspi_driver = {
     .ddata = NULL,
     .sendData = bpspi_sendData,
     .receiveData = bpspi_receiveData,
-    .getStatus = bpspi_getStatus
+    .getStatus = bpspi_getStatus,
+    .config = bpspi_config
 };
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
@@ -66,7 +67,8 @@ static struct driverAPI bpi2c_driver = {
     .ddata = NULL,
     .sendData = bpi2c_sendData,
     .receiveData = bpi2c_receiveData,
-    .getStatus = bpi2c_getStatus
+    .getStatus = bpi2c_getStatus,
+    .config = i2cspi_config
 };
 #endif
 
@@ -88,6 +90,47 @@ int buspirate_init()
         LOGE("Regexec compilation error: %s\n", err_str);
         return rc;
     }
+    ASSERT(sizeof(struct confspi_pereph) == 1);
+    ASSERT(sizeof(struct confspi_speed) == 1);
+    ASSERT(sizeof(struct confspi_bus) == 1);
+
+    /* Testing SPI structs */
+    {
+        volatile struct confspi_pereph pereph = {
+            .cmd = CONFIG_SPI_PEREPHERIALS,
+            .power_on = 1,
+            .pullups = 1,
+            .aux = 0,
+            .cs_active = 0
+        };
+        LOGW("pereph: cmd=%d power_on=%d pullups=%d aux=%d cs_active=%d "
+             "(raw=0x%02X)\n", pereph.cmd, pereph.power_on, pereph.pullups,
+             pereph.aux, pereph.cs_active, pereph.raw);
+        ASSERT(pereph.raw == 0x4C);
+
+        struct confspi_speed speed = {
+            .cmd = CONFIG_SPI_SPEED,
+            .speed = SPISPEED_1MHz
+        };
+        LOGW("spispeed: cmd=%d speed=%d (raw=0x%02X)\n", speed.cmd, speed.speed,
+             speed.raw);
+        ASSERT(speed.raw == 0x2B);
+
+        struct confspi_bus bus = {
+            .cmd = CONFIG_SPI_BUS,
+            .active_output = 1,
+            .clk_pol_idle = 0,
+            .output_clk_edge = 1,
+            .input_sample_end = 0
+        };
+
+        LOGW("bus: cmd=%d active_output=%d clk_pol_idle=%d output_clk_edge=%d "
+             "input_sample_end=%d (raw=0x%02X)\n", bus.cmd, bus.active_output,
+             bus.clk_pol_idle, bus.output_clk_edge, bus.input_sample_end,
+             bus.raw);
+        ASSERT(bus.raw == 0x8A);
+    }
+
     return 0;
 }
 
@@ -200,10 +243,37 @@ int buspirate_init_device(struct device *device)
     ASSURE((ddata->fd =
             open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
 
+/* *INDENT-OFF* */
+    if (device->role == SPI) {
+        ddata->config.spi.speed = (struct confspi_speed) {
+            .cmd =                  CONFIG_SPI_SPEED,
+            .speed =                BUSPIRATE_SPI_DFLT_SPEED
+        };
+        ddata->config.spi.pereph = (struct confspi_pereph) {
+            .cmd =                  CONFIG_SPI_PEREPHERIALS,
+            .power_on =             BUSPIRATE_SPI_DFLT_PON,
+            .pullups =              BUSPIRATE_SPI_DFLT_ENABLE_PULLUPS,
+            .aux =                  BUSPIRATE_SPI_DFLT_AUX_ON,
+            .cs_active =            BUSPIRATE_SPI_DFLT_CS_ACTIVE,
+        };
+        ddata->config.spi.bus = (struct confspi_bus) {
+            .cmd =                  CONFIG_SPI_BUS,
+            .active_output =        BUSPIRATE_SPI_DFLT_OUTPUT_TYPE,
+            .clk_pol_idle =         BUSPIRATE_SPI_DFLT_CLK_IDLE_POLARITY,
+            .output_clk_edge =      BUSPIRATE_SPI_DFLT_CLK_EDGE,
+            .input_sample_end =     BUSPIRATE_SPI_DFLT_SAMPLE
+        };
+    }
+/* *INDENT-ON* */
+
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
     driver->device = device;
     device->driver = driver;
+
+    /* Setting convenience pointers (- try to move to caller (TBD)) */
+    ddata->odriver = driver;
+    driver->odevice = device;
 
     ASSURE(rawMode_enter(device) == 0);
 
@@ -222,6 +292,27 @@ int buspirate_init_device(struct device *device)
             LOGE("Device BusPirate can't handle role %d (yet)\n", device->role);
             ASSURE("Bad device->role" == 0);
     }
+    close(ddata->fd);
+    ASSURE((ddata->fd = open(device->buspirate->name, O_RDWR)) != -1);
+    LOGD("Device [%s] is now state-initialized and re-opened blocking r/w\n",
+         device->buspirate->name);
+
+    /* Configure the device to a known state as the state can't be read */
+    switch (device->role) {
+#ifdef BUSPIRATE_ENABLE_SPI
+        case SPI:
+            ASSURE(bpspi_config(ddata) == 0);
+            break;
+#endif
+#ifdef BUSPIRATE_ENABLE_I2C
+        case I2C:
+            ASSURE(bpi2c_config(ddata) == 0);
+            break;
+#endif
+        default:
+            LOGE("Device BusPirate can't handle role %d (yet)\n", device->role);
+            ASSURE("Bad device->role" == 0);
+    }
 
     return 0;
 }
@@ -231,6 +322,11 @@ int buspirate_deinit_device(struct device *device)
     struct driverAPI *driver = device->driver;
     struct ddata *ddata = driver->ddata;
     struct buspirate *buspirate = device->buspirate;
+
+    close(ddata->fd);
+    ASSURE((ddata->fd =
+            open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
+    LOGD("Device [%s] re-opened non-blocking r/w\n", device->buspirate->name);
 
     LOGI("BP: Destroying device ID [%d]\n", device->devid);
     empty_inbuff(ddata->fd);

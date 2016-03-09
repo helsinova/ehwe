@@ -139,6 +139,7 @@ int devices_init_device(struct device *device)
         default:
             LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
     }
+
     return rc;
 }
 

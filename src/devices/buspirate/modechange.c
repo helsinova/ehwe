@@ -34,7 +34,7 @@
 
 /* Lookup-table: Expected replies for command */
 struct cmdrply_s {
-    bpcmd_t command;
+    bpcmd_raw_t command;
     const char *rply;
 };
 
@@ -221,7 +221,7 @@ int rawMode_enter(struct device *device)
     return 0;
 }
 
-int rawMode_toMode(struct device *device, bpcmd_t bpcmd)
+int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
 {
     int ret, i, slen, corr_cmd, tries = 0;
     char tmp[BUF_SZ] = { '\0' };

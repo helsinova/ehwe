@@ -23,12 +23,16 @@
 #include <stdint.h>
 
 struct device;
+struct ddata;
+
 struct driverAPI {
     struct device *device;      /* Belongs to this device */
-    void *ddata;                /* Device specific driver-data */
+    struct ddata *ddata;        /* Device specific driver-data */
     void (*sendData) (const uint8_t *data, int sz);
     void (*receiveData) (uint8_t *data, int sz);
     uint16_t (*getStatus) (uint16_t);
+    int (*config) (struct ddata * ddata);
+    struct device *odevice;     /* Owned by device */
 };
 
 #endif                          /* driver_h */
