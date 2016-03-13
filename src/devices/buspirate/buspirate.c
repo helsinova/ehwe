@@ -58,7 +58,32 @@ static struct driverAPI bpspi_driver = {
     .sendData = bpspi_sendData,
     .receiveData = bpspi_receiveData,
     .getStatus = bpspi_getStatus,
-    .config = bpspi_config
+    .configure = bpspi_configure,
+    .newddata = bpspi_newddata,
+    .cSPI = {
+             .set = {
+                     .speed = bpspi_set_speed,
+                     .power_on = bpspi_set_power_on,
+                     .pullups = bpspi_set_pullups,
+                     .aux_on = bpspi_set_aux_on,
+                     .cs_active = bpspi_set_cs_active,
+                     .output_type = bpspi_set_output_type,
+                     .clk_pol_idle = bpspi_set_clk_pol_idle,
+                     .output_clk_edge = bpspi_set_output_clk_edge,
+                     .input_sample_end = bpspi_set_input_sample_end,
+                     },
+             .get = {
+                     .speed = bpspi_get_speed,
+                     .power_on = bpspi_get_power_on,
+                     .pullups = bpspi_get_pullups,
+                     .aux_on = bpspi_get_aux_on,
+                     .cs_active = bpspi_get_cs_active,
+                     .output_type = bpspi_get_output_type,
+                     .clk_pol_idle = bpspi_get_clk_pol_idle,
+                     .output_clk_edge = bpspi_get_output_clk_edge,
+                     .input_sample_end = bpspi_get_input_sample_end,
+                     },
+             },
 };
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
@@ -68,7 +93,8 @@ static struct driverAPI bpi2c_driver = {
     .sendData = bpi2c_sendData,
     .receiveData = bpi2c_receiveData,
     .getStatus = bpi2c_getStatus,
-    .config = i2cspi_config
+    .config = i2cspi_config,
+    .newddata = bpi2c_newddata
 };
 #endif
 
@@ -118,14 +144,14 @@ int buspirate_init()
 
         struct confspi_bus bus = {
             .cmd = CONFIG_SPI_BUS,
-            .active_output = 1,
+            .output_type = 1,
             .clk_pol_idle = 0,
             .output_clk_edge = 1,
             .input_sample_end = 0
         };
 
-        LOGW("bus: cmd=%d active_output=%d clk_pol_idle=%d output_clk_edge=%d "
-             "input_sample_end=%d (raw=0x%02X)\n", bus.cmd, bus.active_output,
+        LOGW("bus: cmd=%d output_type=%d clk_pol_idle=%d output_clk_edge=%d "
+             "input_sample_end=%d (raw=0x%02X)\n", bus.cmd, bus.output_type,
              bus.clk_pol_idle, bus.output_clk_edge, bus.input_sample_end,
              bus.raw);
         ASSERT(bus.raw == 0x8A);
@@ -227,11 +253,13 @@ int buspirate_init_device(struct device *device)
 #ifdef BUSPIRATE_ENABLE_SPI
         case SPI:
             memcpy(driver, &bpspi_driver, sizeof(struct driverAPI));
+            ddata = bpspi_newddata(NULL);
             break;
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
         case I2C:
             memcpy(driver, &bpi2c_driver, sizeof(struct driverAPI));
+            ddata = bpi2c_newddata(NULL);
             break;
 #endif
         default:
@@ -239,32 +267,8 @@ int buspirate_init_device(struct device *device)
             return -1;
     }
 
-    ASSERT(ddata = malloc(sizeof(struct ddata)));
     ASSURE((ddata->fd =
             open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
-
-/* *INDENT-OFF* */
-    if (device->role == SPI) {
-        ddata->config.spi.speed = (struct confspi_speed) {
-            .cmd =                  CONFIG_SPI_SPEED,
-            .speed =                BUSPIRATE_SPI_DFLT_SPEED
-        };
-        ddata->config.spi.pereph = (struct confspi_pereph) {
-            .cmd =                  CONFIG_SPI_PEREPHERIALS,
-            .power_on =             BUSPIRATE_SPI_DFLT_PON,
-            .pullups =              BUSPIRATE_SPI_DFLT_ENABLE_PULLUPS,
-            .aux =                  BUSPIRATE_SPI_DFLT_AUX_ON,
-            .cs_active =            BUSPIRATE_SPI_DFLT_CS_ACTIVE,
-        };
-        ddata->config.spi.bus = (struct confspi_bus) {
-            .cmd =                  CONFIG_SPI_BUS,
-            .active_output =        BUSPIRATE_SPI_DFLT_OUTPUT_TYPE,
-            .clk_pol_idle =         BUSPIRATE_SPI_DFLT_CLK_IDLE_POLARITY,
-            .output_clk_edge =      BUSPIRATE_SPI_DFLT_CLK_EDGE,
-            .input_sample_end =     BUSPIRATE_SPI_DFLT_SAMPLE
-        };
-    }
-/* *INDENT-ON* */
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
@@ -301,12 +305,12 @@ int buspirate_init_device(struct device *device)
     switch (device->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
         case SPI:
-            ASSURE(bpspi_config(ddata) == 0);
+            ASSURE(bpspi_configure(ddata) == 0);
             break;
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
         case I2C:
-            ASSURE(bpi2c_config(ddata) == 0);
+            ASSURE(bpi2c_configure(ddata) == 0);
             break;
 #endif
         default:

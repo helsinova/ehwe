@@ -24,6 +24,7 @@
  ***************************************************************************/
 #include <log.h>
 #include <inttypes.h>
+#include <driver.h>
 
 #define LOGV_IOERROR( X ) log_ioerror( X , LOG_LEVEL_VERBOSE )
 #define LOGD_IOERROR( X ) log_ioerror( X , LOG_LEVEL_DEBUG )
@@ -140,7 +141,7 @@ struct confspi_bus {
         struct {
 #if defined(_BIT_FIELDS_HTOL)
             bpcmd_spi_t cmd:4;  /* When used as cmd, 1000 = 0x08 */
-            pinout_t active_output:1;   /* 0=HiZ, 1=3.3V */
+            pinout_t output_type:1; /* 0=HiZ, 1=3.3V */
             pol_t clk_pol_idle:1;   /* Clock polarity on idle: 0=low, 1=high */
             edge_t output_clk_edge:1;   /* MOSI on clock-edge: 0=front, 1=back */
             phase_t input_sample_end:1; /* MISO sample where: 0=middle, 1=end */
@@ -148,7 +149,7 @@ struct confspi_bus {
             phase_t input_sample_end:1;
             edge_t output_clk_edge:1;
             pol_t clk_pol_idle:1;
-            pinout_t active_output:1;
+            pinout_t output_type:1;
             bpcmd_spi_t cmd:4;
 #endif
         } __attribute__ ((packed));
@@ -163,8 +164,10 @@ struct config_SPI {
     struct confspi_bus bus;
 };
 
-/* Driver companion - NOTE: unique for each driver. Must NOT be public */
+/* Convenience-variable pre-set with build-system configuration */
+extern struct config_SPI dflt_config_SPI;
 
+/* Driver companion - NOTE: unique for each driver. Must NOT be public */
 struct ddata {
     int fd;
     bpcmd_raw_t state;
@@ -182,16 +185,68 @@ int rawMode_enter(struct device *);
 int rawMode_toMode(struct device *, bpcmd_raw_t bpcmd);
 
 /***************************************************************************
- * Driver interfaces
+ * Main driver interfaces
+ ***************************************************************************
+ * SPI
  ***************************************************************************/
 void bpspi_sendData(const uint8_t *data, int sz);
 void bpspi_receiveData(uint8_t *data, int sz);
 uint16_t bpspi_getStatus(uint16_t flags);
-int bpspi_config(struct ddata *ddata);
-
+int bpspi_configure(struct ddata *ddata);
+struct ddata *bpspi_newddata();
+/***************************************************************************
+ * I2C
+ ***************************************************************************/
 void bpi2c_sendData(const uint8_t *data, int sz);
 void bpi2c_receiveData(uint8_t *data, int sz);
 uint16_t bpi2c_getStatus(uint16_t flags);
-int bpi2c_config(struct ddata *ddata);
+int bpi2c_configure(struct ddata *ddata);
+struct ddata *bpi2c_newddata();
+/***************************************************************************
+ * Configuration  interface
+ ***************************************************************************
+ * SPI
+ ***************************************************************************/
+config_etype_t bpspi_set_speed(int, struct ddata *);
+config_etype_t bpspi_set_power_on(int, struct ddata *);
+config_etype_t bpspi_set_pullups(int, struct ddata *);
+config_etype_t bpspi_set_aux_on(int, struct ddata *);
+config_etype_t bpspi_set_cs_active(int, struct ddata *);
+config_etype_t bpspi_set_output_type(int, struct ddata *);
+config_etype_t bpspi_set_clk_pol_idle(int, struct ddata *);
+config_etype_t bpspi_set_output_clk_edge(int, struct ddata *);
+config_etype_t bpspi_set_input_sample_end(int, struct ddata *);
+
+config_etype_t bpspi_get_speed(int *, struct ddata *);
+config_etype_t bpspi_get_power_on(int *, struct ddata *);
+config_etype_t bpspi_get_pullups(int *, struct ddata *);
+config_etype_t bpspi_get_aux_on(int *, struct ddata *);
+config_etype_t bpspi_get_cs_active(int *, struct ddata *);
+config_etype_t bpspi_get_output_type(int *, struct ddata *);
+config_etype_t bpspi_get_clk_pol_idle(int *, struct ddata *);
+config_etype_t bpspi_get_output_clk_edge(int *, struct ddata *);
+config_etype_t bpspi_get_input_sample_end(int *, struct ddata *);
+/***************************************************************************
+ * I2C
+ ***************************************************************************/
+config_etype_t bpi2c_set_speed(int, struct ddata *);
+config_etype_t bpi2c_set_power_on(int, struct ddata *);
+config_etype_t bpi2c_set_pullups(int, struct ddata *);
+config_etype_t bpi2c_set_aux_on(int, struct ddata *);
+config_etype_t bpi2c_set_cs_active(int, struct ddata *);
+config_etype_t bpi2c_set_output_type(int, struct ddata *);
+config_etype_t bpi2c_set_clk_pol_idle(int, struct ddata *);
+config_etype_t bpi2c_set_output_clk_edge(int, struct ddata *);
+config_etype_t bpi2c_set_input_sample_end(int, struct ddata *);
+
+config_etype_t bpi2c_get_speed(int *, struct ddata *);
+config_etype_t bpi2c_get_power_on(int *, struct ddata *);
+config_etype_t bpi2c_get_pullups(int *, struct ddata *);
+config_etype_t bpi2c_get_aux_on(int *, struct ddata *);
+config_etype_t bpi2c_get_cs_active(int *, struct ddata *);
+config_etype_t bpi2c_get_output_type(int *, struct ddata *);
+config_etype_t bpi2c_get_clk_pol_idle(int *, struct ddata *);
+config_etype_t bpi2c_get_output_clk_edge(int *, struct ddata *);
+config_etype_t bpi2c_get_input_sample_end(int *, struct ddata *);
 
 #endif                          //buspirate_local_h

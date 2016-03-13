@@ -60,7 +60,116 @@ uint16_t bpi2c_getStatus(uint16_t flags)
     return flags;
 }
 
-int bpi2c_config(struct ddata *ddata)
+int bpi2c_configure(struct ddata *ddata)
 {
     return 0;
+}
+
+/* Create a new device/driver-data object for external manipulation without
+ * interfering with current one. If arg "device" is not NULL it will be a
+ * copy of current, else it's will be pre-set with build-system defaults. */
+struct ddata *bpi2c_newddata(struct device *device)
+{
+    struct ddata *ddata;
+    ASSERT(ddata = malloc(sizeof(struct ddata)));
+
+    if (device != NULL)
+        return (struct ddata *)memcpy(ddata, device->driver->ddata,
+                                      sizeof(struct ddata));
+
+    memcpy(ddata->config, &dflt_config_SPI, sizeof(struct config_SPI));
+    return ddata;
+}
+
+/***************************************************************************
+ * Configuration  interface
+ ***************************************************************************/
+config_etype_t bpi2c_set_speed(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_power_on(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_pullups(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_aux_on(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_cs_active(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_output_type(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_clk_pol_idle(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_output_clk_edge(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_set_input_sample_end(int setval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_speed(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_power_on(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_pullups(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_aux_on(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_cs_active(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_output_type(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_clk_pol_idle(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_output_clk_edge(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
+}
+
+config_etype_t bpi2c_get_input_sample_end(int *retval, struct ddata * dd)
+{
+    return E_UNKNOWN;
 }
