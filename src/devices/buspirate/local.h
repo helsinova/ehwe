@@ -80,29 +80,30 @@ typedef enum {
     RESET_BUSPIRATE = 0x0F      /* Execute full reset cycle */
 } bpcmd_raw_t;
 
-/* Commands while in SPI mode */
+/* Configuration commands while in SPI mode. Note, upper part of complete byte to fit
+ * corresponding struct */
 typedef enum {
     CONFIG_SPI_PEREPHERIALS = 0x04,
     CONFIG_SPI_SPEED = 0x05,
     CONFIG_SPI_BUS = 0x08
-} bpcmd_spi_t;
+} bpconfigcmd_spi_t;
 
 /* Enable (1) and disable (0) Bus Pirate peripherals and pins. */
 struct confspi_pereph {
     union {
         struct {
 #if defined(_BIT_FIELDS_HTOL)
-            bpcmd_spi_t cmd:4;  /* When used as cmd, 0100 = 0x04 */
+            bpconfigcmd_spi_t cmd:4;    /* When used as cmd, 0100 = 0x04 */
             uint8_t power_on:1; /* Enable power on */
             uint8_t pullups:1;  /* Enable pull-up resistors */
             uint8_t aux:1;      /* Set AUX-pin */
-            uint8_t cs_active:1;    /* CS pin state */
+            uint8_t cs_active:1;    /* CS pin state? */
 #else
             uint8_t cs_active:1;
             uint8_t aux:1;
             uint8_t pullups:1;
             uint8_t power_on:1;
-            bpcmd_spi_t cmd:4;
+            bpconfigcmd_spi_t cmd:4;
 #endif
         } __attribute__ ((packed));
         uint8_t raw;
@@ -124,11 +125,11 @@ struct confspi_speed {
     union {
         struct {
 #if defined(_BIT_FIELDS_HTOL)
-            bpcmd_spi_t cmd:5;  /* When used as cmd, 01100 = 0x05 */
+            bpconfigcmd_spi_t cmd:5;    /* When used as cmd, 01100 = 0x05 */
             speed_t speed:3;
 #else
             speed_t speed:3;
-            bpcmd_spi_t cmd:5;
+            bpconfigcmd_spi_t cmd:5;
 #endif
         } __attribute__ ((packed));
         uint8_t raw;
@@ -140,7 +141,7 @@ struct confspi_bus {
     union {
         struct {
 #if defined(_BIT_FIELDS_HTOL)
-            bpcmd_spi_t cmd:4;  /* When used as cmd, 1000 = 0x08 */
+            bpconfigcmd_spi_t cmd:4;    /* When used as cmd, 1000 = 0x08 */
             pinout_t output_type:1; /* 0=HiZ, 1=3.3V */
             pol_t clk_pol_idle:1;   /* Clock polarity on idle: 0=low, 1=high */
             edge_t output_clk_edge:1;   /* MOSI on clock-edge: 0=front, 1=back */
@@ -150,7 +151,7 @@ struct confspi_bus {
             edge_t output_clk_edge:1;
             pol_t clk_pol_idle:1;
             pinout_t output_type:1;
-            bpcmd_spi_t cmd:4;
+            bpconfigcmd_spi_t cmd:4;
 #endif
         } __attribute__ ((packed));
         uint8_t raw;
@@ -189,17 +190,17 @@ int rawMode_toMode(struct device *, bpcmd_raw_t bpcmd);
  ***************************************************************************
  * SPI
  ***************************************************************************/
-void bpspi_sendData(const uint8_t *data, int sz);
-void bpspi_receiveData(uint8_t *data, int sz);
-uint16_t bpspi_getStatus(uint16_t flags);
+void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz);
+void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz);
+uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags);
 int bpspi_configure(struct ddata *ddata);
 struct ddata *bpspi_newddata();
 /***************************************************************************
  * I2C
  ***************************************************************************/
-void bpi2c_sendData(const uint8_t *data, int sz);
-void bpi2c_receiveData(uint8_t *data, int sz);
-uint16_t bpi2c_getStatus(uint16_t flags);
+void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz);
+void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz);
+uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags);
 int bpi2c_configure(struct ddata *ddata);
 struct ddata *bpi2c_newddata();
 /***************************************************************************

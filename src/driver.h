@@ -63,12 +63,18 @@ struct configAPI_SPI {
 };
 
 struct driverAPI {
-    struct device *device;      /* Belongs to this device */
-    struct ddata *ddata;        /* Device specific driver-data */
-    struct device *odevice;     /* Owned by device */
-    void (*sendData) (const uint8_t *data, int sz);
-    void (*receiveData) (uint8_t *data, int sz);
-    uint16_t (*getStatus) (uint16_t);
+	/*------------ Data -----------*/
+    struct device *odevice;     /* Belongs to this device */
+    struct ddata *ddata;        /* Device specific Driver-Data */
+
+	/*---------- Methods ----------*/
+    void (*sendData) (struct ddata * ddata, const uint8_t *data, int sz);
+    void (*receiveData) (struct ddata * ddata, uint8_t *data, int sz);
+	/* First send then directly receive data. Toggle CS in start and
+	 * beginning */
+    void (*sendrecieveData) (struct ddata * ddata, uint8_t *outbuf, int outsz,
+                         uint8_t *indata, int insz);
+    uint16_t (*getStatus) (struct ddata * ddata, uint16_t);
     int (*configure) (struct ddata * ddata);    /* Actuate configuration */
 
     /* Allocate and return pointer *a copy* to driver specific driver-data */

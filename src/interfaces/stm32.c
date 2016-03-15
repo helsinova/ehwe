@@ -30,9 +30,9 @@
 
 SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
 
-static void nod_sendData(const uint8_t *data, int sz);
-static void nod_receiveData(uint8_t *data, int sz);
-static uint16_t nod_getStatus(uint16_t);
+static void nod_sendData(struct ddata *ddata, const uint8_t *data, int sz);
+static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz);
+static uint16_t nod_getStatus(struct ddata *ddata, uint16_t);
 
 static struct driverAPI nodriverAPI = {
     .ddata = NULL,
@@ -85,7 +85,9 @@ int stm32_init_interface(const struct device *device)
 void SPI_I2S_SendData(SPI_TypeDef * SPIx, uint16_t Data)
 {
     uint8_t ldata = Data;       /*Intentional truncation to 8-bit */
-    SPIx->sendData(&ldata, 1);
+    struct ddata *ddata = SPIx->ddata;
+
+    SPIx->sendData(ddata, &ldata, 1);
 }
 
 /**
@@ -97,8 +99,11 @@ void SPI_I2S_SendData(SPI_TypeDef * SPIx, uint16_t Data)
   */
 uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx)
 {
+    uint8_t ldata;
+    struct ddata *ddata = SPIx->ddata;
 
-    return 0;
+    SPIx->receiveData(ddata, &ldata, 1);
+    return ldata;
 }
 
 /**
@@ -120,14 +125,15 @@ uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx)
   */
 FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG)
 {
-    FlagStatus bitstatus = SPIx->getStatus(SPI_I2S_FLAG);
+    struct ddata *ddata = SPIx->ddata;
+    FlagStatus bitstatus = SPIx->getStatus(ddata, SPI_I2S_FLAG);
     return bitstatus;
 }
 
 /***************************************************************************
  * No-driver stubs                                                         *
  ***************************************************************************/
-static void nod_sendData(const uint8_t *data, int sz)
+static void nod_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
     int i;
     char cbuf[512] = { '\0' };
@@ -142,12 +148,12 @@ static void nod_sendData(const uint8_t *data, int sz)
     LOGW("%s\n", cbuf);
 }
 
-static void nod_receiveData(uint8_t *data, int sz)
+static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
     LOGW("Interface %s is not supposed to run\n", __func__);
 }
 
-static uint16_t nod_getStatus(uint16_t flags)
+static uint16_t nod_getStatus(struct ddata *ddata, uint16_t flags)
 {
     LOGW("Interface-stub %s quired about flags 0x02X% bytes \n", __func__,
          flags);

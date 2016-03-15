@@ -272,12 +272,9 @@ int buspirate_init_device(struct device *device)
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
-    driver->device = device;
-    device->driver = driver;
-
-    /* Setting convenience pointers (- try to move to caller (TBD)) */
-    ddata->odriver = driver;
     driver->odevice = device;
+    device->driver = driver;
+    ddata->odriver = driver;
 
     ASSURE(rawMode_enter(device) == 0);
 

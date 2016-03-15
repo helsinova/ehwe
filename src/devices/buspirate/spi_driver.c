@@ -33,6 +33,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assure.h>
+#include <arpa/inet.h>
 
 struct config_SPI dflt_config_SPI = {
     .speed = {
@@ -54,29 +55,70 @@ struct config_SPI dflt_config_SPI = {
             },
 };
 
+/* Commands while in SPI mode. Note, upper part of complete byte to fit
+ * corresponding struct */
+typedef enum {
+    CMD_CS = 0x02,              /* Toggle CS */
+    CMD_WR_RD = 0x04,           /* Write then read up to 4096 bytes in each
+                                   direction */
+    CMD_WR_RD_NOCS = 0x05,      /* Same as CMD_WR_RD but without automatic
+                                   toggling of CS */
+    CMD_SNIFF = 0x0C,
+    CMD_BULK = 0x10,
+} bpcmd_spi_t;
+
 /***************************************************************************
  * Main driver interface
  ***************************************************************************/
-void bpspi_sendData(const uint8_t *data, int sz)
+void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
-    int i;
-    char cbuf[512] = { '\0' };
+    int ret;
+    uint16_t nsz_send, nsz_receive;
+    uint8_t tmp[8] = { 0 };
 
-    LOGW("BP: Interface %s sending %d bytes \n", __func__, sz);
-    for (i = 0; i < sz; i++) {
-        if (data[i] > 31)
-            sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
-        else
-            sprintf(cbuf, "0x%02X %s,", data[i], " ");
-    }
-    LOGW("BP: %s\n", cbuf);
+    nsz_send = htons(sz);
+    nsz_receive = htons(0);
+    ASSERT(sz < 4096);          /* Primitive handling for now */
+
+    LOGD("BP: Interface %s sending %d bytes \n", __func__, sz);
+
+    tmp[0] = 0;
+    ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                   CMD_WR_RD}, 1) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp[0] == 0x00);
+
+    ASSURE_E((ret = write(ddata->fd, data, sz)) != -1, LOGE_IOERROR(errno));
+    LOGD("BP: %d bytes written to device\n", ret);
 }
 
-void bpspi_receiveData(uint8_t *data, int sz)
+void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
+    int ret;
+    uint16_t nsz_send, nsz_receive;
+    uint8_t tmp[8] = { 0 };
+
+    nsz_send = htons(0);
+    nsz_receive = htons(sz);
+    ASSERT(sz < 4096);          /* Primitive handling for now */
+
+    LOGD("BP: Interface %s receiving %d bytes \n", __func__, sz);
+
+    tmp[0] = 0;
+    ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                   CMD_WR_RD}, 1) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp[0] == 0x00);
+
+    ASSURE_E((ret = read(ddata->fd, data, sz)) != -1, LOGE_IOERROR(errno));
+    LOGD("BP: %d bytes read from device\n", ret);
 }
 
-uint16_t bpspi_getStatus(uint16_t flags)
+uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags)
 {
     return flags;
 }
