@@ -54,8 +54,18 @@ FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG);
 /***************************************************************************
  * These don't exist in stdperf but are added for testing ehwe             *
  ***************************************************************************/
+void SPI_I2S_SendData_ncs(SPI_TypeDef * SPIx, uint16_t Data);
+uint16_t SPI_I2S_ReceiveData_ncs(SPI_TypeDef * SPIx);
+
 void SPI_I2S_SendReceiveData(SPI_TypeDef * SPIx, const uint8_t *obuffer,
                              int osz, uint8_t *ibuffer, int isz);
 void SPI_I2S_SendDataArray(SPI_TypeDef * SPIx, const uint8_t *buffer, int sz);
+void SPI_I2S_SendDataArray_ncs(SPI_TypeDef * SPIx, const uint8_t *buffer,
+                               int sz);
+void SPI_I2S_ReceiveDataArray(SPI_TypeDef * SPIx, uint8_t *buffer, int sz);
+void SPI_I2S_ReceiveDataArray_ncs(SPI_TypeDef * SPIx, uint8_t *buffer, int sz);
+/* Special case. This exists in stdperf but is a GPIO. Needs refined API
+ * (TBD)*/
+void SPI_I2S_SetCS(SPI_TypeDef * SPIx, int state);
 
 #endif                          //stm32f10x_h

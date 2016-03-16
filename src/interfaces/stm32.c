@@ -35,13 +35,18 @@ static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 static uint16_t nod_getStatus(struct ddata *ddata, uint16_t);
 static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                                 int outsz, uint8_t *indata, int insz);
+static void nod_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
+                                    int outsz, uint8_t *indata, int insz);
+static void nod_setCS(struct ddata *ddata, int state);
 
 static struct driverAPI nodriverAPI = {
     .ddata = NULL,
     .sendData = nod_sendData,
     .receiveData = nod_receiveData,
     .getStatus = nod_getStatus,
-    .sendrecieveData = nod_sendrecieveData
+    .sendrecieveData = nod_sendrecieveData,
+    .sendrecieveData_ncs = nod_sendrecieveData_ncs,
+    .setCS = nod_setCS
 };
 
 /***************************************************************************
@@ -76,7 +81,6 @@ int stm32_init_interface(const struct device *device)
 /***************************************************************************
  * STM32F10x_StdPeriph_Lib_V3.5.0 API                                      *
  ***************************************************************************/
-
 /**
   * @brief  Transmits a Data through the SPIx/I2Sx peripheral.
   * @param  SPIx: where x can be
@@ -144,10 +148,60 @@ void SPI_I2S_SendReceiveData(SPI_TypeDef * SPIx, const uint8_t *obuffer,
 
 }
 
+void SPI_I2S_SendReceiveData_ncs(SPI_TypeDef * SPIx, const uint8_t *obuffer,
+                                 int osz, uint8_t *ibuffer, int isz)
+{
+    struct ddata *ddata = SPIx->ddata;
+    SPIx->sendrecieveData_ncs(ddata, obuffer, osz, ibuffer, isz);
+
+}
+
 void SPI_I2S_SendDataArray(SPI_TypeDef * SPIx, const uint8_t *buffer, int sz)
 {
     struct ddata *ddata = SPIx->ddata;
-    SPIx->sendData(ddata, buffer, sz);
+    SPIx->sendrecieveData(ddata, buffer, sz, NULL, 0);
+}
+
+void SPI_I2S_SendDataArray_ncs(SPI_TypeDef * SPIx, const uint8_t *buffer,
+                               int sz)
+{
+    struct ddata *ddata = SPIx->ddata;
+    SPIx->sendrecieveData_ncs(ddata, buffer, sz, NULL, 0);
+}
+
+void SPI_I2S_ReceiveDataArray(SPI_TypeDef * SPIx, uint8_t *buffer, int sz)
+{
+    struct ddata *ddata = SPIx->ddata;
+    SPIx->sendrecieveData(ddata, NULL, 0, buffer, sz);
+}
+
+void SPI_I2S_ReceiveDataArray_ncs(SPI_TypeDef * SPIx, uint8_t *buffer, int sz)
+{
+    struct ddata *ddata = SPIx->ddata;
+    SPIx->sendrecieveData_ncs(ddata, NULL, 0, buffer, sz);
+}
+
+void SPI_I2S_SetCS(SPI_TypeDef * SPIx, int state)
+{
+    struct ddata *ddata = SPIx->ddata;
+    SPIx->setCS(ddata, state);
+}
+
+void SPI_I2S_SendData_ncs(SPI_TypeDef * SPIx, uint16_t Data)
+{
+    uint8_t ldata = Data;       /*Intentional truncation to 8-bit */
+    struct ddata *ddata = SPIx->ddata;
+
+    SPIx->sendrecieveData_ncs(ddata, &ldata, 1, NULL, 0);
+}
+
+uint16_t SPI_I2S_ReceiveData_ncs(SPI_TypeDef * SPIx)
+{
+    uint8_t ldata;
+    struct ddata *ddata = SPIx->ddata;
+
+    SPIx->sendrecieveData_ncs(ddata, NULL, 0, &ldata, 1);
+	return ldata;
 }
 
 /***************************************************************************
@@ -168,9 +222,29 @@ static void nod_sendData(struct ddata *ddata, const uint8_t *data, int sz)
     LOGW("%s\n", cbuf);
 }
 
+static void nod_sendData_ncs(struct ddata *ddata, const uint8_t *data, int sz)
+{
+    int i;
+    char cbuf[512] = { '\0' };
+
+    LOGW("Interface-stub %s sending %d bytes (NO CS) \n", __func__, sz);
+    for (i = 0; i < sz; i++) {
+        if (data[i] > 31)
+            sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
+        else
+            sprintf(cbuf, "0x%02X %s,", data[i], " ");
+    }
+    LOGW("%s\n", cbuf);
+}
+
 static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
     LOGW("Interface %s is not supposed to run\n", __func__);
+}
+
+static void nod_setCS(struct ddata *ddata, int state)
+{
+    LOGW("Stubbed [%s] sets CS to: \n", __func__, state);
 }
 
 static uint16_t nod_getStatus(struct ddata *ddata, uint16_t flags)
@@ -185,6 +259,14 @@ static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
 {
 
     LOGW("Interface-stub %s sending 0x02X% bytes, receiving  0x02X% bytes\n",
+         __func__, outsz, insz);
+}
+
+static void nod_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
+                                int outsz, uint8_t *indata, int insz)
+{
+
+    LOGW("Interface-stub %s (NO CS) sending 0x02X% bytes, receiving  0x02X% bytes\n",
          __func__, outsz, insz);
 }
 

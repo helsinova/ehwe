@@ -72,18 +72,18 @@ struct driverAPI {
     void (*receiveData) (struct ddata * ddata, uint8_t *data, int sz);
 
     /* First send then directly receive data. Toggle CS in start and
-       beginning 
-	 */
+       beginning of operation.
+     */
     void (*sendrecieveData) (struct ddata * ddata, const uint8_t *outbuf,
                              int outsz, uint8_t *indata, int insz);
 
-	/* As above but no CS is set before and after */
-	void (*sendrecieveData_ncs) (struct ddata * ddata, const uint8_t *outbuf,
-                             int outsz, uint8_t *indata, int insz);
+    /* As above but don't toggle CS */
+    void (*sendrecieveData_ncs) (struct ddata * ddata, const uint8_t *outbuf,
+                                 int outsz, uint8_t *indata, int insz);
 
-	/* Sets state of CS signal. Note: state is logical value, not electrical
-	 */
-	void (*setCS) (int state);
+    /* Sets state of CS signal. Note: state is logical value, not electrical
+     */
+    void (*setCS) (struct ddata * ddata, int state);
 
     uint16_t (*getStatus) (struct ddata * ddata, uint16_t);
     int (*configure) (struct ddata * ddata);    /* Actuate configuration */
@@ -92,7 +92,7 @@ struct driverAPI {
        driver-data unless device is NULL, in which case content is built-in
        defaults
      */
-	struct ddata *(*newddata)(struct device *device);
+    struct ddata *(*newddata) (struct device * device);
 
     /* Standardized functions for configuring device and/or driver.
        Functions may be NULL or only partly filled-in depending if driver

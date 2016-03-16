@@ -194,6 +194,9 @@ void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 
 void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                            int outsz, uint8_t *indata, int insz);
+void bpspi_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
+                           int outsz, uint8_t *indata, int insz);
+void bpspi_setCS(struct ddata *ddata, int state);
 void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags);
 int bpspi_configure(struct ddata *ddata);
