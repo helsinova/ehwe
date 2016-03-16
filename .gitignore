@@ -1,6 +1,7 @@
 *.d
 *.o
 *.hi
+*.out
 gitit.log
 gitit-users
 cache/
