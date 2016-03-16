@@ -56,6 +56,7 @@ struct ddata;
 static struct driverAPI bpspi_driver = {
     .ddata = NULL,
     .sendData = bpspi_sendData,
+    .sendrecieveData = bpspi_sendrecieveData,
     .receiveData = bpspi_receiveData,
     .getStatus = bpspi_getStatus,
     .configure = bpspi_configure,

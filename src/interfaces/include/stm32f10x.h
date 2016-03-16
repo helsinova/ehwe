@@ -51,4 +51,11 @@ void SPI_I2S_SendData(SPI_TypeDef * SPIx, uint16_t Data);
 uint16_t SPI_I2S_ReceiveData(SPI_TypeDef * SPIx);
 FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG);
 
+/***************************************************************************
+ * These don't exist in stdperf but are added for testing ehwe             *
+ ***************************************************************************/
+void SPI_I2S_SendReceiveData(SPI_TypeDef * SPIx, const uint8_t *obuffer,
+                             int osz, uint8_t *ibuffer, int isz);
+void SPI_I2S_SendDataArray(SPI_TypeDef * SPIx, const uint8_t *buffer, int sz);
+
 #endif                          //stm32f10x_h

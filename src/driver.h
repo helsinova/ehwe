@@ -63,34 +63,43 @@ struct configAPI_SPI {
 };
 
 struct driverAPI {
-	/*------------ Data -----------*/
+    /*------------ Data -----------*/
     struct device *odevice;     /* Belongs to this device */
     struct ddata *ddata;        /* Device specific Driver-Data */
 
-	/*---------- Methods ----------*/
+    /*---------- Methods ----------*/
     void (*sendData) (struct ddata * ddata, const uint8_t *data, int sz);
     void (*receiveData) (struct ddata * ddata, uint8_t *data, int sz);
-	/* First send then directly receive data. Toggle CS in start and
-	 * beginning */
-    void (*sendrecieveData) (struct ddata * ddata, uint8_t *outbuf, int outsz,
-                         uint8_t *indata, int insz);
+
+    /* First send then directly receive data. Toggle CS in start and
+       beginning 
+	 */
+    void (*sendrecieveData) (struct ddata * ddata, const uint8_t *outbuf,
+                             int outsz, uint8_t *indata, int insz);
+
+	/* As above but no CS is set before and after */
+	void (*sendrecieveData_ncs) (struct ddata * ddata, const uint8_t *outbuf,
+                             int outsz, uint8_t *indata, int insz);
+
+	/* Sets state of CS signal. Note: state is logical value, not electrical
+	 */
+	void (*setCS) (int state);
+
     uint16_t (*getStatus) (struct ddata * ddata, uint16_t);
     int (*configure) (struct ddata * ddata);    /* Actuate configuration */
 
-    /* Allocate and return pointer *a copy* to driver specific driver-data */
-    struct ddata *(*newddata) (struct device);
-
-    /* Standardized functions for configuring
-       device and/or driver. May be NULL or only partly
-       filled-in depending if driver allows
-       run-rime configuration or not. Behavior,
-       such as in order what should be done, is
-       also mandated by implementation
+    /* Allocate and return a pointer with a copy* of driver specific
+       driver-data unless device is NULL, in which case content is built-in
+       defaults
      */
+	struct ddata *(*newddata)(struct device *device);
 
-    union {
-        struct configAPI_SPI cSPI;
-    };
+    /* Standardized functions for configuring device and/or driver.
+       Functions may be NULL or only partly filled-in depending if driver
+       allows run-rime configuration or not. Behavior, such as in order what
+       should be done, is also mandated by implementation
+     */
+    struct configAPI_SPI cSPI;
 };
 
 #endif                          /* driver_h */

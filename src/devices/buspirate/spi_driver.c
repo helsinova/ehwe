@@ -70,52 +70,57 @@ typedef enum {
 /***************************************************************************
  * Main driver interface
  ***************************************************************************/
-void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz)
+void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
+                           int osz, uint8_t *ibuf, int isz)
 {
     int ret;
     uint16_t nsz_send, nsz_receive;
     uint8_t tmp[8] = { 0 };
 
-    nsz_send = htons(sz);
-    nsz_receive = htons(0);
-    ASSERT(sz < 4096);          /* Primitive handling for now */
+    nsz_send = htons(osz);
+    nsz_receive = htons(isz);
+    ASSERT(osz < 4096);         /* Primitive handling for now */
+    ASSERT(osz > 0);
+    ASSERT(isz < 4096);
 
-    LOGD("BP: Interface %s sending %d bytes \n", __func__, sz);
+#ifndef NDEBUG
+	memset(ibuf,0,isz);
+#endif
 
-    tmp[0] = 0;
+    LOGD("BP: Interface %s sending-receiving %d,%d bytes \n", __func__, osz,
+         isz);
+
+    //tmp[0] = 0;
     ASSURE_E(write(ddata->fd, (uint8_t[]) {
                    CMD_WR_RD}, 1) != -1, LOGE_IOERROR(errno));
     ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
     ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
-    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
-    ASSERT(tmp[0] == 0x00);
+	//We need another solution for reading that can
+	//timeout if blocked-on-read (TBD)
+    //ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    //ASSERT(tmp[0] == 0x00);
 
-    ASSURE_E((ret = write(ddata->fd, data, sz)) != -1, LOGE_IOERROR(errno));
+    ASSURE_E((ret = write(ddata->fd, obuf, osz)) >= -1, LOGE_IOERROR(errno));
     LOGD("BP: %d bytes written to device\n", ret);
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+	//n_sent=ntohs(*(int16_t*)(tmp));
+    //LOGD("BP: %d bytes written SPI\n", n_sent);
+    ASSERT(tmp[0] == 0x01);
+
+    if (isz > 0) {
+        ASSURE_E((ret = read(ddata->fd, ibuf, isz)) != -1, LOGE_IOERROR(errno));
+        LOGD("BP: %d bytes read from device\n", ret);
+    }
+}
+
+void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz)
+{
+    bpspi_sendrecieveData(ddata, data, sz, NULL, 0);
 }
 
 void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
-    int ret;
-    uint16_t nsz_send, nsz_receive;
-    uint8_t tmp[8] = { 0 };
-
-    nsz_send = htons(0);
-    nsz_receive = htons(sz);
-    ASSERT(sz < 4096);          /* Primitive handling for now */
-
-    LOGD("BP: Interface %s receiving %d bytes \n", __func__, sz);
-
-    tmp[0] = 0;
-    ASSURE_E(write(ddata->fd, (uint8_t[]) {
-                   CMD_WR_RD}, 1) != -1, LOGE_IOERROR(errno));
-    ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
-    ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
-    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
-    ASSERT(tmp[0] == 0x00);
-
-    ASSURE_E((ret = read(ddata->fd, data, sz)) != -1, LOGE_IOERROR(errno));
-    LOGD("BP: %d bytes read from device\n", ret);
+    bpspi_sendrecieveData(ddata, NULL, 0, data, sz);
 }
 
 uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags)

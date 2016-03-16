@@ -33,12 +33,15 @@ SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
 static void nod_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 static uint16_t nod_getStatus(struct ddata *ddata, uint16_t);
+static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
+                                int outsz, uint8_t *indata, int insz);
 
 static struct driverAPI nodriverAPI = {
     .ddata = NULL,
     .sendData = nod_sendData,
     .receiveData = nod_receiveData,
-    .getStatus = nod_getStatus
+    .getStatus = nod_getStatus,
+    .sendrecieveData = nod_sendrecieveData
 };
 
 /***************************************************************************
@@ -131,6 +134,23 @@ FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG)
 }
 
 /***************************************************************************
+ * These don't exist in stdperf but are added for testing ehwe             *
+ ***************************************************************************/
+void SPI_I2S_SendReceiveData(SPI_TypeDef * SPIx, const uint8_t *obuffer,
+                             int osz, uint8_t *ibuffer, int isz)
+{
+    struct ddata *ddata = SPIx->ddata;
+    SPIx->sendrecieveData(ddata, obuffer, osz, ibuffer, isz);
+
+}
+
+void SPI_I2S_SendDataArray(SPI_TypeDef * SPIx, const uint8_t *buffer, int sz)
+{
+    struct ddata *ddata = SPIx->ddata;
+    SPIx->sendData(ddata, buffer, sz);
+}
+
+/***************************************************************************
  * No-driver stubs                                                         *
  ***************************************************************************/
 static void nod_sendData(struct ddata *ddata, const uint8_t *data, int sz)
@@ -158,6 +178,14 @@ static uint16_t nod_getStatus(struct ddata *ddata, uint16_t flags)
     LOGW("Interface-stub %s quired about flags 0x02X% bytes \n", __func__,
          flags);
     return -1;
+}
+
+static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
+                                int outsz, uint8_t *indata, int insz)
+{
+
+    LOGW("Interface-stub %s sending 0x02X% bytes, receiving  0x02X% bytes\n",
+         __func__, outsz, insz);
 }
 
 /***************************************************************************
