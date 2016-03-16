@@ -44,7 +44,7 @@ struct config_SPI dflt_config_SPI = {
                .power_on = BUSPIRATE_SPI_DFLT_PON,
                .pullups = BUSPIRATE_SPI_DFLT_ENABLE_PULLUPS,
                .aux = BUSPIRATE_SPI_DFLT_AUX_ON,
-               .cs_active = BUSPIRATE_SPI_DFLT_CS_ACTIVE,
+               .cs_active = BUSPIRATE_SPI_DFLT_CS_START_LEVEL,
                },
     .bus = {
             .cmd = CONFIG_SPI_BUS,
@@ -152,9 +152,14 @@ void bpspi_setCS(struct ddata *ddata, int state)
     uint8_t tmp[8] = { 0 };
     uint8_t mstate = state;
 
+/*
+ * This is not the flag for inverted polarity. Kept in code for future
+ * reference.
+
     if (!ddata->config.spi.pereph.cs_active) {
         mstate = mstate ^ 0x01;
     }
+*/
     ASSERT((mstate == 0) || (mstate == 1));
     mstate &= 0x01;
 

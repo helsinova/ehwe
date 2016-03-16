@@ -33,10 +33,10 @@ if(BUSPIRATE_ENABLE_SPI)
         CACHE STRING
         "SPI-bus: Input sample phase (PULSE_MIDDLE=0,PULSE_END=1)")
 
-    set(BUSPIRATE_SPI_DFLT_CS_POL
-        "POL_LOW"
-        CACHE STRING
-        "SPI-bus: Chip-select polarity (POL_HI=1,POL_LOW=2)")
+#    set(BUSPIRATE_SPI_DFLT_CS_POL
+#        "POL_LOW"
+#        CACHE STRING
+#        "SPI-bus: Chip-select polarity (POL_LOW=0,POL_HIGH=1)")
 
     set(BUSPIRATE_SPI_DFLT_OUTPUT_TYPE
         "OPEN_DRAIN"
@@ -52,8 +52,8 @@ if(BUSPIRATE_ENABLE_SPI)
     option(BUSPIRATE_SPI_DFLT_AUX_ON
         "Auxaliary output-pin active" no)
 
-    option(BUSPIRATE_SPI_DFLT_CS_ACTIVE
-        "Power supply output-pin active" no)
+    option(BUSPIRATE_SPI_DFLT_CS_START_LEVEL
+        "CS starts high" yes)
 
 
     set(LIBBUSPIRATE_SOURCE
