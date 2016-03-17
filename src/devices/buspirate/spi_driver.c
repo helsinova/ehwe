@@ -202,7 +202,7 @@ int bpspi_configure(struct ddata *ddata)
               write(ddata->fd, speed, sizeof(struct confspi_speed))) != -1,
              LOGE_IOERROR(errno));
     ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
-    ASSERT(tmp[0] == 0x00);
+    ASSERT(tmp[0] == 0x01);
     memcpy(&ddata->config.spi.speed, speed, sizeof(struct confspi_speed));
 
     tmp[0] = 0;

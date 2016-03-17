@@ -143,7 +143,7 @@ int buspirate_init()
         };
         LOGW("spispeed: cmd=%d speed=%d (raw=0x%02X)\n", speed.cmd, speed.speed,
              speed.raw);
-        ASSERT(speed.raw == 0x2B);
+        ASSERT(speed.raw == 0x63);
 
         struct confspi_bus bus = {
             .cmd = CONFIG_SPI_BUS,

@@ -84,7 +84,7 @@ typedef enum {
  * corresponding struct */
 typedef enum {
     CONFIG_SPI_PEREPHERIALS = 0x04,
-    CONFIG_SPI_SPEED = 0x05,
+    CONFIG_SPI_SPEED = 0x0C,    /*Note, this command is 5 bit long */
     CONFIG_SPI_BUS = 0x08
 } bpconfigcmd_spi_t;
 
@@ -195,7 +195,7 @@ void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                            int outsz, uint8_t *indata, int insz);
 void bpspi_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
-                           int outsz, uint8_t *indata, int insz);
+                               int outsz, uint8_t *indata, int insz);
 void bpspi_setCS(struct ddata *ddata, int state);
 void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags);
