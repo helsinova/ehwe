@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "config.h"
+#include "buspirate_config.h"
 #include "local.h"
 #include <sys/types.h>
 #include <regex.h>
@@ -32,11 +33,37 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assure.h>
+#include <arpa/inet.h>
+
+struct config_I2C dflt_config_I2C = {
+    .speed = {
+              .cmd = I2CCMD_CONFIG_SPEED,
+              .speed = BUSPIRATE_I2C_DFLT_SPEED},
+    .pereph = {
+               .cmd = SPICMD_CONFIG_PEREPHERIALS,
+               .power_on = BUSPIRATE_I2C_DFLT_PON,
+               .pullups = BUSPIRATE_I2C_DFLT_ENABLE_PULLUPS,
+               .aux = BUSPIRATE_I2C_DFLT_AUX_ON,
+               .cs_active = BUSPIRATE_I2C_DFLT_CS_START_LEVEL,
+               },
+};
+
+/* Commands while in I2C mode. */
+typedef enum {
+    CMD_START_BIT = 0x02,
+    CMD_I2C_STOP_BIT = 0x03,
+    CMD_I2C_READ_BYTE = 0x04,
+    CMD_ACK_BIT = 0x06,
+    CMD_NACK_BIT = 0x07,
+    CMD_WRITE_THEN_READ = 0x08,
+    CMD_START_BUS_SNIFFER = 0x0F,
+    CMD_BULK = 0X10
+} bpcmd_i2c_t;
 
 /***************************************************************************
  * Driver interface
  ***************************************************************************/
-void bpi2c_sendData(const uint8_t *data, int sz)
+void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
     int i;
     char cbuf[512] = { '\0' };
@@ -51,11 +78,11 @@ void bpi2c_sendData(const uint8_t *data, int sz)
     LOGW("BP: %s\n", cbuf);
 }
 
-void bpi2c_receiveData(uint8_t *data, int sz)
+void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
 }
 
-uint16_t bpi2c_getStatus(uint16_t flags)
+uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags)
 {
     return flags;
 }
@@ -77,7 +104,7 @@ struct ddata *bpi2c_newddata(struct device *device)
         return (struct ddata *)memcpy(ddata, device->driver->ddata,
                                       sizeof(struct ddata));
 
-    memcpy(ddata->config, &dflt_config_SPI, sizeof(struct config_SPI));
+    memcpy(&(ddata->config.i2c), &dflt_config_I2C, sizeof(struct config_I2C));
     return ddata;
 }
 

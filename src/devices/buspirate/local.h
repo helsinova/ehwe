@@ -80,13 +80,24 @@ typedef enum {
     RESET_BUSPIRATE = 0x0F      /* Execute full reset cycle */
 } bpcmd_raw_t;
 
-/* Configuration commands while in SPI mode. Note, upper part of complete byte to fit
+/* Configuration commands wile in corresponding binary mode. Note:
+ * configuration commands only. Normal runtime commands are not in public
+ * header but in respective driver */
+
+/* while in SPI mode. Note, upper part of complete byte to fit
  * corresponding struct */
 typedef enum {
-    CONFIG_SPI_PEREPHERIALS = 0x04,
-    CONFIG_SPI_SPEED = 0x0C,    /*Note, this command is 5 bit long */
-    CONFIG_SPI_BUS = 0x08
+    SPICMD_CONFIG_PEREPHERIALS = 0x04,
+    SPICMD_CONFIG_SPEED = 0x0C, /*Note, this command is 5 bit long MSB */
+    SPICMD_CONFIG_BUS = 0x08
 } bpconfigcmd_spi_t;
+
+/* while in I2C mode. Note, upper part of complete byte to fit
+ * corresponding struct */
+typedef enum {
+    I2CCMD_CONFIG_PEREPHERIALS = 0x04,
+    I2CCMD_CONFIG_SPEED = 0x18  /*Note, this command is 6 bit long MSB */
+} bpconfigcmd_i2c_t;
 
 /* Enable (1) and disable (0) Bus Pirate peripherals and pins. */
 struct confspi_pereph {
@@ -110,6 +121,35 @@ struct confspi_pereph {
     };
 } __attribute__ ((packed));
 
+/* Enable (1) and disable (0) Bus Pirate peripherals and pins. */
+struct confi2c_pereph {
+    union {
+        struct {
+#if defined(_BIT_FIELDS_HTOL)
+            uint8_t cmd:4;      /* Only I2CCMD_CONFIG_PEREPHERIALS = 0x04 */
+            uint8_t power_on:1; /* Enable power on */
+            uint8_t pullups:1;  /* Enable pull-up resistors */
+            uint8_t aux:1;      /* Set AUX-pin */
+            uint8_t cs_active:1;    /* CS pin state? */
+#else
+            uint8_t cs_active:1;
+            uint8_t aux:1;
+            uint8_t pullups:1;
+            uint8_t power_on:1;
+            uint8_t cmd:4;
+#endif
+        } __attribute__ ((packed));
+        uint8_t raw;
+    };
+} __attribute__ ((packed));
+
+typedef enum {
+    I2CSPEED_5kHz = 0x0,
+    I2CSPEED_50kHz = 0x1,
+    I2CSPEED_100kHz = 0x2,
+    I2CSPEED_400kHz = 0x3
+} i2c_speed_t;
+
 typedef enum {
     SPISPEED_30kHz = 0x0,
     SPISPEED_125kHz = 0x1,
@@ -119,17 +159,33 @@ typedef enum {
     SPISPEED_2_6MHz = 0x5,
     SPISPEED_4MHz = 0x6,
     SPISPEED_8MHz = 0x7
-} speed_t;
+} spi_speed_t;
 
 struct confspi_speed {
     union {
         struct {
 #if defined(_BIT_FIELDS_HTOL)
             bpconfigcmd_spi_t cmd:5;    /* When used as cmd, 01100 = 0x05 */
-            speed_t speed:3;
+            spi_speed_t speed:3;
 #else
-            speed_t speed:3;
+            spi_speed_t speed:3;
             bpconfigcmd_spi_t cmd:5;
+#endif
+        } __attribute__ ((packed));
+        uint8_t raw;
+    };
+
+} __attribute__ ((packed));
+
+struct confi2c_speed {
+    union {
+        struct {
+#if defined(_BIT_FIELDS_HTOL)
+            bpconfigcmd_i2c_t cmd:6;    /* When used as cmd, 011000 */
+            i2c_speed_t speed:2;
+#else
+            i2c_speed_t speed:2;
+            bpconfigcmd_i2c_t cmd:6;
 #endif
         } __attribute__ ((packed));
         uint8_t raw;
@@ -165,6 +221,11 @@ struct config_SPI {
     struct confspi_bus bus;
 };
 
+struct config_I2C {
+    struct confi2c_pereph pereph;
+    struct confi2c_speed speed;
+};
+
 /* Convenience-variable pre-set with build-system configuration */
 extern struct config_SPI dflt_config_SPI;
 
@@ -173,6 +234,7 @@ struct ddata {
     int fd;
     bpcmd_raw_t state;
     union {
+        struct config_I2C i2c;
         struct config_SPI spi;
     } config;
     struct driverAPI *odriver;  /* Owned by driver */
@@ -205,6 +267,12 @@ struct ddata *bpspi_newddata(struct device *device);
  * I2C
  ***************************************************************************/
 void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz);
+
+void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
+                           int outsz, uint8_t *indata, int insz);
+void bpi2c_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
+                               int outsz, uint8_t *indata, int insz);
+void bpi2c_setCS(struct ddata *ddata, int state);
 void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags);
 int bpi2c_configure(struct ddata *ddata);

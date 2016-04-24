@@ -35,7 +35,7 @@
 /***************************************************************************
  * Driver interface I2C
  ***************************************************************************/
-void bpi2c_sendData(const uint8_t *data, int sz)
+void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
     int i;
     char cbuf[512] = { '\0' };
@@ -50,11 +50,11 @@ void bpi2c_sendData(const uint8_t *data, int sz)
     LOGW("BP: %s\n", cbuf);
 }
 
-void bpi2c_receiveData(uint8_t *data, int sz)
+void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
 }
 
-uint16_t bpi2c_getStatus(uint16_t flags)
+uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags)
 {
     return flags;
 }

@@ -5,7 +5,7 @@ option(BUSPIRATE_ENABLE_SPI
     "Enable SPI for BUSPIRATE." YES)
 
 option(BUSPIRATE_ENABLE_I2C
-    "Enable i2c for BUSPIRATE." NO)
+    "Enable i2c for BUSPIRATE." YES)
 
 set(LIBBUSPIRATE_SOURCE
     buspirate.c
@@ -55,7 +55,6 @@ if(BUSPIRATE_ENABLE_SPI)
     option(BUSPIRATE_SPI_DFLT_CS_START_LEVEL
         "CS starts high" yes)
 
-
     set(LIBBUSPIRATE_SOURCE
         ${LIBBUSPIRATE_SOURCE}
         spi_raw.c
@@ -66,6 +65,23 @@ else()
 endif()
 
 if(BUSPIRATE_ENABLE_I2C)
+    set(BUSPIRATE_I2C_DFLT_SPEED
+        "I2CSPEED_5kHz"
+        CACHE STRING
+        "I2C-bus: Default clock speed (5kHz=0,50kHz=1,100kHz=2,500kHz=3)")
+
+    option(BUSPIRATE_I2C_DFLT_PON
+        "Power supply output-pin active" no)
+
+    option(BUSPIRATE_I2C_DFLT_ENABLE_PULLUPS
+        "Toggle on-board pull-up resistors" no)
+
+    option(BUSPIRATE_I2C_DFLT_AUX_ON
+        "Auxaliary output-pin active" no)
+
+    option(BUSPIRATE_I2C_DFLT_CS_START_LEVEL
+        "CS starts high" yes)
+
     set(LIBBUSPIRATE_SOURCE
         ${LIBBUSPIRATE_SOURCE}
         i2c_raw.c

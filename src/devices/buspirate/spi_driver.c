@@ -37,17 +37,17 @@
 
 struct config_SPI dflt_config_SPI = {
     .speed = {
-              .cmd = CONFIG_SPI_SPEED,
+              .cmd = SPICMD_CONFIG_SPEED,
               .speed = BUSPIRATE_SPI_DFLT_SPEED},
     .pereph = {
-               .cmd = CONFIG_SPI_PEREPHERIALS,
+               .cmd = SPICMD_CONFIG_PEREPHERIALS,
                .power_on = BUSPIRATE_SPI_DFLT_PON,
                .pullups = BUSPIRATE_SPI_DFLT_ENABLE_PULLUPS,
                .aux = BUSPIRATE_SPI_DFLT_AUX_ON,
                .cs_active = BUSPIRATE_SPI_DFLT_CS_START_LEVEL,
                },
     .bus = {
-            .cmd = CONFIG_SPI_BUS,
+            .cmd = SPICMD_CONFIG_BUS,
             .output_type = BUSPIRATE_SPI_DFLT_OUTPUT_TYPE,
             .clk_pol_idle = BUSPIRATE_SPI_DFLT_CLK_IDLE_POLARITY,
             .output_clk_edge = BUSPIRATE_SPI_DFLT_CLK_EDGE,
@@ -55,8 +55,7 @@ struct config_SPI dflt_config_SPI = {
             },
 };
 
-/* Commands while in SPI mode. Note, upper part of complete byte to fit
- * corresponding struct */
+/* Commands while in SPI mode. */
 typedef enum {
     CMD_CS = 0x02,              /* Toggle CS */
     CMD_WR_RD = 0x04,           /* Write then read up to 4096 bytes in each
@@ -236,7 +235,7 @@ struct ddata *bpspi_newddata(struct device *device)
         return (struct ddata *)memcpy(ddata, device->driver->ddata,
                                       sizeof(struct ddata));
 
-    memcpy(&ddata->config, &dflt_config_SPI, sizeof(struct config_SPI));
+    memcpy(&(ddata->config.spi), &dflt_config_SPI, sizeof(struct config_SPI));
     return ddata;
 }
 

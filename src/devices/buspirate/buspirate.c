@@ -93,11 +93,38 @@ static struct driverAPI bpspi_driver = {
 /*    I2C driver */
 static struct driverAPI bpi2c_driver = {
     .ddata = NULL,
-    .sendData = bpi2c_sendData,
-    .receiveData = bpi2c_receiveData,
-    .getStatus = bpi2c_getStatus,
-    .config = i2cspi_config,
-    .newddata = bpi2c_newddata
+    .sendData = bpspi_sendData,
+    .sendrecieveData = bpspi_sendrecieveData,
+    .sendrecieveData_ncs = bpspi_sendrecieveData_ncs,
+    .setCS = bpspi_setCS,
+    .receiveData = bpspi_receiveData,
+    .getStatus = bpspi_getStatus,
+    .configure = bpspi_configure,
+    .newddata = bpspi_newddata,
+    .cSPI = {
+             .set = {
+                     .speed = bpspi_set_speed,
+                     .power_on = bpspi_set_power_on,
+                     .pullups = bpspi_set_pullups,
+                     .aux_on = bpspi_set_aux_on,
+                     .cs_active = bpspi_set_cs_active,
+                     .output_type = bpspi_set_output_type,
+                     .clk_pol_idle = bpspi_set_clk_pol_idle,
+                     .output_clk_edge = bpspi_set_output_clk_edge,
+                     .input_sample_end = bpspi_set_input_sample_end,
+                     },
+             .get = {
+                     .speed = bpspi_get_speed,
+                     .power_on = bpspi_get_power_on,
+                     .pullups = bpspi_get_pullups,
+                     .aux_on = bpspi_get_aux_on,
+                     .cs_active = bpspi_get_cs_active,
+                     .output_type = bpspi_get_output_type,
+                     .clk_pol_idle = bpspi_get_clk_pol_idle,
+                     .output_clk_edge = bpspi_get_output_clk_edge,
+                     .input_sample_end = bpspi_get_input_sample_end,
+                     },
+             },
 };
 #endif
 
@@ -126,7 +153,7 @@ int buspirate_init()
     /* Testing SPI structs */
     {
         volatile struct confspi_pereph pereph = {
-            .cmd = CONFIG_SPI_PEREPHERIALS,
+            .cmd = SPICMD_CONFIG_PEREPHERIALS,
             .power_on = 1,
             .pullups = 1,
             .aux = 0,
@@ -138,7 +165,7 @@ int buspirate_init()
         ASSERT(pereph.raw == 0x4C);
 
         struct confspi_speed speed = {
-            .cmd = CONFIG_SPI_SPEED,
+            .cmd = SPICMD_CONFIG_SPEED,
             .speed = SPISPEED_1MHz
         };
         LOGW("spispeed: cmd=%d speed=%d (raw=0x%02X)\n", speed.cmd, speed.speed,
@@ -146,7 +173,7 @@ int buspirate_init()
         ASSERT(speed.raw == 0x63);
 
         struct confspi_bus bus = {
-            .cmd = CONFIG_SPI_BUS,
+            .cmd = SPICMD_CONFIG_BUS,
             .output_type = 1,
             .clk_pol_idle = 0,
             .output_clk_edge = 1,
