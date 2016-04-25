@@ -9,8 +9,10 @@
 	url = https://github.com/mambrus/libmtime.git
 [submodule "src/embedded"]
 	path = src/embedded
-	url = ssh://focus1/home/pike/repo/ehwe_SPIRAM.git
+	url = ssh://siterepo/ehwe_workbench.git
+	branch = i2c_magnetometer
 	ignore = all
 [submodule "wiki/wikidata"]
 	path = wiki/wikidata
-	url = ssh://focus1/home/pike/repo/ehwe_wiki.git
+	url = ssh://siterepo/ehwe_wiki.git
+	branch = master
