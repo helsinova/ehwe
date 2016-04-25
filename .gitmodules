@@ -9,7 +9,7 @@
 	url = https://github.com/mambrus/libmtime.git
 [submodule "src/embedded"]
 	path = src/embedded
-	url = ssh://focus1/home/pike/repo/ehwe_SPIRAM.git
+	url = ssh://focus1/home/pike/repo/ehwe_workbench.git
 	ignore = all
 [submodule "wiki/wikidata"]
 	path = wiki/wikidata
