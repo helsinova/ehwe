@@ -13,15 +13,34 @@ Simplified build-instructions are available under [src/README.md](src/README.md)
 Cloning with submodules in one go:
 ----------------------------------
 
-To clone project including it's submodules from any server:
+## Prerequisite:
 
-    git clone -b master --single-branch --recursive \
-	   proto://url/path/etrace.git
+To avoid "hard-coding" remote-names of submodules, a "symbolic" name is
+used instead: ``ssh://siterepo/``
 
-To clone the public Github repository:
+Remap this in ``~/.gitconfig`` to fit the server hosting the submodules for
+example like this (typical Gerrit hosting):
 
-    git clone --recursive \
-	    https://github.com/mambrus/etrace.git
+```
+[url "ssh://account@server:29418/pathname/"]
+    insteadOf = ssh://siterepo/
+
+[url "ssh://account@review_server:29418/pathname/"]
+    pushInsteadOf = ssh://siterepo/
+    pushInsteadOf = ssh://account@server:29418/pathname/
+
+```
+
+If no review server is used, only the first remap is needed.
+
+## Cloning
+
+To clone the project including it's submodules:
+
+```bash
+git clone -b master --single-branch --recursive \
+   ssh://siterepo/ehwe.git
+```
 
 Embedded workbench (src/embedded)
 ---------------------------------
