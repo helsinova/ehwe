@@ -123,6 +123,8 @@ static char *expected_rply(int cmd)
         if (cmdrply[i].command == cmd)
             return (char *)cmdrply[i].rply;
     }
+    LOGE("BusPirate drive doesn't know what response to expect for cmd %d",
+         cmd);
     return NULL;
 }
 
@@ -231,7 +233,7 @@ int rawMode_enter(struct device *device)
 
 int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
 {
-    int ret, i, slen, corr_cmd, tries = 0;
+    int ret, slen, corr_cmd, tries = 0;
     char tmp[BUF_SZ] = { '\0' };
     char *expRply = NULL;
     struct ddata *ddata = device->driver->ddata;
@@ -239,16 +241,7 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
 
     LOGI("BusPirate entering mode %d\n", bpcmd);
 
-    for (i = 0; i < TBL_LEN; i++) {
-        if (cmdrply[i].command == bpcmd)
-            expRply = (char *)cmdrply[i].rply;
-    }
     expRply = expected_rply(bpcmd);
-    if (expRply == NULL) {
-        LOGE("BusPirate drive doesn't know what response to expect for cmd %d",
-             bpcmd);
-        return -1;
-    }
 
     usleep(US_DELAY_RETRY);
     empty_inbuff(*fd);
