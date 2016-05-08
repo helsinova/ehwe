@@ -54,7 +54,8 @@ struct cmdrply_s cmdrply[] = {
 #define STATE_RETRIES 10
 #define US_CHAR_TIME 100        /* Time in uS to propagate one character over
                                  * the serial device. Note: Baud-rate
-                                 * dependent
+                                 * dependent. TBD: detect baud-rate to
+                                 * release this dependency.
                                  */
 #define MAX_ONGOING_CHARS 6     /* Number of character possibly coming */
 #define US_DELAY_RETRY (MAX_ONGOING_CHARS * US_CHAR_TIME)
@@ -95,7 +96,14 @@ static int read_2err(int fd, char *rbuff, int len)
     return 0;
 }
 
-/* ONLY to be used when device is in non-blocking. Add check for this (TBD)*/
+/* Empty (i.e. flush) any remaining stdlib-level in-buffer characters. This
+   could be necessary when BP and host are not in sync, i.e. reply from a
+   previous command is already in in-buffer (resulting in that current
+   response will be the pending previous one).
+
+  NOTE: **ONLY** to be used when device is in non-blocking. Add check for
+  this (TBD)
+ */
 void empty_inbuff(int fd)
 {
     int ret, tries = 0;
@@ -242,6 +250,8 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
         return -1;
     }
 
+    usleep(US_DELAY_RETRY);
+    empty_inbuff(*fd);
     for (tries = 0; tries < STATE_RETRIES; tries++) {
         memset(tmp, 0, BUF_SZ);
         tmp[0] = bpcmd;
@@ -259,8 +269,8 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
         }
         usleep(US_DELAY_RETRY);
         empty_inbuff(*fd);
-        LOGD("Retry (%d) due to Buspirate unexpected response to "
-             "mode-change: (%i,%s) \n", tries + 1, ret, tmp);
+        LOGE("Retry (%d) due to Buspirate unexpected response to "
+             "mode-change: (%i,%s).\n", tries + 1, ret, tmp);
     }
 
     corr_cmd = lookup_cmd(tmp);
