@@ -52,10 +52,14 @@ struct cmdrply_s cmdrply[] = {
 #define TBL_LEN (sizeof(cmdrply) / sizeof(struct cmdrply_s))
 #define BUF_SZ 100
 #define STATE_RETRIES 10
-#define US_CHAR_TIME 100        /* Time in uS to propagate one character over
-                                 * the serial device. Note: Baud-rate
+#define US_BPCMD_RESPONSE_TIME 725
+                                /* Time in uS for BusPirate to process a
+                                 * command. Machine constant.*/
+#define US_CHAR_TIME 100        /* Time in uS to propagate one character
+                                 * over the serial device. Note: Baud-rate
                                  * dependent. TBD: detect baud-rate to
-                                 * release this dependency.
+                                 * release this dependency, current constant
+                                 * assumes 9K6 bps
                                  */
 #define MAX_ONGOING_CHARS 6     /* Number of character possibly coming */
 #define US_DELAY_RETRY (MAX_ONGOING_CHARS * US_CHAR_TIME)
@@ -173,14 +177,17 @@ void log_ioerror(int ecode, log_level llevel)
 /* Enter binary mode from normal console-mode */
 int rawMode_enter(struct device *device)
 {
-    int ret, i, corr_cmd;
+    int ret, slen, i, corr_cmd;
     char tmp[BUF_SZ] = { '\0' };
+    char *expRply = NULL;
     int done = 0;
     int tries = 0;
     struct ddata *ddata = device->driver->ddata;
     int *fd = &ddata->fd;
 
     LOGI("BusPirate entering binary mode...\n");
+    expRply = expected_rply(ENTER_RESET);
+    slen = strlen(expRply);
 
     if (*fd == -1) {
         LOGE("Device isn't open\n");
@@ -191,9 +198,10 @@ int rawMode_enter(struct device *device)
      * according to BusPirate protocol spec V1.
      */
     for (i = 0; i < 20; i++) {
-        tmp[0] = 0x00;
+        tmp[0] = ENTER_RESET;
         LOGD("Sending 0x%02X to port\n", tmp[0]);
-        usleep(US_CHAR_TIME);
+        usleep(US_CHAR_TIME * (slen + 2) + US_CHAR_TIME +
+               US_BPCMD_RESPONSE_TIME);
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
     }
 
@@ -204,7 +212,8 @@ int rawMode_enter(struct device *device)
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
         tries++;
         LOGD("tries: %i Ret %i\n", tries, ret);
-        usleep(US_CHAR_TIME);
+        usleep(US_CHAR_TIME * (slen + 2) + US_CHAR_TIME +
+               US_BPCMD_RESPONSE_TIME);
         ASSURE_E((ret = read_2err(*fd, tmp, 5)) != -1, LOGE_IOERROR(errno));
         if (ret != 5 && tries > 22) {
             corr_cmd = lookup_cmd(tmp);
@@ -240,8 +249,8 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
     int *fd = &ddata->fd;
 
     LOGI("BusPirate entering mode %d\n", bpcmd);
-
     expRply = expected_rply(bpcmd);
+    slen = strlen(expRply);
 
     usleep(US_DELAY_RETRY);
     empty_inbuff(*fd);
@@ -251,11 +260,11 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
         LOGD("Sending 0x%02X to port. Expecting response %s\n", tmp[0],
              expRply);
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
-        msleep(1);
-        slen = strlen(expRply);
+        usleep(US_CHAR_TIME * (slen + 2) + US_CHAR_TIME +
+               US_BPCMD_RESPONSE_TIME);
         ASSURE_E((ret = read_2err(*fd, tmp, slen)) != -1, LOGE_IOERROR(errno));
 
-        if ((ret == strlen(expRply)) && (strncmp(tmp, expRply, slen) == 0)) {
+        if ((ret == slen) && (strncmp(tmp, expRply, slen) == 0)) {
             ddata->state = bpcmd;
             empty_inbuff(*fd);
             return 0;
