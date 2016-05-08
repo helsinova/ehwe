@@ -89,7 +89,30 @@ uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags)
 
 int bpi2c_configure(struct ddata *ddata)
 {
+    int ret;
+    uint8_t tmp[8] = { 0 };
+
+    struct confi2c_pereph *pereph = &(ddata->config.i2c.pereph);
+    struct confi2c_speed *speed = &(ddata->config.i2c.speed);
+
+    tmp[0] = 0;
+    ASSURE_E((ret =
+              write(ddata->fd, speed, sizeof(struct confi2c_speed))) != -1,
+             LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp[0] == 0x01);
+    memcpy(&ddata->config.i2c.speed, speed, sizeof(struct confi2c_speed));
+
+    tmp[0] = 0;
+    ASSURE_E((ret =
+              write(ddata->fd, pereph, sizeof(struct confi2c_pereph))) != -1,
+             LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp[0] == 0x01);
+    memcpy(&ddata->config.i2c.pereph, pereph, sizeof(struct confi2c_pereph));
+
     return 0;
+
 }
 
 /* Create a new device/driver-data object for external manipulation without

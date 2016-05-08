@@ -71,10 +71,39 @@ int stm32_init()
 
 int stm32_init_interface(const struct device *device)
 {
-    ASSERT(device->role == SPI);
-    ASSERT(device->index > 0 && device->index <= MAX_SPI_INTERFACES);
+    int if_init = 0;
 
-    SPI_stm32_drv[device->index - 1] = device->driver;
+    switch (device->devid) {
+#ifdef DEVICE_PARAPORT
+        case PARAPORT:
+            ASSERT("PARAPORT is TBD" == NULL);
+            if_init = 1;
+            break;
+#endif
+#ifdef DEVICE_BUSPIRATE
+        case BUSPIRATE:
+            switch (device->role) {
+                case SPI:
+                    ASSERT(device->index > 0
+                           && device->index <= MAX_SPI_INTERFACES);
+                    break;
+                case I2C:
+                    ASSERT(device->index > 0
+                           && device->index <= MAX_I2C_INTERFACES);
+                    break;
+                default:
+                    ASSERT("Role not supported for BUSPIRATE driver" == NULL);
+            }
+
+            SPI_stm32_drv[device->index - 1] = device->driver;
+            if_init = 1;
+            break;
+#endif
+        default:
+            LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
+
+    }
+    ASSERT(if_init);
     return 0;
 }
 
@@ -201,7 +230,7 @@ uint16_t SPI_I2S_ReceiveData_ncs(SPI_TypeDef * SPIx)
     struct ddata *ddata = SPIx->ddata;
 
     SPIx->sendrecieveData_ncs(ddata, NULL, 0, &ldata, 1);
-	return ldata;
+    return ldata;
 }
 
 /***************************************************************************
@@ -263,11 +292,11 @@ static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
 }
 
 static void nod_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
-                                int outsz, uint8_t *indata, int insz)
+                                    int outsz, uint8_t *indata, int insz)
 {
 
-    LOGW("Interface-stub %s (NO CS) sending 0x02X% bytes, receiving  0x02X% bytes\n",
-         __func__, outsz, insz);
+    LOGW("Interface-stub %s (NO CS) sending 0x02X% bytes, "
+         "receiving  0x02X% bytes\n", __func__, outsz, insz);
 }
 
 /***************************************************************************

@@ -23,7 +23,11 @@
 
 /* STM32F10x_StdPeriph_Lib_V3.5.0 API */
 
-/* Glue */
+/* Glue
+ * Note: may be fewer depending on MPU variant.
+ * TBD: SPI and I2C are mutually exclusive. I.e. shared resources. Implement
+ * logic to handle that sum does not exceed shared number of shared
+ * resources */
 #define MAX_SPI_INTERFACES 3
 #define MAX_I2C_INTERFACES 3
 struct driverAPI;
