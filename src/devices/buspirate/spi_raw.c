@@ -35,26 +35,3 @@
 /***************************************************************************
  * Driver interface SPI
  ***************************************************************************/
-void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
-{
-    int i;
-    char cbuf[512] = { '\0' };
-
-    LOGW("BP: Interface %s sending %d bytes \n", __func__, sz);
-    for (i = 0; i < sz; i++) {
-        if (data[i] > 31)
-            sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
-        else
-            sprintf(cbuf, "0x%02X %s,", data[i], " ");
-    }
-    LOGW("BP: %s\n", cbuf);
-}
-
-void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz)
-{
-}
-
-uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags)
-{
-    return flags;
-}

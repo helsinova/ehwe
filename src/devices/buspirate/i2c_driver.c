@@ -61,8 +61,117 @@ typedef enum {
 } bpcmd_i2c_t;
 
 /***************************************************************************
- * Driver interface
+ * Main driver interface
  ***************************************************************************/
+void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
+                           int osz, uint8_t *ibuf, int isz)
+{
+    int ret;
+    uint16_t nsz_send, nsz_receive;
+    uint8_t tmp[8] = { 0 };
+
+    nsz_send = htons(osz);
+    nsz_receive = htons(isz);
+    ASSERT((osz < 4096) && (osz >= 0)); /* Primitive handling for now (TBD) */
+    ASSERT(isz < 4096);
+
+#ifndef NDEBUG
+    memset(ibuf, 0, isz);
+#endif
+
+    LOGD("BP: Interface %s sending-receiving %d,%d bytes \n", __func__, osz,
+         isz);
+
+    //tmp[0] = 0;
+	/*
+    ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                   CMD_WR_RD}, 1) != -1, LOGE_IOERROR(errno));
+	*/
+    ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
+    //We need another solution for reading that can
+    //timeout if blocked-on-read (TBD)
+    //ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    //ASSERT(tmp[0] == 0x00);
+
+    ASSURE_E((ret = write(ddata->fd, obuf, osz)) >= -1, LOGE_IOERROR(errno));
+    LOGD("BP: %d bytes written to device\n", ret);
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    //n_sent=ntohs(*(int16_t*)(tmp));
+    //LOGD("BP: %d bytes written SPI\n", n_sent);
+    ASSERT(tmp[0] == 0x01);
+
+    if (isz > 0) {
+        ASSURE_E((ret = read(ddata->fd, ibuf, isz)) != -1, LOGE_IOERROR(errno));
+        LOGD("BP: %d bytes read from device\n", ret);
+    }
+}
+
+void bpi2c_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *obuf,
+                               int osz, uint8_t *ibuf, int isz)
+{
+    int ret;
+    uint16_t nsz_send, nsz_receive;
+    uint8_t tmp[8] = { 0 };
+
+    nsz_send = htons(osz);
+    nsz_receive = htons(isz);
+    ASSERT((osz < 4096) && (osz >= 0)); /* Primitive handling for now (TBD) */
+    ASSERT(isz < 4096);
+
+#ifndef NDEBUG
+    memset(ibuf, 0, isz);
+#endif
+
+    LOGD("BP: Interface %s sending-receiving %d,%d bytes (NO CS)\n", __func__,
+         osz, isz);
+
+	/*
+    ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                   CMD_WR_RD_NOCS}, 1) != -1, LOGE_IOERROR(errno));
+	*/
+    ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
+
+    ASSURE_E((ret = write(ddata->fd, obuf, osz)) >= -1, LOGE_IOERROR(errno));
+    LOGD("BP: %d bytes written to device\n", ret);
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp[0] == 0x01);
+
+    if (isz > 0) {
+        ASSURE_E((ret = read(ddata->fd, ibuf, isz)) != -1, LOGE_IOERROR(errno));
+        LOGD("BP: %d bytes read from device\n", ret);
+    }
+}
+
+void bpi2c_setCS(struct ddata *ddata, int state)
+{
+    uint8_t tmp[8] = { 0 };
+    uint8_t mstate = state;
+
+/*
+ * This is not the flag for inverted polarity. Kept in code for future
+ * reference.
+
+    if (!ddata->config.i2c.pereph.cs_active) {
+        mstate = mstate ^ 0x01;
+    }
+*/
+    ASSERT((mstate == 0) || (mstate == 1));
+    mstate &= 0x01;
+
+    /*
+	tmp[0] = CMD_CS | mstate;
+	*/
+    LOGD("BP: Interface %s sets CS to: (0x%02X)\n", __func__, mstate, tmp[0]);
+
+    ASSURE_E(write(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    memset(tmp, 0, sizeof(tmp));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp[0] == 0x01);
+
+}
+
 void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
     int i;
