@@ -29,6 +29,7 @@
 #include <assure.h>
 
 SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
+I2C_TypeDef *I2C_stm32_drv[MAX_I2C_INTERFACES];
 
 static void nod_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz);
@@ -65,6 +66,9 @@ int stm32_init()
     for (i = 0; i < MAX_SPI_INTERFACES; i++) {
         SPI_stm32_drv[i] = &nodriverAPI;
     }
+    for (i = 0; i < MAX_I2C_INTERFACES; i++) {
+        I2C_stm32_drv[i] = &nodriverAPI;
+    }
 
     return 0;
 }
@@ -86,16 +90,17 @@ int stm32_init_interface(const struct device *device)
                 case SPI:
                     ASSERT(device->index > 0
                            && device->index <= MAX_SPI_INTERFACES);
+                    SPI_stm32_drv[device->index - 1] = device->driver;
                     break;
                 case I2C:
                     ASSERT(device->index > 0
                            && device->index <= MAX_I2C_INTERFACES);
+                    I2C_stm32_drv[device->index - 1] = device->driver;
                     break;
                 default:
                     ASSERT("Role not supported for BUSPIRATE driver" == NULL);
             }
 
-            SPI_stm32_drv[device->index - 1] = device->driver;
             if_init = 1;
             break;
 #endif
@@ -110,6 +115,10 @@ int stm32_init_interface(const struct device *device)
 /***************************************************************************
  * STM32F10x_StdPeriph_Lib_V3.5.0 API                                      *
  ***************************************************************************/
+/*--------------------------------------------------------------------------
+ * SPI or I2S (slave mode I2C) API
+ *-------------------------------------------------------------------------*/
+
 /**
   * @brief  Transmits a Data through the SPIx/I2Sx peripheral.
   * @param  SPIx: where x can be
@@ -164,6 +173,185 @@ FlagStatus SPI_I2S_GetFlagStatus(SPI_TypeDef * SPIx, uint16_t SPI_I2S_FLAG)
     struct ddata *ddata = SPIx->ddata;
     FlagStatus bitstatus = SPIx->getStatus(ddata, SPI_I2S_FLAG);
     return bitstatus;
+}
+
+/*--------------------------------------------------------------------------
+ * I2C API
+ *-------------------------------------------------------------------------*/
+/**
+  * @brief  Generates I2Cx communication START condition.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  NewState: new state of the I2C START condition generation.
+  *   This parameter can be: ENABLE or DISABLE.
+  * @retval None.
+  */
+void I2C_GenerateSTART(I2C_TypeDef * I2Cx, FunctionalState NewState)
+{
+}
+
+/**
+  * @brief  Generates I2Cx communication STOP condition.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  NewState: new state of the I2C STOP condition generation.
+  *   This parameter can be: ENABLE or DISABLE.
+  * @retval None.
+  */
+void I2C_GenerateSTOP(I2C_TypeDef * I2Cx, FunctionalState NewState)
+{
+}
+
+/**
+  * @brief  Enables or disables the specified I2C acknowledge feature.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  NewState: new state of the I2C Acknowledgement.
+  *   This parameter can be: ENABLE or DISABLE.
+  * @retval None.
+  */
+void I2C_AcknowledgeConfig(I2C_TypeDef * I2Cx, FunctionalState NewState)
+{
+}
+
+/**
+  * @brief  Transmits the address byte to select the slave device.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  Address: specifies the slave address which will be transmitted
+  * @param  I2C_Direction: specifies whether the I2C device will be a
+  *   Transmitter or a Receiver. This parameter can be one of the following values
+  *     @arg I2C_Direction_Transmitter: Transmitter mode
+  *     @arg I2C_Direction_Receiver: Receiver mode
+  * @retval None.
+  */
+void I2C_Send7bitAddress(I2C_TypeDef * I2Cx, uint8_t Address,
+                         uint8_t I2C_Direction)
+{
+}
+
+/**
+  * @brief  Sends a data byte through the I2Cx peripheral.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  Data: Byte to be transmitted..
+  * @retval None
+  */
+void I2C_SendData(I2C_TypeDef * I2Cx, uint8_t Data)
+{
+}
+
+/**
+  * @brief  Returns the most recent received data by the I2Cx peripheral.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @retval The value of the received data.
+  */
+uint8_t I2C_ReceiveData(I2C_TypeDef * I2Cx)
+{
+    return 0;
+}
+
+/**
+  * @brief  Checks whether the last I2Cx Event is equal to the one passed
+  *   as parameter.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  I2C_EVENT: specifies the event to be checked.
+  *   This parameter can be one of the following values:
+  *     @arg I2C_EVENT_SLAVE_TRANSMITTER_ADDRESS_MATCHED           : EV1
+  *     @arg I2C_EVENT_SLAVE_RECEIVER_ADDRESS_MATCHED              : EV1
+  *     @arg I2C_EVENT_SLAVE_TRANSMITTER_SECONDADDRESS_MATCHED     : EV1
+  *     @arg I2C_EVENT_SLAVE_RECEIVER_SECONDADDRESS_MATCHED        : EV1
+  *     @arg I2C_EVENT_SLAVE_GENERALCALLADDRESS_MATCHED            : EV1
+  *     @arg I2C_EVENT_SLAVE_BYTE_RECEIVED                         : EV2
+  *     @arg (I2C_EVENT_SLAVE_BYTE_RECEIVED | I2C_FLAG_DUALF)      : EV2
+  *     @arg (I2C_EVENT_SLAVE_BYTE_RECEIVED | I2C_FLAG_GENCALL)    : EV2
+  *     @arg I2C_EVENT_SLAVE_BYTE_TRANSMITTED                      : EV3
+  *     @arg (I2C_EVENT_SLAVE_BYTE_TRANSMITTED | I2C_FLAG_DUALF)   : EV3
+  *     @arg (I2C_EVENT_SLAVE_BYTE_TRANSMITTED | I2C_FLAG_GENCALL) : EV3
+  *     @arg I2C_EVENT_SLAVE_ACK_FAILURE                           : EV3_2
+  *     @arg I2C_EVENT_SLAVE_STOP_DETECTED                         : EV4
+  *     @arg I2C_EVENT_MASTER_MODE_SELECT                          : EV5
+  *     @arg I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED            : EV6
+  *     @arg I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED               : EV6
+  *     @arg I2C_EVENT_MASTER_BYTE_RECEIVED                        : EV7
+  *     @arg I2C_EVENT_MASTER_BYTE_TRANSMITTING                    : EV8
+  *     @arg I2C_EVENT_MASTER_BYTE_TRANSMITTED                     : EV8_2
+  *     @arg I2C_EVENT_MASTER_MODE_ADDRESS10                       : EV9
+  *
+  * @note: For detailed description of Events, please refer to section
+  *    I2C_Events in stm32f10x_i2c.h file.
+  *
+  * @retval An ErrorStatus enumeration value:
+  * - SUCCESS: Last event is equal to the I2C_EVENT
+  * - ERROR: Last event is different from the I2C_EVENT
+  */
+ErrorStatus I2C_CheckEvent(I2C_TypeDef * I2Cx, uint32_t I2C_EVENT)
+{
+    return SUCCESS;
+}
+
+/**
+  * @brief  Clears the I2Cx's pending flags.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  I2C_FLAG: specifies the flag to clear.
+  *   This parameter can be any combination of the following values:
+  *     @arg I2C_FLAG_SMBALERT: SMBus Alert flag
+  *     @arg I2C_FLAG_TIMEOUT: Timeout or Tlow error flag
+  *     @arg I2C_FLAG_PECERR: PEC error in reception flag
+  *     @arg I2C_FLAG_OVR: Overrun/Underrun flag (Slave mode)
+  *     @arg I2C_FLAG_AF: Acknowledge failure flag
+  *     @arg I2C_FLAG_ARLO: Arbitration lost flag (Master mode)
+  *     @arg I2C_FLAG_BERR: Bus error flag
+  *
+  * @note
+  *   - STOPF (STOP detection) is cleared by software sequence: a read operation
+  *     to I2C_SR1 register (I2C_GetFlagStatus()) followed by a write operation
+  *     to I2C_CR1 register (I2C_Cmd() to re-enable the I2C peripheral).
+  *   - ADD10 (10-bit header sent) is cleared by software sequence: a read
+  *     operation to I2C_SR1 (I2C_GetFlagStatus()) followed by writing the
+  *     second byte of the address in DR register.
+  *   - BTF (Byte Transfer Finished) is cleared by software sequence: a read
+  *     operation to I2C_SR1 register (I2C_GetFlagStatus()) followed by a
+  *     read/write to I2C_DR register (I2C_SendData()).
+  *   - ADDR (Address sent) is cleared by software sequence: a read operation to
+  *     I2C_SR1 register (I2C_GetFlagStatus()) followed by a read operation to
+  *     I2C_SR2 register ((void)(I2Cx->SR2)).
+  *   - SB (Start Bit) is cleared software sequence: a read operation to I2C_SR1
+  *     register (I2C_GetFlagStatus()) followed by a write operation to I2C_DR
+  *     register  (I2C_SendData()).
+  * @retval None
+  */
+void I2C_ClearFlag(I2C_TypeDef * I2Cx, uint32_t I2C_FLAG)
+{
+}
+
+/**
+  * @brief  Checks whether the specified I2C flag is set or not.
+  * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
+  * @param  I2C_FLAG: specifies the flag to check.
+  *   This parameter can be one of the following values:
+  *     @arg I2C_FLAG_DUALF: Dual flag (Slave mode)
+  *     @arg I2C_FLAG_SMBHOST: SMBus host header (Slave mode)
+  *     @arg I2C_FLAG_SMBDEFAULT: SMBus default header (Slave mode)
+  *     @arg I2C_FLAG_GENCALL: General call header flag (Slave mode)
+  *     @arg I2C_FLAG_TRA: Transmitter/Receiver flag
+  *     @arg I2C_FLAG_BUSY: Bus busy flag
+  *     @arg I2C_FLAG_MSL: Master/Slave flag
+  *     @arg I2C_FLAG_SMBALERT: SMBus Alert flag
+  *     @arg I2C_FLAG_TIMEOUT: Timeout or Tlow error flag
+  *     @arg I2C_FLAG_PECERR: PEC error in reception flag
+  *     @arg I2C_FLAG_OVR: Overrun/Underrun flag (Slave mode)
+  *     @arg I2C_FLAG_AF: Acknowledge failure flag
+  *     @arg I2C_FLAG_ARLO: Arbitration lost flag (Master mode)
+  *     @arg I2C_FLAG_BERR: Bus error flag
+  *     @arg I2C_FLAG_TXE: Data register empty flag (Transmitter)
+  *     @arg I2C_FLAG_RXNE: Data register not empty (Receiver) flag
+  *     @arg I2C_FLAG_STOPF: Stop detection flag (Slave mode)
+  *     @arg I2C_FLAG_ADD10: 10-bit header sent flag (Master mode)
+  *     @arg I2C_FLAG_BTF: Byte transfer finished flag
+  *     @arg I2C_FLAG_ADDR: Address sent flag (Master mode) "ADSL"
+  *   Address matched flag (Slave mode)"ENDA"
+  *     @arg I2C_FLAG_SB: Start bit flag (Master mode)
+  * @retval The new state of I2C_FLAG (SET or RESET).
+  */
+FlagStatus I2C_GetFlagStatus(I2C_TypeDef * I2Cx, uint32_t I2C_FLAG)
+{
+    return RESET;
 }
 
 /***************************************************************************
