@@ -182,7 +182,7 @@ int rawMode_enter(struct device *device)
     char *expRply = NULL;
     int done = 0;
     int tries = 0;
-    struct ddata *ddata = device->driver->ddata;
+    struct ddata *ddata = device->driver.any->ddata;
     int *fd = &ddata->fd;
 
     LOGI("BusPirate entering binary mode...\n");
@@ -245,7 +245,7 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
     int ret, slen, corr_cmd, tries = 0;
     char tmp[BUF_SZ] = { '\0' };
     char *expRply = NULL;
-    struct ddata *ddata = device->driver->ddata;
+    struct ddata *ddata = device->driver.any->ddata;
     int *fd = &ddata->fd;
 
     LOGI("BusPirate entering mode %d\n", bpcmd);

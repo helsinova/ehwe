@@ -53,7 +53,7 @@ struct ddata;
 /* Convenience variables: */
 #ifdef BUSPIRATE_ENABLE_SPI
 /*    SPI driver */
-static struct driverAPI bpspi_driver = {
+static struct driverAPI_spi bpspi_driver = {
     .ddata = NULL,
     .sendData = bpspi_sendData,
     .sendrecieveData = bpspi_sendrecieveData,
@@ -61,37 +61,37 @@ static struct driverAPI bpspi_driver = {
     .setCS = bpspi_setCS,
     .receiveData = bpspi_receiveData,
     .getStatus = bpspi_getStatus,
-    .configure = bpspi_configure,
+    .actuate_config = bpspi_configure,
     .newddata = bpspi_newddata,
-    .cSPI = {
-             .set = {
-                     .speed = bpspi_set_speed,
-                     .power_on = bpspi_set_power_on,
-                     .pullups = bpspi_set_pullups,
-                     .aux_on = bpspi_set_aux_on,
-                     .cs_active = bpspi_set_cs_active,
-                     .output_type = bpspi_set_output_type,
-                     .clk_pol_idle = bpspi_set_clk_pol_idle,
-                     .output_clk_edge = bpspi_set_output_clk_edge,
-                     .input_sample_end = bpspi_set_input_sample_end,
-                     },
-             .get = {
-                     .speed = bpspi_get_speed,
-                     .power_on = bpspi_get_power_on,
-                     .pullups = bpspi_get_pullups,
-                     .aux_on = bpspi_get_aux_on,
-                     .cs_active = bpspi_get_cs_active,
-                     .output_type = bpspi_get_output_type,
-                     .clk_pol_idle = bpspi_get_clk_pol_idle,
-                     .output_clk_edge = bpspi_get_output_clk_edge,
-                     .input_sample_end = bpspi_get_input_sample_end,
-                     },
-             },
+    .config = {
+               .set = {
+                       .speed = bpspi_set_speed,
+                       .power_on = bpspi_set_power_on,
+                       .pullups = bpspi_set_pullups,
+                       .aux_on = bpspi_set_aux_on,
+                       .cs_active = bpspi_set_cs_active,
+                       .output_type = bpspi_set_output_type,
+                       .clk_pol_idle = bpspi_set_clk_pol_idle,
+                       .output_clk_edge = bpspi_set_output_clk_edge,
+                       .input_sample_end = bpspi_set_input_sample_end,
+                       },
+               .get = {
+                       .speed = bpspi_get_speed,
+                       .power_on = bpspi_get_power_on,
+                       .pullups = bpspi_get_pullups,
+                       .aux_on = bpspi_get_aux_on,
+                       .cs_active = bpspi_get_cs_active,
+                       .output_type = bpspi_get_output_type,
+                       .clk_pol_idle = bpspi_get_clk_pol_idle,
+                       .output_clk_edge = bpspi_get_output_clk_edge,
+                       .input_sample_end = bpspi_get_input_sample_end,
+                       },
+               },
 };
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
 /*    I2C driver */
-static struct driverAPI bpi2c_driver = {
+static struct driverAPI_i2c bpi2c_driver = {
     .ddata = NULL,
     .sendData = bpi2c_sendData,
     .sendrecieveData = bpi2c_sendrecieveData,
@@ -99,32 +99,32 @@ static struct driverAPI bpi2c_driver = {
     .setCS = bpi2c_setCS,
     .receiveData = bpi2c_receiveData,
     .getStatus = bpi2c_getStatus,
-    .configure = bpi2c_configure,
+    .actuate_config = bpi2c_configure,
     .newddata = bpi2c_newddata,
-    .cSPI = {
-             .set = {
-                     .speed = bpi2c_set_speed,
-                     .power_on = bpi2c_set_power_on,
-                     .pullups = bpi2c_set_pullups,
-                     .aux_on = bpi2c_set_aux_on,
-                     .cs_active = bpi2c_set_cs_active,
-                     .output_type = bpi2c_set_output_type,
-                     .clk_pol_idle = bpi2c_set_clk_pol_idle,
-                     .output_clk_edge = bpi2c_set_output_clk_edge,
-                     .input_sample_end = bpi2c_set_input_sample_end,
-                     },
-             .get = {
-                     .speed = bpi2c_get_speed,
-                     .power_on = bpi2c_get_power_on,
-                     .pullups = bpi2c_get_pullups,
-                     .aux_on = bpi2c_get_aux_on,
-                     .cs_active = bpi2c_get_cs_active,
-                     .output_type = bpi2c_get_output_type,
-                     .clk_pol_idle = bpi2c_get_clk_pol_idle,
-                     .output_clk_edge = bpi2c_get_output_clk_edge,
-                     .input_sample_end = bpi2c_get_input_sample_end,
-                     },
-             },
+    .config = {
+               .set = {
+                       .speed = bpi2c_set_speed,
+                       .power_on = bpi2c_set_power_on,
+                       .pullups = bpi2c_set_pullups,
+                       .aux_on = bpi2c_set_aux_on,
+                       .cs_active = bpi2c_set_cs_active,
+                       .output_type = bpi2c_set_output_type,
+                       .clk_pol_idle = bpi2c_set_clk_pol_idle,
+                       .output_clk_edge = bpi2c_set_output_clk_edge,
+                       .input_sample_end = bpi2c_set_input_sample_end,
+                       },
+               .get = {
+                       .speed = bpi2c_get_speed,
+                       .power_on = bpi2c_get_power_on,
+                       .pullups = bpi2c_get_pullups,
+                       .aux_on = bpi2c_get_aux_on,
+                       .cs_active = bpi2c_get_cs_active,
+                       .output_type = bpi2c_get_output_type,
+                       .clk_pol_idle = bpi2c_get_clk_pol_idle,
+                       .output_clk_edge = bpi2c_get_output_clk_edge,
+                       .input_sample_end = bpi2c_get_input_sample_end,
+                       },
+               },
 };
 #endif
 
@@ -273,22 +273,22 @@ buspirate_parse_err:
 
 int buspirate_init_device(struct device *device)
 {
-    struct driverAPI *driver;
+    struct driverAPI_any *driver;
     struct ddata *ddata;
 
     LOGI("BP: Initializing device ID [%d]\n", device->devid);
 
-    ASSERT(driver = malloc(sizeof(struct driverAPI)));
+    ASSERT(driver = malloc(sizeof(struct driverAPI_spi)));
     switch (device->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
         case SPI:
-            memcpy(driver, &bpspi_driver, sizeof(struct driverAPI));
+            memcpy(driver, &bpspi_driver, sizeof(struct driverAPI_spi));
             ddata = bpspi_newddata(NULL);
             break;
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
         case I2C:
-            memcpy(driver, &bpi2c_driver, sizeof(struct driverAPI));
+            memcpy(driver, &bpi2c_driver, sizeof(struct driverAPI_spi));
             ddata = bpi2c_newddata(NULL);
             break;
 #endif
@@ -303,8 +303,8 @@ int buspirate_init_device(struct device *device)
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
     driver->odevice = device;
-    device->driver = driver;
-    ddata->odriver = driver;
+    device->driver.any = driver;
+    ddata->ownedby.any = driver;
 
     ASSURE(rawMode_enter(device) == 0);
 
@@ -350,7 +350,7 @@ int buspirate_init_device(struct device *device)
 
 int buspirate_deinit_device(struct device *device)
 {
-    struct driverAPI *driver = device->driver;
+    struct driverAPI_any *driver = device->driver.any;
     struct ddata *ddata = driver->ddata;
     struct buspirate *buspirate = device->buspirate;
 
@@ -372,7 +372,7 @@ int buspirate_deinit_device(struct device *device)
     free(driver);
     free(buspirate);
 
-    device->driver = NULL;
+    device->driver.any = NULL;
     device->buspirate = NULL;
     return 0;
 }

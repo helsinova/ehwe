@@ -40,7 +40,17 @@ static void nod_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
                                     int outsz, uint8_t *indata, int insz);
 static void nod_setCS(struct ddata *ddata, int state);
 
-static struct driverAPI nodriverAPI = {
+static struct driverAPI_spi nodriverAPI_spi = {
+    .ddata = NULL,
+    .sendData = nod_sendData,
+    .receiveData = nod_receiveData,
+    .getStatus = nod_getStatus,
+    .sendrecieveData = nod_sendrecieveData,
+    .sendrecieveData_ncs = nod_sendrecieveData_ncs,
+    .setCS = nod_setCS
+};
+
+static struct driverAPI_i2c nodriverAPI_i2c = {
     .ddata = NULL,
     .sendData = nod_sendData,
     .receiveData = nod_receiveData,
@@ -64,10 +74,10 @@ int stm32_init()
     }
     is_init = 1;
     for (i = 0; i < MAX_SPI_INTERFACES; i++) {
-        SPI_stm32_drv[i] = &nodriverAPI;
+        SPI_stm32_drv[i] = &nodriverAPI_spi;
     }
     for (i = 0; i < MAX_I2C_INTERFACES; i++) {
-        I2C_stm32_drv[i] = &nodriverAPI;
+        I2C_stm32_drv[i] = &nodriverAPI_i2c;
     }
 
     return 0;
@@ -90,12 +100,12 @@ int stm32_init_interface(const struct device *device)
                 case SPI:
                     ASSERT(device->index > 0
                            && device->index <= MAX_SPI_INTERFACES);
-                    SPI_stm32_drv[device->index - 1] = device->driver;
+                    SPI_stm32_drv[device->index - 1] = device->driver.spi;
                     break;
                 case I2C:
                     ASSERT(device->index > 0
                            && device->index <= MAX_I2C_INTERFACES);
-                    I2C_stm32_drv[device->index - 1] = device->driver;
+                    I2C_stm32_drv[device->index - 1] = device->driver.i2c;
                     break;
                 default:
                     ASSERT("Role not supported for BUSPIRATE driver" == NULL);

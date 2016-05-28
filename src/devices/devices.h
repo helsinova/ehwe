@@ -58,7 +58,9 @@ typedef enum {
 // Valid regex-i patterns for "direction"
 #define DIRECTIONS "MASTER|SLAVE"
 
-struct driverAPI;
+struct driverAPI_spi;
+struct driverAPI_i2c;
+struct driverAPI_any;
 struct paraport;
 struct buspirate;
 
@@ -74,7 +76,11 @@ struct device {
         struct buspirate *buspirate;
 #endif
     };
-    struct driverAPI *driver;
+    union {
+        struct driverAPI_any *any;
+        struct driverAPI_spi *spi;
+        struct driverAPI_i2c *i2c;
+    } driver;
 };
 
 int devices_init();

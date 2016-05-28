@@ -31,9 +31,10 @@
 #define MAX_SPI_INTERFACES 3
 #define MAX_I2C_INTERFACES 3
 
-struct driverAPI;
-typedef struct driverAPI SPI_TypeDef;
-typedef struct driverAPI I2C_TypeDef;
+struct driverAPI_spi;
+struct driverAPI_i2c;
+typedef struct driverAPI_spi SPI_TypeDef;
+typedef struct driverAPI_i2c I2C_TypeDef;
 
 extern SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
 extern I2C_TypeDef *I2C_stm32_drv[MAX_I2C_INTERFACES];

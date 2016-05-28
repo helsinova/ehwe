@@ -232,7 +232,7 @@ struct ddata *bpspi_newddata(struct device *device)
     ASSERT(ddata = malloc(sizeof(struct ddata)));
 
     if (device != NULL)
-        return (struct ddata *)memcpy(ddata, device->driver->ddata,
+        return (struct ddata *)memcpy(ddata, device->driver.any->ddata,
                                       sizeof(struct ddata));
 
     memcpy(&(ddata->config.spi), &dflt_config_SPI, sizeof(struct config_SPI));

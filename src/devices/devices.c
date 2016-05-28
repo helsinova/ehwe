@@ -148,7 +148,7 @@ int devices_deinit_device(struct device *device)
     int rc = 0;
 
     ASSERT(device);
-    ASSERT(device->driver);
+    ASSERT(device->driver.any);
     LOGD("{%d,%d,%d}\n", device->devid, device->role, device->index);
     switch (device->devid) {
 #ifdef DEVICE_PARAPORT

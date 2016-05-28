@@ -221,7 +221,6 @@ int bpi2c_configure(struct ddata *ddata)
     memcpy(&ddata->config.i2c.pereph, pereph, sizeof(struct confi2c_pereph));
 
     return 0;
-
 }
 
 /* Create a new device/driver-data object for external manipulation without
@@ -233,7 +232,7 @@ struct ddata *bpi2c_newddata(struct device *device)
     ASSERT(ddata = malloc(sizeof(struct ddata)));
 
     if (device != NULL)
-        return (struct ddata *)memcpy(ddata, device->driver->ddata,
+        return (struct ddata *)memcpy(ddata, device->driver.any->ddata,
                                       sizeof(struct ddata));
 
     memcpy(&(ddata->config.i2c), &dflt_config_I2C, sizeof(struct config_I2C));

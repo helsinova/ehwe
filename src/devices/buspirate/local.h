@@ -237,7 +237,12 @@ struct ddata {
         struct config_I2C i2c;
         struct config_SPI spi;
     } config;
-    struct driverAPI *odriver;  /* Owned by driver */
+    /* Owned by driver */
+    union {
+        struct driverAPI_any *any;
+        struct driverAPI_spi *spi;
+        struct driverAPI_i2c *ic2;
+    } ownedby;
 };
 
 struct device;
