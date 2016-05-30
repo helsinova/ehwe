@@ -314,19 +314,11 @@ config_etype_t bpi2c_set_power_on(int, struct ddata *);
 config_etype_t bpi2c_set_pullups(int, struct ddata *);
 config_etype_t bpi2c_set_aux_on(int, struct ddata *);
 config_etype_t bpi2c_set_cs_active(int, struct ddata *);
-config_etype_t bpi2c_set_output_type(int, struct ddata *);
-config_etype_t bpi2c_set_clk_pol_idle(int, struct ddata *);
-config_etype_t bpi2c_set_output_clk_edge(int, struct ddata *);
-config_etype_t bpi2c_set_input_sample_end(int, struct ddata *);
 
 config_etype_t bpi2c_get_speed(int *, struct ddata *);
 config_etype_t bpi2c_get_power_on(int *, struct ddata *);
 config_etype_t bpi2c_get_pullups(int *, struct ddata *);
 config_etype_t bpi2c_get_aux_on(int *, struct ddata *);
 config_etype_t bpi2c_get_cs_active(int *, struct ddata *);
-config_etype_t bpi2c_get_output_type(int *, struct ddata *);
-config_etype_t bpi2c_get_clk_pol_idle(int *, struct ddata *);
-config_etype_t bpi2c_get_output_clk_edge(int *, struct ddata *);
-config_etype_t bpi2c_get_input_sample_end(int *, struct ddata *);
 
 #endif                          //buspirate_local_h

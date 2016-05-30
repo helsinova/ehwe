@@ -108,10 +108,6 @@ static struct driverAPI_i2c bpi2c_driver = {
                        .pullups = bpi2c_set_pullups,
                        .aux_on = bpi2c_set_aux_on,
                        .cs_active = bpi2c_set_cs_active,
-                       .output_type = bpi2c_set_output_type,
-                       .clk_pol_idle = bpi2c_set_clk_pol_idle,
-                       .output_clk_edge = bpi2c_set_output_clk_edge,
-                       .input_sample_end = bpi2c_set_input_sample_end,
                        },
                .get = {
                        .speed = bpi2c_get_speed,
@@ -119,10 +115,6 @@ static struct driverAPI_i2c bpi2c_driver = {
                        .pullups = bpi2c_get_pullups,
                        .aux_on = bpi2c_get_aux_on,
                        .cs_active = bpi2c_get_cs_active,
-                       .output_type = bpi2c_get_output_type,
-                       .clk_pol_idle = bpi2c_get_clk_pol_idle,
-                       .output_clk_edge = bpi2c_get_output_clk_edge,
-                       .input_sample_end = bpi2c_get_input_sample_end,
                        },
                },
 };

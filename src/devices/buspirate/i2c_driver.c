@@ -267,26 +267,6 @@ config_etype_t bpi2c_set_cs_active(int setval, struct ddata * dd)
     return E_UNKNOWN;
 }
 
-config_etype_t bpi2c_set_output_type(int setval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}
-
-config_etype_t bpi2c_set_clk_pol_idle(int setval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}
-
-config_etype_t bpi2c_set_output_clk_edge(int setval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}
-
-config_etype_t bpi2c_set_input_sample_end(int setval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}
-
 config_etype_t bpi2c_get_speed(int *retval, struct ddata * dd)
 {
     return E_UNKNOWN;
@@ -312,22 +292,3 @@ config_etype_t bpi2c_get_cs_active(int *retval, struct ddata * dd)
     return E_UNKNOWN;
 }
 
-config_etype_t bpi2c_get_output_type(int *retval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}
-
-config_etype_t bpi2c_get_clk_pol_idle(int *retval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}
-
-config_etype_t bpi2c_get_output_clk_edge(int *retval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}
-
-config_etype_t bpi2c_get_input_sample_end(int *retval, struct ddata * dd)
-{
-    return E_UNKNOWN;
-}

@@ -120,10 +120,6 @@ struct configAPI_i2c {
         config_etype_t(*pullups) (int, struct ddata *);
         config_etype_t(*aux_on) (int, struct ddata *);
         config_etype_t(*cs_active) (int, struct ddata *);
-        config_etype_t(*output_type) (int, struct ddata *);
-        config_etype_t(*clk_pol_idle) (int, struct ddata *);
-        config_etype_t(*output_clk_edge) (int, struct ddata *);
-        config_etype_t(*input_sample_end) (int, struct ddata *);
     } set;
     struct {
         config_etype_t(*speed) (int *, struct ddata *);
@@ -131,10 +127,6 @@ struct configAPI_i2c {
         config_etype_t(*pullups) (int *, struct ddata *);
         config_etype_t(*aux_on) (int *, struct ddata *);
         config_etype_t(*cs_active) (int *, struct ddata *);
-        config_etype_t(*output_type) (int *, struct ddata *);
-        config_etype_t(*clk_pol_idle) (int *, struct ddata *);
-        config_etype_t(*output_clk_edge) (int *, struct ddata *);
-        config_etype_t(*input_sample_end) (int *, struct ddata *);
     } get;
 };
 
