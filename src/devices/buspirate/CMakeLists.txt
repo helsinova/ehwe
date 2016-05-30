@@ -68,7 +68,7 @@ if(BUSPIRATE_ENABLE_I2C)
     set(BUSPIRATE_I2C_DFLT_SPEED
         "I2CSPEED_5kHz"
         CACHE STRING
-        "I2C-bus: Default clock speed (5kHz=0,50kHz=1,100kHz=2,500kHz=3)")
+        "I2C-bus: Default clock speed (5kHz=0,50kHz=1,100kHz=2,400kHz=3)")
 
     option(BUSPIRATE_I2C_DFLT_PON
         "Power supply output-pin active" no)

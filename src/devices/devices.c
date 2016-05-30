@@ -176,7 +176,7 @@ int devices_deinit_device(struct device *device)
 void __init __devices_init(void)
 {
     int rc;
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism ====\n");
 #endif
@@ -188,7 +188,7 @@ void __init __devices_init(void)
 
 void __fini __devices_fini(void)
 {
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism\n");
 #endif

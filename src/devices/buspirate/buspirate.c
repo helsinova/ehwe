@@ -150,8 +150,10 @@ int buspirate_init()
     ASSERT(sizeof(struct confspi_speed) == 1);
     ASSERT(sizeof(struct confspi_bus) == 1);
 
-    /* Testing SPI structs */
+    /* Testing bit-field structs for portability */
+#ifdef ENABLE_BITFIELD_TEST
     {
+#ifdef BUSPIRATE_ENABLE_SPI
         volatile struct confspi_pereph pereph = {
             .cmd = SPICMD_CONFIG_PEREPHERIALS,
             .power_on = 1,
@@ -159,17 +161,17 @@ int buspirate_init()
             .aux = 0,
             .cs_active = 0
         };
-        LOGW("pereph: cmd=%d power_on=%d pullups=%d aux=%d cs_active=%d "
-             "(raw=0x%02X)\n", pereph.cmd, pereph.power_on, pereph.pullups,
-             pereph.aux, pereph.cs_active, pereph.raw);
+        LOGW("Testing confspi_pereph bitfields: cmd=%d power_on=%d pullups=%d "
+             "aux=%d cs_active=%d (raw=0x%02X)\n", pereph.cmd, pereph.power_on,
+             pereph.pullups, pereph.aux, pereph.cs_active, pereph.raw);
         ASSERT(pereph.raw == 0x4C);
 
         struct confspi_speed speed = {
             .cmd = SPICMD_CONFIG_SPEED,
             .speed = SPISPEED_1MHz
         };
-        LOGW("spispeed: cmd=%d speed=%d (raw=0x%02X)\n", speed.cmd, speed.speed,
-             speed.raw);
+        LOGW("Testing confspi_speed bitfields: cmd=%d speed=%d (raw=0x%02X)\n",
+             speed.cmd, speed.speed, speed.raw);
         ASSERT(speed.raw == 0x63);
 
         struct confspi_bus bus = {
@@ -180,12 +182,14 @@ int buspirate_init()
             .input_sample_end = 0
         };
 
-        LOGW("bus: cmd=%d output_type=%d clk_pol_idle=%d output_clk_edge=%d "
-             "input_sample_end=%d (raw=0x%02X)\n", bus.cmd, bus.output_type,
-             bus.clk_pol_idle, bus.output_clk_edge, bus.input_sample_end,
-             bus.raw);
+        LOGW("Tasting confspi_bus bitfields: cmd=%d output_type=%d "
+             "clk_pol_idle=%d output_clk_edge=%d input_sample_end=%d "
+             "(raw=0x%02X)\n", bus.cmd, bus.output_type, bus.clk_pol_idle,
+             bus.output_clk_edge, bus.input_sample_end, bus.raw);
         ASSERT(bus.raw == 0x8A);
+#endif
     }
+#endif
 
     return 0;
 }
@@ -386,7 +390,7 @@ int buspirate_deinit_device(struct device *device)
 void __init __buspirate_init(void)
 {
     int rc;
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism ====\n");
 #endif
@@ -398,7 +402,7 @@ void __init __buspirate_init(void)
 
 void __fini __buspirate_fini(void)
 {
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism\n");
 #endif

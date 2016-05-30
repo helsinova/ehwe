@@ -67,7 +67,7 @@ interfaces_init_interface_err:
 void __init __interfaces_init(void)
 {
     int rc;
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism ====\n");
 #endif
@@ -79,7 +79,7 @@ void __init __interfaces_init(void)
 
 void __fini __interfaces_fini(void)
 {
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism\n");
 #endif

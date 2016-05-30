@@ -26,8 +26,13 @@ option(ENABLE_LOGGING
 option(ENABLE_SYSLOG
     "Enable log to syslog (Linux/OSX)" OFF)
 
-option(INITFINI_SHOW
+# Init/fini
+option(ENABLE_INITFINI_SHOWEXEC
     "Show init/fini execution using CTORS/DTORS mechanism" OFF)
+
+# Self-tests
+option(ENABLE_BITFIELD_TEST
+    "Assure that bit-fields are organized/layedout as intended" OFF)
 
 #-------------------------------------------------------------------------------
 # Build-tool options (gcc)

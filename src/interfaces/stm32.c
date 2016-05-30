@@ -506,7 +506,7 @@ static void nod_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
 void __init __stm32_init(void)
 {
     int rc;
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism ====\n");
 #endif
@@ -518,7 +518,7 @@ void __init __stm32_init(void)
 
 void __fini __stm32_fini(void)
 {
-#ifdef INITFINI_SHOW
+#ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism\n");
 #endif
