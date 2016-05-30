@@ -82,6 +82,9 @@ if(BUSPIRATE_ENABLE_I2C)
     option(BUSPIRATE_I2C_DFLT_CS_START_LEVEL
         "CS starts high" yes)
 
+    option(BUSPIRATE_I2C_DFLT_AUTOACK
+        "Send ACK on each byte-read autoatically" yes)
+
     set(LIBBUSPIRATE_SOURCE
         ${LIBBUSPIRATE_SOURCE}
         i2c_raw.c

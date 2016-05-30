@@ -126,7 +126,7 @@ struct confi2c_pereph {
     union {
         struct {
 #if defined(_BIT_FIELDS_HTOL)
-            uint8_t cmd:4;    /* Only I2CCMD_CONFIG_PEREPHERIALS = 0x04 */
+            uint8_t cmd:4;      /* Only I2CCMD_CONFIG_PEREPHERIALS = 0x04 */
             uint8_t power_on:1; /* Enable power on */
             uint8_t pullups:1;  /* Enable pull-up resistors */
             uint8_t aux:1;      /* Set AUX-pin */
@@ -222,6 +222,7 @@ struct config_SPI {
 };
 
 struct config_I2C {
+    int autoAck;
     struct confi2c_pereph pereph;
     struct confi2c_speed speed;
 };
@@ -257,31 +258,33 @@ int rawMode_toMode(struct device *, bpcmd_raw_t bpcmd);
  ***************************************************************************
  * SPI
  ***************************************************************************/
+void bpspi_setCS(struct ddata *ddata, int state);
+void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz);
-
+uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags);
+int bpspi_configure(struct ddata *ddata);
+struct ddata *bpspi_newddata(struct device *device);
+/* High level */
 void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                            int outsz, uint8_t *indata, int insz);
 void bpspi_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
                                int outsz, uint8_t *indata, int insz);
-void bpspi_setCS(struct ddata *ddata, int state);
-void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz);
-uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags);
-int bpspi_configure(struct ddata *ddata);
-struct ddata *bpspi_newddata(struct device *device);
 /***************************************************************************
  * I2C
  ***************************************************************************/
-void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz);
-
-void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
-                           int outsz, uint8_t *indata, int insz);
-void bpi2c_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
-                               int outsz, uint8_t *indata, int insz);
-void bpi2c_setCS(struct ddata *ddata, int state);
+void bpi2c_start(struct ddata *ddata);
+void bpi2c_stop(struct ddata *ddata);
+void bpi2c_autoAck(struct ddata *ddata, int state);
+void bpi2c_receiveByte(struct ddata *ddata, uint8_t *data);
+void bpi2c_sendByte(struct ddata *ddata, uint8_t data);
 void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz);
+void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags);
 int bpi2c_configure(struct ddata *ddata);
 struct ddata *bpi2c_newddata(struct device *device);
+/* High level */
+void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
+                           int outsz, uint8_t *indata, int insz);
 /***************************************************************************
  * Configuration  interface
  ***************************************************************************

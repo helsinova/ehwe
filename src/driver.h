@@ -136,6 +136,8 @@ struct driverAPI_i2c {
     struct ddata *ddata;        /* Device specific Driver-Data */
 
     /*---------- Methods ----------*/
+    void (*receiveByte) (struct ddata * ddata, uint8_t *data);
+    void (*sendByte) (struct ddata * ddata, uint8_t data);
     void (*sendData) (struct ddata * ddata, const uint8_t *data, int sz);
     void (*receiveData) (struct ddata * ddata, uint8_t *data, int sz);
 
@@ -145,13 +147,14 @@ struct driverAPI_i2c {
     void (*sendrecieveData) (struct ddata * ddata, const uint8_t *outbuf,
                              int outsz, uint8_t *indata, int insz);
 
-    /* As above but don't toggle CS */
-    void (*sendrecieveData_ncs) (struct ddata * ddata, const uint8_t *outbuf,
-                                 int outsz, uint8_t *indata, int insz);
-
-    /* Sets state of CS signal. Note: state is logical value, not electrical
+    /* Send bus-start/-stop condition
      */
-    void (*setCS) (struct ddata * ddata, int state);
+    void (*start) (struct ddata * ddata);
+    void (*stop) (struct ddata * ddata);
+
+    /* If each should be automatically ACKed or not
+     */
+    void (*autoAck) (struct ddata * ddata, int state);
 
     uint16_t (*getStatus) (struct ddata * ddata, uint16_t);
     int (*actuate_config) (struct ddata * ddata);   /* Actuate configuration */

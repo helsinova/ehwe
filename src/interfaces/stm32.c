@@ -36,9 +36,17 @@ static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 static uint16_t nod_getStatus(struct ddata *ddata, uint16_t);
 static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                                 int outsz, uint8_t *indata, int insz);
+/* SPI specific */
 static void nod_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
                                     int outsz, uint8_t *indata, int insz);
 static void nod_setCS(struct ddata *ddata, int state);
+
+/* I2C specific */
+static void nod_start(struct ddata *ddata);
+static void nod_stop(struct ddata *ddata);
+static void nod_autoAck(struct ddata *ddata, int state);
+static void nod_sendByte(struct ddata *ddata, uint8_t data);
+static void nod_receiveByte(struct ddata *ddata, uint8_t *data);
 
 static struct driverAPI_spi nodriverAPI_spi = {
     .ddata = NULL,
@@ -52,12 +60,15 @@ static struct driverAPI_spi nodriverAPI_spi = {
 
 static struct driverAPI_i2c nodriverAPI_i2c = {
     .ddata = NULL,
+    .sendByte = nod_sendByte,
+    .receiveByte = nod_receiveByte,
     .sendData = nod_sendData,
     .receiveData = nod_receiveData,
     .getStatus = nod_getStatus,
     .sendrecieveData = nod_sendrecieveData,
-    .sendrecieveData_ncs = nod_sendrecieveData_ncs,
-    .setCS = nod_setCS
+    .start = nod_start,
+    .stop = nod_stop,
+    .autoAck = nod_autoAck
 };
 
 /***************************************************************************
@@ -474,6 +485,11 @@ static void nod_setCS(struct ddata *ddata, int state)
     LOGW("Stubbed [%s] sets CS to: \n", __func__, state);
 }
 
+static void nod_autoAck(struct ddata *ddata, int state)
+{
+    LOGW("Stubbed [%s] sets CS to: \n", __func__, state);
+}
+
 static uint16_t nod_getStatus(struct ddata *ddata, uint16_t flags)
 {
     LOGW("Interface-stub %s quired about flags 0x02X% bytes \n", __func__,
@@ -484,7 +500,6 @@ static uint16_t nod_getStatus(struct ddata *ddata, uint16_t flags)
 static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                                 int outsz, uint8_t *indata, int insz)
 {
-
     LOGW("Interface-stub %s sending 0x02X% bytes, receiving  0x02X% bytes\n",
          __func__, outsz, insz);
 }
@@ -492,9 +507,28 @@ static void nod_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
 static void nod_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *outbuf,
                                     int outsz, uint8_t *indata, int insz)
 {
-
     LOGW("Interface-stub %s (NO CS) sending 0x02X% bytes, "
          "receiving  0x02X% bytes\n", __func__, outsz, insz);
+}
+
+static void nod_start(struct ddata *ddata)
+{
+    LOGW("Interface-stub %s\n", __func__);
+}
+
+static void nod_stop(struct ddata *ddata)
+{
+    LOGW("Interface-stub %s\n", __func__);
+}
+
+static void nod_sendByte(struct ddata *ddata, uint8_t data)
+{
+    LOGW("Interface-stub %s\n", __func__);
+}
+
+static void nod_receiveByte(struct ddata *ddata, uint8_t *data)
+{
+    LOGW("Interface-stub %s\n", __func__);
 }
 
 /***************************************************************************

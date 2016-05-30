@@ -93,11 +93,14 @@ static struct driverAPI_spi bpspi_driver = {
 /*    I2C driver */
 static struct driverAPI_i2c bpi2c_driver = {
     .ddata = NULL,
+    .sendByte = bpi2c_sendByte,
+    .receiveByte = bpi2c_receiveByte,
     .sendData = bpi2c_sendData,
-    .sendrecieveData = bpi2c_sendrecieveData,
-    .sendrecieveData_ncs = bpi2c_sendrecieveData_ncs,
-    .setCS = bpi2c_setCS,
     .receiveData = bpi2c_receiveData,
+    .sendrecieveData = bpi2c_sendrecieveData,
+    .start = bpi2c_start,
+    .stop = bpi2c_stop,
+    .autoAck = bpi2c_autoAck,
     .getStatus = bpi2c_getStatus,
     .actuate_config = bpi2c_configure,
     .newddata = bpi2c_newddata,

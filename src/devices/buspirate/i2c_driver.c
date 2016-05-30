@@ -36,6 +36,7 @@
 #include <arpa/inet.h>
 
 struct config_I2C dflt_config_I2C = {
+    .autoAck = BUSPIRATE_I2C_DFLT_AUTOACK,
     .speed = {
               .cmd = I2CCMD_CONFIG_SPEED,
               .speed = BUSPIRATE_I2C_DFLT_SPEED},
@@ -51,8 +52,8 @@ struct config_I2C dflt_config_I2C = {
 /* Commands while in I2C mode. */
 typedef enum {
     CMD_START_BIT = 0x02,
-    CMD_I2C_STOP_BIT = 0x03,
-    CMD_I2C_READ_BYTE = 0x04,
+    CMD_STOP_BIT = 0x03,
+    CMD_READ_BYTE = 0x04,
     CMD_ACK_BIT = 0x06,
     CMD_NACK_BIT = 0x07,
     CMD_WRITE_THEN_READ = 0x08,
@@ -60,135 +61,102 @@ typedef enum {
     CMD_BULK = 0X10
 } bpcmd_i2c_t;
 
+#define AUTOACK (ddata->config.i2c.autoAck)
+
 /***************************************************************************
  * Main driver interface
  ***************************************************************************/
 void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
                            int osz, uint8_t *ibuf, int isz)
 {
-    int ret;
-    uint16_t nsz_send, nsz_receive;
-    uint8_t tmp[8] = { 0 };
-
-    nsz_send = htons(osz);
-    nsz_receive = htons(isz);
-    ASSERT((osz < 4096) && (osz >= 0)); /* Primitive handling for now (TBD) */
-    ASSERT(isz < 4096);
-
-#ifndef NDEBUG
-    memset(ibuf, 0, isz);
-#endif
-
-    LOGD("BP: Interface %s sending-receiving %d,%d bytes \n", __func__, osz,
-         isz);
-
-    //tmp[0] = 0;
-    /*
-       ASSURE_E(write(ddata->fd, (uint8_t[]) {
-       CMD_WR_RD}, 1) != -1, LOGE_IOERROR(errno));
-     */
-    ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
-    ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
-    //We need another solution for reading that can
-    //timeout if blocked-on-read (TBD)
-    //ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
-    //ASSERT(tmp[0] == 0x00);
-
-    ASSURE_E((ret = write(ddata->fd, obuf, osz)) >= -1, LOGE_IOERROR(errno));
-    LOGD("BP: %d bytes written to device\n", ret);
-    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
-    //n_sent=ntohs(*(int16_t*)(tmp));
-    //LOGD("BP: %d bytes written SPI\n", n_sent);
-    ASSERT(tmp[0] == 0x01);
-
-    if (isz > 0) {
-        ASSURE_E((ret = read(ddata->fd, ibuf, isz)) != -1, LOGE_IOERROR(errno));
-        LOGD("BP: %d bytes read from device\n", ret);
-    }
+    ASSERT("TBD" == NULL);
 }
 
-void bpi2c_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *obuf,
-                               int osz, uint8_t *ibuf, int isz)
+void bpi2c_start(struct ddata *ddata)
 {
-    int ret;
-    uint16_t nsz_send, nsz_receive;
-    uint8_t tmp[8] = { 0 };
+    uint8_t tmp[8] = { CMD_START_BIT };
 
-    nsz_send = htons(osz);
-    nsz_receive = htons(isz);
-    ASSERT((osz < 4096) && (osz >= 0)); /* Primitive handling for now (TBD) */
-    ASSERT(isz < 4096);
-
-#ifndef NDEBUG
-    memset(ibuf, 0, isz);
-#endif
-
-    LOGD("BP: Interface %s sending-receiving %d,%d bytes (NO CS)\n", __func__,
-         osz, isz);
-
-    /*
-       ASSURE_E(write(ddata->fd, (uint8_t[]) {
-       CMD_WR_RD_NOCS}, 1) != -1, LOGE_IOERROR(errno));
-     */
-    ASSURE_E(write(ddata->fd, &nsz_send, 2) != -1, LOGE_IOERROR(errno));
-    ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
-
-    ASSURE_E((ret = write(ddata->fd, obuf, osz)) >= -1, LOGE_IOERROR(errno));
-    LOGD("BP: %d bytes written to device\n", ret);
-    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
-    ASSERT(tmp[0] == 0x01);
-
-    if (isz > 0) {
-        ASSURE_E((ret = read(ddata->fd, ibuf, isz)) != -1, LOGE_IOERROR(errno));
-        LOGD("BP: %d bytes read from device\n", ret);
-    }
-}
-
-void bpi2c_setCS(struct ddata *ddata, int state)
-{
-    uint8_t tmp[8] = { 0 };
-    uint8_t mstate = state;
-
-/*
- * This is not the flag for inverted polarity. Kept in code for future
- * reference.
-
-    if (!ddata->config.i2c.pereph.cs_active) {
-        mstate = mstate ^ 0x01;
-    }
-*/
-    ASSERT((mstate == 0) || (mstate == 1));
-    mstate &= 0x01;
-
-    /*
-       tmp[0] = CMD_CS | mstate;
-     */
-    LOGD("BP: Interface %s sets CS to: (0x%02X)\n", __func__, mstate, tmp[0]);
+    LOGD("BP: Interface %s sends i2c-start: (0x%02X)\n", __func__, tmp[0]);
 
     ASSURE_E(write(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
     memset(tmp, 0, sizeof(tmp));
     ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
     ASSERT(tmp[0] == 0x01);
+}
 
+void bpi2c_stop(struct ddata *ddata)
+{
+    uint8_t tmp[8] = { CMD_STOP_BIT };
+
+    LOGD("BP: Interface %s sends i2c-stop: (0x%02X)\n", __func__, tmp[0]);
+
+    ASSURE_E(write(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    memset(tmp, 0, sizeof(tmp));
+    ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp[0] == 0x01);
+}
+
+void bpi2c_autoAck(struct ddata *ddata, int state)
+{
+    AUTOACK = state;
+}
+
+void bpi2c_receiveByte(struct ddata *ddata, uint8_t *data)
+{
+    int tmp;
+
+    ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                   CMD_READ_BYTE}, 1) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, data, 1) != -1, LOGE_IOERROR(errno));
+
+    if (AUTOACK) {
+        ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                       CMD_ACK_BIT}, 1) != -1, LOGE_IOERROR(errno));
+        ASSURE_E(read(ddata->fd, &tmp, 1) != -1, LOGE_IOERROR(errno));
+        ASSERT(tmp == 0x01);
+    } else {
+        ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                       CMD_NACK_BIT}, 1) != -1, LOGE_IOERROR(errno));
+        ASSURE_E(read(ddata->fd, &tmp, 1) != -1, LOGE_IOERROR(errno));
+        ASSERT(tmp == 0x01);
+    }
+}
+
+void bpi2c_sendByte(struct ddata *ddata, uint8_t data)
+{
+    int tmp;
+
+    ASSURE_E(write(ddata->fd, (uint8_t[]) {
+                   CMD_BULK, data}, 2) != -1, LOGE_IOERROR(errno));
+    ASSURE_E(read(ddata->fd, &tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp == 0x01);
+    ASSURE_E(read(ddata->fd, &tmp, 1) != -1, LOGE_IOERROR(errno));
+    ASSERT(tmp == 0x00 || tmp == 0x01);
 }
 
 void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
     int i;
-    char cbuf[512] = { '\0' };
 
-    LOGW("BP: Interface %s sending %d bytes \n", __func__, sz);
+    LOGD("BP: Interface %s sending %d bytes \n", __func__, sz);
     for (i = 0; i < sz; i++) {
-        if (data[i] > 31)
-            sprintf(cbuf, "0x%02X %c,", data[i], data[i]);
-        else
-            sprintf(cbuf, "0x%02X %s,", data[i], " ");
+        bpi2c_sendByte(ddata, data[i]);
     }
-    LOGW("BP: %s\n", cbuf);
 }
 
 void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
+    int wasAutoAck = AUTOACK;
+    int i;
+
+    LOGD("BP: Interface %s reads %d bytes: (0x%02X)\n", __func__, sz);
+
+    for (i = 0; i < sz; i++) {
+        if (i == (sz - 1))
+            AUTOACK = 0;
+        bpi2c_receiveByte(ddata, &data[i]);
+    }
+    AUTOACK = wasAutoAck;
 }
 
 uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags)
@@ -291,4 +259,3 @@ config_etype_t bpi2c_get_cs_active(int *retval, struct ddata * dd)
 {
     return E_UNKNOWN;
 }
-
