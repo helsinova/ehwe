@@ -150,10 +150,11 @@ int buspirate_init()
     ASSERT(sizeof(struct confspi_speed) == 1);
     ASSERT(sizeof(struct confspi_bus) == 1);
 
-    /* Testing bit-field structs for portability */
+    /* Testing bit-field structs for portability. Needed only once per
+     * new compiler/target combo. */
 #ifdef ENABLE_BITFIELD_TEST
-    {
 #ifdef BUSPIRATE_ENABLE_SPI
+    {
         volatile struct confspi_pereph pereph = {
             .cmd = SPICMD_CONFIG_PEREPHERIALS,
             .power_on = 1,
@@ -187,8 +188,31 @@ int buspirate_init()
              "(raw=0x%02X)\n", bus.cmd, bus.output_type, bus.clk_pol_idle,
              bus.output_clk_edge, bus.input_sample_end, bus.raw);
         ASSERT(bus.raw == 0x8A);
-#endif
     }
+#endif
+#ifdef BUSPIRATE_ENABLE_I2C
+    {
+        volatile struct confi2c_pereph pereph = {
+            .cmd = I2CCMD_CONFIG_PEREPHERIALS,
+            .power_on = 0,
+            .pullups = 1,
+            .aux = 1,
+            .cs_active = 0
+        };
+        LOGW("Testing confi2c_pereph bitfields: cmd=%d power_on=%d pullups=%d "
+             "aux=%d cs_active=%d (raw=0x%02X)\n", pereph.cmd, pereph.power_on,
+             pereph.pullups, pereph.aux, pereph.cs_active, pereph.raw);
+        ASSERT(pereph.raw == 0x46);
+
+        struct confi2c_speed speed = {
+            .cmd = I2CCMD_CONFIG_SPEED,
+            .speed = I2CSPEED_100kHz
+        };
+        LOGW("Testing confi2c_speed bitfields: cmd=%d speed=%d (raw=0x%02X)\n",
+             speed.cmd, speed.speed, speed.raw);
+        ASSERT(speed.raw == 0x62);
+    }
+#endif
 #endif
 
     return 0;

@@ -126,7 +126,7 @@ struct confi2c_pereph {
     union {
         struct {
 #if defined(_BIT_FIELDS_HTOL)
-            uint8_t cmd:4;      /* Only I2CCMD_CONFIG_PEREPHERIALS = 0x04 */
+            uint8_t cmd:4;    /* Only I2CCMD_CONFIG_PEREPHERIALS = 0x04 */
             uint8_t power_on:1; /* Enable power on */
             uint8_t pullups:1;  /* Enable pull-up resistors */
             uint8_t aux:1;      /* Set AUX-pin */
