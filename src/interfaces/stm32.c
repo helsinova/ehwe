@@ -45,7 +45,7 @@ static void nod_setCS(struct ddata *ddata, int state);
 static void nod_start(struct ddata *ddata);
 static void nod_stop(struct ddata *ddata);
 static void nod_autoAck(struct ddata *ddata, int state);
-static void nod_sendByte(struct ddata *ddata, uint8_t data);
+static int nod_sendByte(struct ddata *ddata, uint8_t data);
 static void nod_receiveByte(struct ddata *ddata, uint8_t *data);
 
 static struct driverAPI_spi nodriverAPI_spi = {
@@ -521,9 +521,10 @@ static void nod_stop(struct ddata *ddata)
     LOGW("Interface-stub %s\n", __func__);
 }
 
-static void nod_sendByte(struct ddata *ddata, uint8_t data)
+static int nod_sendByte(struct ddata *ddata, uint8_t data)
 {
     LOGW("Interface-stub %s\n", __func__);
+    return 1;
 }
 
 static void nod_receiveByte(struct ddata *ddata, uint8_t *data)

@@ -276,7 +276,7 @@ void bpi2c_start(struct ddata *ddata);
 void bpi2c_stop(struct ddata *ddata);
 void bpi2c_autoAck(struct ddata *ddata, int state);
 void bpi2c_receiveByte(struct ddata *ddata, uint8_t *data);
-void bpi2c_sendByte(struct ddata *ddata, uint8_t data);
+int bpi2c_sendByte(struct ddata *ddata, uint8_t data);
 void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags);

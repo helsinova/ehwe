@@ -103,7 +103,7 @@ void bpi2c_autoAck(struct ddata *ddata, int state)
 
 void bpi2c_receiveByte(struct ddata *ddata, uint8_t *data)
 {
-    int tmp;
+    uint8_t tmp;
 
     ASSURE_E(write(ddata->fd, (uint8_t[]) {
                    CMD_READ_BYTE}, 1) != -1, LOGE_IOERROR(errno));
@@ -122,9 +122,9 @@ void bpi2c_receiveByte(struct ddata *ddata, uint8_t *data)
     }
 }
 
-void bpi2c_sendByte(struct ddata *ddata, uint8_t data)
+int bpi2c_sendByte(struct ddata *ddata, uint8_t data)
 {
-    int tmp;
+    uint8_t tmp;
 
     ASSURE_E(write(ddata->fd, (uint8_t[]) {
                    CMD_BULK, data}, 2) != -1, LOGE_IOERROR(errno));
@@ -132,15 +132,20 @@ void bpi2c_sendByte(struct ddata *ddata, uint8_t data)
     ASSERT(tmp == 0x01);
     ASSURE_E(read(ddata->fd, &tmp, 1) != -1, LOGE_IOERROR(errno));
     ASSERT(tmp == 0x00 || tmp == 0x01);
+    return !tmp;
 }
 
 void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
-    int i;
+    int i, ack;
 
     LOGD("BP: Interface %s sending %d bytes \n", __func__, sz);
-    for (i = 0; i < sz; i++) {
-        bpi2c_sendByte(ddata, data[i]);
+    for (ack = 1, i = 0; (i < sz) && (ack == 1); i++) {
+        ack = bpi2c_sendByte(ddata, data[i]);
+    }
+    if (i < sz) {
+        LOGW("BP: I2C recipient didn't ACK as expected. %s ended prematurely "
+             "%d(%d)\n", __func__, i, sz);
     }
 }
 

@@ -137,7 +137,7 @@ struct driverAPI_i2c {
 
     /*---------- Methods ----------*/
     void (*receiveByte) (struct ddata * ddata, uint8_t *data);
-    void (*sendByte) (struct ddata * ddata, uint8_t data);
+    int (*sendByte) (struct ddata * ddata, uint8_t data);
     void (*sendData) (struct ddata * ddata, const uint8_t *data, int sz);
     void (*receiveData) (struct ddata * ddata, uint8_t *data, int sz);
 
