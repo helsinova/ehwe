@@ -36,7 +36,7 @@ typedef enum {
 /* Driver abstract type common to all drivers */
 struct driverAPI_any {
     /*------------ Data -----------*/
-    struct device *odevice;     /* Belongs to this device */
+    struct device *device;      /* Belongs to this device */
     struct ddata *ddata;        /* Device specific Driver-Data */
 };
 
@@ -71,7 +71,7 @@ struct configAPI_spi {
 
 struct driverAPI_spi {
     /*------------ Data -----------*/
-    struct device *odevice;     /* Belongs to this device */
+    struct device *device;      /* Belongs to this device */
     struct ddata *ddata;        /* Device specific Driver-Data */
 
     /*---------- Methods ----------*/
@@ -132,7 +132,7 @@ struct configAPI_i2c {
 
 struct driverAPI_i2c {
     /*------------ Data -----------*/
-    struct device *odevice;     /* Belongs to this device */
+    struct device *device;      /* Belongs to this device */
     struct ddata *ddata;        /* Device specific Driver-Data */
 
     /*---------- Methods ----------*/

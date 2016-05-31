@@ -242,8 +242,8 @@ struct ddata {
     union {
         struct driverAPI_any *any;
         struct driverAPI_spi *spi;
-        struct driverAPI_i2c *ic2;
-    } ownedby;
+        struct driverAPI_i2c *i2c;
+    } driver;
 };
 
 struct device;

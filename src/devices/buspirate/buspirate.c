@@ -325,9 +325,9 @@ int buspirate_init_device(struct device *device)
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
-    driver->odevice = device;
+    driver->device = device;
     device->driver.any = driver;
-    ddata->ownedby.any = driver;
+    ddata->driver.any = driver;
 
     ASSURE(rawMode_enter(device) == 0);
 
