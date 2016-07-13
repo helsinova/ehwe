@@ -26,6 +26,7 @@
 #include <config.h>
 #include "interfaces.h"
 #include "stm32.h"
+#include "ehwe.h"
 #include "devices.h"
 
 int interfaces_init()
@@ -44,6 +45,10 @@ int interfaces_init()
 int interfaces_init_interface(const struct device *device)
 {
     int rc = 0;
+
+    ASSURE_E((rc =
+              ehwe_init_interface(device)) == 0,
+             goto interfaces_init_interface_err);
 
 #ifdef INTERFACE_STM32
     ASSURE_E((rc =

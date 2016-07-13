@@ -17,6 +17,7 @@ option(INTERFACE_STM32
 #Top level sources
 set(LIBINTERFACES_SOURCE
 	interfaces.c
+	ehwe.c
 )
 
 if (INTERFACE_STM32)
