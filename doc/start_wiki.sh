@@ -27,7 +27,7 @@ pushd ${THIS_WIKI_DIR} >/dev/null
 	SESSION_NAME="wiki-$(basename $(cd ../; pwd))"
 	echo
 	echo "Gitit starting local webserver at http://127.0.0.1:${CPORT} in screen"
-	screen -dmS "${SESSION_NAME}" ${GITIT_BIN} -f wiki_config.txt -l 127.0.0.1
+	screen -dmS "${SESSION_NAME}" ${GITIT_BIN} -f wiki.conf -l 127.0.0.1
 	echo "To enter local screen (debugging):"
 	echo "  screen -rd \"${SESSION_NAME}\""
 	echo
