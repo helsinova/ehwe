@@ -13,6 +13,6 @@
 	branch = i2c_magnetometer
 	ignore = all
 [submodule "wiki/wikidata"]
-	path = doc/wikidata
+	path = wiki/wikidata
 	url = ssh://siterepo/ehwe_wiki.git
 	branch = master
