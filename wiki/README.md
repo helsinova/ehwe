@@ -25,5 +25,5 @@ http://gitit.net/Installing
 
 4) Open browser and go to:
 
-[http://localhost:5011](http://localhost:5011)
+[http://localhost:5031](http://localhost:5031)
 
