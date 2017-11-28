@@ -1,6 +1,7 @@
 #!/bin/bash
 
 THIS_WIKI_DIR=$(dirname $(readlink -f $0))
+CONFIG_FILE=${THIS_WIKI_DIR}/wiki.conf
 
 if [ -f ~/.cabal/bin/gitit ]; then
 	echo "Will start with local-build gitit binary... (preferred)"
@@ -23,11 +24,11 @@ fi
 
 pushd ${THIS_WIKI_DIR} >/dev/null
 	#get config port:
-	CPORT=$(grep -e'^port:[[:space:]]' wiki_config.txt | cut -f2 -d" ")
+	CPORT=$(grep -e'^port:[[:space:]]' ${CONFIG_FILE} | cut -f2 -d" ")
 	SESSION_NAME="wiki-$(basename $(cd ../; pwd))"
 	echo
 	echo "Gitit starting local webserver at http://127.0.0.1:${CPORT} in screen"
-	screen -dmS "${SESSION_NAME}" ${GITIT_BIN} -f wiki.conf -l 127.0.0.1
+	screen -dmS "${SESSION_NAME}" ${GITIT_BIN} -f ${CONFIG_FILE} -l 127.0.0.1
 	echo "To enter local screen (debugging):"
 	echo "  screen -rd \"${SESSION_NAME}\""
 	echo
