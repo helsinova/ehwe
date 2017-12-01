@@ -10,9 +10,9 @@
 [submodule "src/embedded"]
 	path = src/embedded
 	url = ssh://siterepo/ehwe_workbench.git
-	branch = i2c_magnetometer
+	branch = BP_i2c_hmc5883l
 	ignore = all
 [submodule "wiki/wikidata"]
 	path = wiki/wikidata
-	url = ssh://siterepo/ehwe_wiki.git
+	url = ssh://siterepo/ehwe.wiki
 	branch = master
