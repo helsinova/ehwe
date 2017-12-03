@@ -15,23 +15,18 @@ Cloning with submodules in one go:
 
 ## Prerequisite:
 
-To avoid "hard-coding" remote-names of submodules, a "symbolic" name is
+To avoid "hard-coding" remote-names of submodules, a *symbolic remote name* is
 used instead: ``ssh://siterepo/``
 
-Remap this in ``~/.gitconfig`` to fit the server hosting the submodules for
-example like this (typical Gerrit hosting):
+For `Github`: Remap the *symbolic remote name* as follows in `~/.gitconfig`: 
 
 ```
-[url "ssh://account@server:29418/pathname/"]
+[url "https://github.com/helsinova/"]
     insteadOf = ssh://siterepo/
 
-[url "ssh://account@review_server:29418/pathname/"]
-    pushInsteadOf = ssh://siterepo/
-    pushInsteadOf = ssh://account@server:29418/pathname/
-
 ```
 
-If no review server is used, only the first remap is needed.
+*(For more advanced setup, see the wiki: [Good to know: Git remotes](wiki/Good-to-know:-Git-remotes))*
 
 ## Cloning
 
