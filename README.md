@@ -26,8 +26,6 @@ For `Github`: Remap the *symbolic remote name* as follows in `~/.gitconfig`:
 
 ```
 
-*(For more advanced setup, see the wiki: [Good to know: Git remotes](wiki/Good-to-know:-Git-remotes))*
-
 ## Cloning
 
 To clone the project including it's submodules:
