@@ -11,7 +11,7 @@ if(NOT ${BUILD_DOCUMENTATION})
 endif()
 
 ################################################################################
-# Regenerate interactive help
+# Regenerate interactive help - i.e. man-page
 ################################################################################
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen)
 include_directories ("${CMAKE_CURRENT_BINARY_DIR}/gen")
@@ -19,10 +19,10 @@ find_program(PANDOC_EXECUTABLE pandoc)
 
 if(PANDOC_EXECUTABLE)
     # Run the generation script
-    message(STATUS "Will use pandoc to generate interactive help")
+    message(STATUS "Will use pandoc to generate manpage")
     add_custom_command(
         OUTPUT cmd_help.h cmd_help.man
-        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/bin/generate.bash ${CMAKE_CURRENT_SOURCE_DIR}/interactive-help.page
+        COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/bin/generate.bash ${CMAKE_CURRENT_SOURCE_DIR}/manpage.md
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/gen
     )
 else(PANDOC_EXECUTABLE)
