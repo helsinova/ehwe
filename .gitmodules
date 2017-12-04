@@ -16,3 +16,4 @@
 	path = wiki/wikidata
 	url = ssh://siterepo/ehwe_wiki.git
 	branch = master
+	ignore = all
