@@ -5,17 +5,17 @@ ehwe
 
 Usage: `ehwe [options] [arguments]`
 
-Run embedded program on host as it would on target using host buses.
+Run embedded program on host as it would on SoC target using SoC buses.
 
 ## Options
 
 Options are categorized in:
 
-* Optional
-    * System
-	* Debugging
-	* Program
 * Mandatory
+* Optional
+  * System
+  * Debugging
+  * Program
 
 ### Mandatory options
 
@@ -43,7 +43,7 @@ The first three arguments are mandatory and have the following defined meaning:
 * **role:** What kind of bus-device this local device should be. I.e.:
     * i2c
     * spi
-* **number:** Which device number the API should bind to this device. I.e.: 
+* **number:** Which device number the API should bind to this device. I.e.:
     * `spi1()`
     * `spi2()`
     * `spiN()`
@@ -57,6 +57,104 @@ The first three arguments are mandatory and have the following defined meaning:
 **Note** That all local devices can't take all the roles or can be
 restricted/limited in some way, for example **pp** host-device may not be able
 to be a bus-slave when having the role as an i2c-device.
+
+
+### Terminal control options
+
+These options apply to device-drives that are ttys (i.e. serial) and when
+system defaults are not good.
+
+On some host-systems (Cygwin) the `stty` command is either not available or
+driver changes are reset to some default as soon as the process for the
+command exits.
+
+Options will apply only to device-drivers that are real tty:s or the program
+will exit with an error. Devices will be modified only if also used by
+`ehwe`, i.e. mentioned in any mandatory -d specification. All other
+mentioning will be ignored.
+
+All terminal settings will be restored upon exit unless `-k` option is also
+given, in which case `ehwe` will act and behave the same as the `stty`
+command.
+
+#### The *DEV:* part
+
+`DEV` is a string naming which device to apply settings on. For example:
+
+`/dev/ttyS1`
+
+`DEV` can also be a regular expression for applying the **same setting** to
+**multiple** device-drivers.
+
+#### Termio struct
+
+`struct termios` consists of 4 bit-mask `flag` sections, and one `special
+characters` array, each which is identified by the recognized names below.
+You don't need to keep apart which identifier goes where, the options parser
+will do that for you.
+
+List of recognized identifiers per category and alphabetically sorted
+follows:
+
+_(For in-depth meaning for each identifier, please read the man-pages for
+**termios(3)**.)_
+
+**c_iflag constants:**
+
+BRKINT ICRNL IGNBRK IGNCR IGNPAR IMAXBEL INLCR INPCK ISTRIP IUCLC IUTF8
+IXANY IXOFF IXON PARMRK
+
+**c_oflag constants:**
+
+BSDLY CRDLY FFDLY NLDLY OCRNL OFDEL OFILL OLCUC ONLCR ONLRET ONOCR OPOST
+TABDLY VTDLY
+
+**c_cflag constants:**
+
+CBAUDEX CBAUD CIBAUD CLOCAL CMSPAR CREAD CRTSCTS CSIZE CSTOPB HUPCL LOBLK
+PARENB PARODD
+
+**c_lflag constants:**
+
+DEFECHO ECHOCTL ECHO ECHOE ECHOKE ECHOK ECHONL ECHOPRT FLUSHO ICANON IEXTEN
+ISIG NOFLSH PENDIN TOSTOP XCASE
+
+**cc_array - terminal special characters:**
+
+VDISCARD VDSUSP VEOF VEOL VEOL2 VERASE VINTR VKILL VLNEXT VMIN VQUIT
+VREPRINT VSTART VSTATUS VSTOP VSUSP VSWTCH  VTIME VWERASE
+
+#### -T DEV:STR, --termio DEV:STR
+
+Specifies termios settings to be applied *AS IS* for (a) device-driver(s).
+
+An identifier to be `set` is given by it's name
+
+An identifier to be `unset` is given by it's name **prefixed** by a dash,
+i.e. `-`.
+
+Use this option to set a tty **exactly** as specified . I.e. `STR` might be
+quite long and no good/sane assumptions are made.
+
+You may want to use the `-y` option prior using this option on a system (or
+device-driver) which is known to be good.
+
+#### -t DEV:STR, --termio DEV:STR
+
+Specifies termios settings to be *"appended"* on already existing termios
+settings for (a) device-driver(s). This option is similar to the `-T` option,
+except that already existing termios flags which are not mentioned are left
+untouched.
+
+Each bit-mask is appended by two another masks in order:
+
+* `AND`-mask: All identifiers mentioned *plainly by name* will build up a
+  positive mask which will be `AND`-ed to the existing. This will
+  effectively and unconditionally `set` each mentioned identifier.
+* `OR`-mask: All identifiers mentioned by name which are *prefixed with a
+  dash* (`-`) will build up a NEGATIVE mask which will be `OR`-ed to the
+  existing. This will effectively and unconditionally `unset` each
+  mentioned identifier.
 
 
 clear
