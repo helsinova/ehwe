@@ -41,13 +41,21 @@
 
 static regex_t preg;            /* Compiled regular expression for full
                                    device-string parsing */
+#ifdef HAS_TERMIO_H
+struct termios c_termios;
+tcflag_t c_iflag;      /* input modes */
+tcflag_t c_oflag;      /* output modes */
+tcflag_t c_cflag;      /* control modes */
+tcflag_t c_lflag;      /* local modes */
+cc_t     c_cc[NCCS];   /* special characters */
+#endif
 
 #define REGEX_PATT \
-	"^(" BP_ROLES \
-	"):(" INDEX \
-	"):(" DEVICES \
-	"):(" BP_CLKOWNER \
-	"):(" FILENAME \
+  "^(" BP_ROLES \
+  "):(" INDEX \
+  "):(" DEVICES \
+  "):(" BP_CLKOWNER \
+  "):(" FILENAME \
 ")"
 
 /* Driver companion - NOTE: unique for each driver. Must NOT be public */
@@ -327,6 +335,18 @@ int buspirate_init_device(struct device *device)
 
     ASSURE((ddata->fd =
             open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
+
+#ifdef HAS_TERMIO_H
+    ASSURE(tcgetattr(ddata->fd, &c_termios) == 0);
+    c_iflag=c_termios.c_iflag;
+    c_oflag=c_termios.c_oflag;
+    c_cflag=c_termios.c_cflag;
+    c_lflag=c_termios.c_lflag;
+    LOGW("0x%04X 0x%04X 0x%04X 0x%04X \n",
+        c_iflag, c_oflag, c_cflag, c_lflag);
+
+    ASSURE(tcsetattr(ddata->fd, TCSANOW, &c_termios) == 0);
+#endif
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
