@@ -1,6 +1,11 @@
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}")
 
+include(CheckLibraryExists)
+include(CheckTypeSize)
+include(CheckCSourceCompiles)
+include(CheckIncludeFiles)
+
 set(DEF_MAX_DEVICES
     "30"
     CACHE STRING
@@ -12,6 +17,8 @@ option(DEVICE_BUSPIRATE
 option(DEVICE_PARAPORT
     "Enable device PARAPORT (requires special kernel-driver)." NO)
 
+
+CHECK_INCLUDE_FILES(termio.h HAS_TERMIO_H)
 
 set(LIBDEVICES_SOURCE
     devices.c
@@ -33,6 +40,11 @@ if (DEVICE_PARAPORT)
 else()
     message(STATUS "Skipping PARAPORT build")
 endif()
+
+configure_file (
+  "${CMAKE_CURRENT_SOURCE_DIR}/devices_config.h.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/devices_config.h"
+  )
 
 add_library(devices ${LIBDEVICES_SOURCE})
 

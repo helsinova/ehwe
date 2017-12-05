@@ -34,6 +34,11 @@
 #include <stdlib.h>
 #include <assure.h>
 
+#include "devices_config.h"
+#ifdef HAS_TERMIO_H
+#include <termio.h>
+#endif
+
 static regex_t preg;            /* Compiled regular expression for full
                                    device-string parsing */
 
