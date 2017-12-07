@@ -52,6 +52,7 @@ struct cmdrply_s cmdrply[] = {
 #define TBL_LEN (sizeof(cmdrply) / sizeof(struct cmdrply_s))
 #define BUF_SZ 100
 #define STATE_RETRIES 10
+#define NZEROS_RAW 20
 #define US_BPCMD_RESPONSE_TIME 725
                                 /* Time in uS for BusPirate to process a
                                  * command. Machine constant.*/
@@ -62,7 +63,7 @@ struct cmdrply_s cmdrply[] = {
                                  * assumes 9K6 bps
                                  */
 #define MAX_ONGOING_CHARS 6     /* Number of character possibly coming */
-#define US_DELAY_RETRY (MAX_ONGOING_CHARS * US_CHAR_TIME)
+#define US_DELAY_RETRY (20*(MAX_ONGOING_CHARS * US_CHAR_TIME))
                                 /* Must be long enough to allow any ongoing
                                  * replies to fully reach UART registers,
                                  * including possible multiple strings. If
@@ -197,11 +198,11 @@ int rawMode_enter(struct device *device)
     /* Do the first 20 writes without listening for any reply. This is
      * according to BusPirate protocol spec V1.
      */
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < NZEROS_RAW; i++) {
         tmp[0] = ENTER_RESET;
         LOGD("Sending 0x%02X to port\n", tmp[0]);
-        usleep(US_CHAR_TIME * (slen + 2) + US_CHAR_TIME +
-               US_BPCMD_RESPONSE_TIME);
+        usleep(20 * (US_CHAR_TIME * (slen + 2) + US_CHAR_TIME +
+                     US_BPCMD_RESPONSE_TIME));
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
     }
 
@@ -260,8 +261,8 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
         LOGD("Sending 0x%02X to port. Expecting response %s\n", tmp[0],
              expRply);
         ASSURE_E((ret = write(*fd, tmp, 1)) != -1, LOGE_IOERROR(errno));
-        usleep(US_CHAR_TIME * (slen + 2) + US_CHAR_TIME +
-               US_BPCMD_RESPONSE_TIME);
+        usleep(20 * (US_CHAR_TIME * (slen + 2) + US_CHAR_TIME +
+                     US_BPCMD_RESPONSE_TIME));
         ASSURE_E((ret = read_2err(*fd, tmp, slen)) != -1, LOGE_IOERROR(errno));
 
         if ((ret == slen) && (strncmp(tmp, expRply, slen) == 0)) {
@@ -269,6 +270,7 @@ int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
             empty_inbuff(*fd);
             return 0;
         }
+
         usleep(US_DELAY_RETRY);
         empty_inbuff(*fd);
         LOGE("Retry (%d) due to Buspirate unexpected response to "

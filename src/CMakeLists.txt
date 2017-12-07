@@ -1,6 +1,14 @@
 cmake_minimum_required (VERSION 2.6)
 project (ehwe C)
 
+include(CheckLibraryExists)
+include(CheckTypeSize)
+include(CheckCSourceCompiles)
+include(CheckIncludeFiles)
+
+message("CYGWIN: ${CYGWIN}")
+message("CMAKE SYSTEM: ${CMAKE_SYSTEM_NAME}")
+
 ################################################################################
 # Configuration options
 ################################################################################
@@ -117,6 +125,14 @@ add_subdirectory (lib/mtime)
 set (EXTRA_LIBS ${EXTRA_LIBS} libmtime)
 
 ################################################################################
+# System & host-libraries detection
+################################################################################
+CHECK_INCLUDE_FILES(termio.h HAVE_POSIX_TERMIO)
+if (CYGWIN)
+	set(HAVE_CYGWIN "1")
+endif (CYGWIN)
+
+################################################################################
 # Project
 ################################################################################
 # The version number.
@@ -140,6 +156,10 @@ set(EHWE_SOURCE
 	opts.c
 	opts_help.c
 )
+
+if (HAVE_POSIX_TERMIO)
+	set (EHWE_SOURCE ${EHWE_SOURCE} serial.c)
+endif ()
 
 install(PROGRAMS ${PROJECT_BINARY_DIR}/src DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 

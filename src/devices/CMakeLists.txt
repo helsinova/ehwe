@@ -18,8 +18,6 @@ option(DEVICE_PARAPORT
     "Enable device PARAPORT (requires special kernel-driver)." NO)
 
 
-CHECK_INCLUDE_FILES(termio.h HAS_TERMIO_H)
-
 set(LIBDEVICES_SOURCE
     devices.c
 )

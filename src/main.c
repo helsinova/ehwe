@@ -104,7 +104,7 @@ int main(int argc, char **argv)
 #undef LDATA
 
     /* Close storage of device-specification strings */
-    ASSURE((rc = mlist_close(opts.dev_strs)) == 0);
+    //ASSURE((rc = mlist_close(opts.dev_strs)) == 0);
 
     LOGD("Initialing devices:\n");
 #undef LDATA

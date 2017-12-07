@@ -1,1 +1,3 @@
-#cmakedefine HAS_TERMIO_H
+#cmakedefine DEVICE_PARAPORT
+#cmakedefine DEVICE_BUSPIRATE
+#define DEF_MAX_DEVICES @DEF_MAX_DEVICES@

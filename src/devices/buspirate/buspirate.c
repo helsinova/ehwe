@@ -33,22 +33,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assure.h>
-
-#include "devices_config.h"
-#ifdef HAS_TERMIO_H
-#include <termio.h>
-#endif
+#include "serial.h"
 
 static regex_t preg;            /* Compiled regular expression for full
                                    device-string parsing */
-#ifdef HAS_TERMIO_H
-struct termios c_termios;
-tcflag_t c_iflag;      /* input modes */
-tcflag_t c_oflag;      /* output modes */
-tcflag_t c_cflag;      /* control modes */
-tcflag_t c_lflag;      /* local modes */
-cc_t     c_cc[NCCS];   /* special characters */
-#endif
 
 #define REGEX_PATT \
   "^(" BP_ROLES \
@@ -336,17 +324,9 @@ int buspirate_init_device(struct device *device)
     ASSURE((ddata->fd =
             open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
 
-#ifdef HAS_TERMIO_H
-    ASSURE(tcgetattr(ddata->fd, &c_termios) == 0);
-    c_iflag=c_termios.c_iflag;
-    c_oflag=c_termios.c_oflag;
-    c_cflag=c_termios.c_cflag;
-    c_lflag=c_termios.c_lflag;
-    LOGW("0x%04X 0x%04X 0x%04X 0x%04X \n",
-        c_iflag, c_oflag, c_cflag, c_lflag);
-
-    ASSURE(tcsetattr(ddata->fd, TCSANOW, &c_termios) == 0);
-#endif
+	/* MAke sure terminal is "good" for BP wrt speed etc, but also LF:s and
+	 * what-not:s */
+    setserial_term_bp(ddata->fd);
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
@@ -373,8 +353,11 @@ int buspirate_init_device(struct device *device)
     }
     close(ddata->fd);
     ASSURE((ddata->fd = open(device->buspirate->name, O_RDWR)) != -1);
-    LOGD("Device [%s] is now state-initialized and re-opened blocking r/w\n",
+    setserial_raw_bp(ddata->fd);
+
+    LOGI("Device [%s] is now state-initialized and re-opened blocking r/w\n",
          device->buspirate->name);
+    //setserial_bp(ddata->fd);
 
     /* Configure the device to a known state as the state can't be read */
     switch (device->role) {
@@ -405,6 +388,8 @@ int buspirate_deinit_device(struct device *device)
     close(ddata->fd);
     ASSURE((ddata->fd =
             open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
+    setserial_term_bp(ddata->fd);
+
     LOGD("Device [%s] re-opened non-blocking r/w\n", device->buspirate->name);
 
     LOGI("BP: Destroying device ID [%d]\n", device->devid);

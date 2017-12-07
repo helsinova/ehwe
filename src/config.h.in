@@ -11,6 +11,8 @@
 #cmakedefine DEVICE_BUSPIRATE
 #cmakedefine ENABLE_API_STM32
 #cmakedefine ENABLE_API_HIGH_LVL
+#cmakedefine HAVE_POSIX_TERMIO
+#cmakedefine HAVE_CYGWIN
 #define DEF_MAX_DEVICES @DEF_MAX_DEVICES@
 
 
