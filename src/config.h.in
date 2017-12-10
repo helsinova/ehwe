@@ -9,7 +9,8 @@
 #cmakedefine ENABLE_INITFINI_SHOWEXEC
 #cmakedefine DEVICE_PARAPORT
 #cmakedefine DEVICE_BUSPIRATE
-#cmakedefine INTERFACE_STM32
+#cmakedefine ENABLE_API_STM32
+#cmakedefine ENABLE_API_HIGH_LVL
 #define DEF_MAX_DEVICES @DEF_MAX_DEVICES@
 
 

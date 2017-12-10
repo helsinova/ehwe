@@ -26,12 +26,12 @@ struct device;
 typedef enum {
     IN_UNDEFINED = 0,
     IN_INVALID = 1,             /* Invalid, unknown or parse failure */
-#ifdef INTERFACE_STM32
+#ifdef ENABLE_API_STM32
     STM32 = 101,
 #endif
 } intrfc_t;
 
-#ifdef INTERFACE_STM32
+#ifdef ENABLE_API_STM32
 #  include "stm32.h"
 #endif
 
@@ -39,7 +39,7 @@ struct interface {
     intrfc_t inid;
     int index;
     union {
-#ifdef INTERFACE_STM32
+#ifdef ENABLE_API_STM32
         struct stm32 stm32;
 #endif
     };

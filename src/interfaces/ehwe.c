@@ -17,6 +17,12 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+/*
+ * High level interfaces modeled after Nordic's API
+ *
+ * Note: For many cases you'd want a higher level of control and write your
+ * own corresponding high-level functions
+ */
 #include <sys/types.h>
 #include <log.h>
 #include "interfaces.h"
