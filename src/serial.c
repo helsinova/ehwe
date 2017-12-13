@@ -94,8 +94,10 @@
 
 #define NBITS_TCFLAG_T ( sizeof(tcflag_t) * 8 )
 
-// Force logging as "Warn" (temporary until deloused)
-#ifndef NDEBUG
+/*
+ *If enabled, debug logs in this file will be logged as warnings
+ */
+#ifdef EHWE_DEBUGS_SERIAL
 #  define TCLOG LOGW
 #else
 #  define TCLOG LOGD

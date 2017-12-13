@@ -34,6 +34,9 @@ option(ENABLE_LOGGING
 option(ENABLE_SYSLOG
     "Enable log to syslog (Linux/OSX)" OFF)
 
+option(EHWE_DEBUGS_SERIAL
+	"Debug source serial.c with logs as warnings" OFF)
+
 # Init/fini
 option(ENABLE_INITFINI_SHOWEXEC
     "Show init/fini execution using CTORS/DTORS mechanism" OFF)
