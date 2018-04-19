@@ -10,10 +10,9 @@ include_directories("${PROJECT_SOURCE_DIR}")
 option(ENABLE_API_STM32
     "Enable interface stm32." YES)
 
-# Enebling this will make some old workbenhes not build, therefore disabled
-# by default
+# NOTE: Enebling this will make some old workbenhes not build
 option(ENABLE_API_HIGH_LVL
-	"Enable high-level API similar to Nordic component's HAL" NO)
+	"Enable high-level API similar to Nordic component's HAL" YES)
 
 #-------------------------------------------------------------------------------
 # End of configuration options
