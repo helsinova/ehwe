@@ -35,7 +35,7 @@
 #include <assure.h>
 #include <arpa/inet.h>
 
-struct config_SPI dflt_config_SPI = {
+struct config_SPI bp_dflt_config_SPI = {
     .speed = {
               .cmd = SPICMD_CONFIG_SPEED,
               .speed = BUSPIRATE_SPI_DFLT_SPEED},
@@ -235,7 +235,8 @@ struct ddata *bpspi_newddata(struct device *device)
         return (struct ddata *)memcpy(ddata, device->driver.any->ddata,
                                       sizeof(struct ddata));
 
-    memcpy(&(ddata->config.spi), &dflt_config_SPI, sizeof(struct config_SPI));
+    memcpy(&(ddata->config.spi), &bp_dflt_config_SPI,
+           sizeof(struct config_SPI));
     return ddata;
 }
 

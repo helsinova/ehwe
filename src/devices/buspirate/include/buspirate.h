@@ -23,13 +23,6 @@
  * Public interface
  ***************************************************************************/
 
-typedef enum {
-    CLKOWNR_UNDEFINED = 0,
-    CLKOWNR_INVALID = 1,        /* Invalid, unknown or parse failure */
-    MASTER = 100,
-    SLAVE = 101
-} clkownr_t;
-
 struct buspirate {
     clkownr_t clckownr;
     char *name;                 /* Local hosts device name/path */

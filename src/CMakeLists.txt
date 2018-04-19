@@ -56,8 +56,10 @@ set(SYSROOT
 #-------------------------------------------------------------------------------
 # Build-tool options
 #-------------------------------------------------------------------------------
+
+# (FIXME) Fuckit! I can't make this propagate to the build ;-(
 set(CMAKE_EXTRA_C_FLAGS
-	"-DEHWE"
+	"${CMAKE_EXTRA_C_FLAGS} -DEHWE"
 	CACHE STRING
 	"Compiler options appended to CMAKE_C_FLAGS* (-DEHWE)")
 

@@ -228,7 +228,7 @@ struct config_I2C {
 };
 
 /* Convenience-variable pre-set with build-system configuration */
-extern struct config_SPI dflt_config_SPI;
+extern struct config_SPI bp_dflt_config_SPI;
 
 /* Driver companion - NOTE: unique for each driver. Must NOT be public */
 struct ddata {

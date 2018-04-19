@@ -7,13 +7,10 @@
 #cmakedefine ENABLE_SYSLOG
 #cmakedefine ENABLE_BITFIELD_TEST
 #cmakedefine ENABLE_INITFINI_SHOWEXEC
-#cmakedefine DEVICE_PARAPORT
-#cmakedefine DEVICE_BUSPIRATE
 #cmakedefine ENABLE_API_STM32
 #cmakedefine ENABLE_API_HIGH_LVL
 #cmakedefine HAVE_POSIX_TERMIO
 #cmakedefine HAVE_CYGWIN
-#define DEF_MAX_DEVICES @DEF_MAX_DEVICES@
 #cmakedefine EHWE_DEBUGS_SERIAL
 
 

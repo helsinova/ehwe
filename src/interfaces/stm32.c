@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include <sys/types.h>
 #include <log.h>
+#include <devices_config.h>
 #include "interfaces.h"
 #include "stm32.h"
 #include <stm32f10x.h>
@@ -94,6 +95,8 @@ int stm32_init()
     return 0;
 }
 
+/* Checks bus-interface ability and compare with stm32 API. If OK, accept
+ * it's driver-struct into corresponding API<->DD array */
 int stm32_init_interface(const struct device *device)
 {
     int if_init = 0;
@@ -108,12 +111,12 @@ int stm32_init_interface(const struct device *device)
 #ifdef DEVICE_BUSPIRATE
         case BUSPIRATE:
             switch (device->role) {
-                case SPI:
+                case ROLE_SPI:
                     ASSERT(device->index > 0
                            && device->index <= MAX_SPI_INTERFACES);
                     SPI_stm32_drv[device->index - 1] = device->driver.spi;
                     break;
-                case I2C:
+                case ROLE_I2C:
                     ASSERT(device->index > 0
                            && device->index <= MAX_I2C_INTERFACES);
                     I2C_stm32_drv[device->index - 1] = device->driver.i2c;

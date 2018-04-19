@@ -35,7 +35,7 @@
 #include <assure.h>
 #include <arpa/inet.h>
 
-struct config_I2C dflt_config_I2C = {
+struct config_I2C bp_dflt_config_I2C = {
     .autoAck = BUSPIRATE_I2C_DFLT_AUTOACK,
     .speed = {
               .cmd = I2CCMD_CONFIG_SPEED,
@@ -208,7 +208,8 @@ struct ddata *bpi2c_newddata(struct device *device)
         return (struct ddata *)memcpy(ddata, device->driver.any->ddata,
                                       sizeof(struct ddata));
 
-    memcpy(&(ddata->config.i2c), &dflt_config_I2C, sizeof(struct config_I2C));
+    memcpy(&(ddata->config.i2c), &bp_dflt_config_I2C,
+           sizeof(struct config_I2C));
     return ddata;
 }
 

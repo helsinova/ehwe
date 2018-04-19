@@ -31,11 +31,11 @@
 typedef enum {
     ROLE_UNDEFINED = 0,
     ROLE_INVALID = 1,           /* Invalid, unknown or parse failure */
-    SPI,
-    DSPI,
-    QSPI,
-    I2C,
-    CAN
+    ROLE_SPI,
+    ROLE_DSPI,
+    ROLE_QSPI,
+    ROLE_I2C,
+    ROLE_CAN
 } role_t;
 
 // Valid regex-i patterns for roles
@@ -44,13 +44,17 @@ typedef enum {
 typedef enum {
     DEV_UNDEFINED = 0,
     DEV_INVALID = 1,            /* Invalid, unknown or parse failure */
-#ifdef DEVICE_PARAPORT
     PARAPORT = 100,
-#endif
-#ifdef DEVICE_BUSPIRATE
     BUSPIRATE = 101,
-#endif
 } devid_t;
+
+/* Note: Not all devices can have variations in clock-owners */
+typedef enum {
+    CLKOWNR_UNDEFINED = 0,
+    CLKOWNR_INVALID = 1,        /* Invalid, unknown or parse failure */
+    MASTER = 100,
+    SLAVE = 101
+} clkownr_t;
 
 // Valid regex-i patterns for devices
 #define DEVICES "PP|BP"
@@ -61,6 +65,8 @@ typedef enum {
 struct driverAPI_spi;
 struct driverAPI_i2c;
 struct driverAPI_any;
+
+/* Forward declared Device specific substructures */
 struct paraport;
 struct buspirate;
 
@@ -69,12 +75,8 @@ struct device {
     role_t role;
     int index;
     union {
-#ifdef DEVICE_PARAPORT
         struct paraport *paraport;
-#endif
-#ifdef DEVICE_BUSPIRATE
         struct buspirate *buspirate;
-#endif
     };
     union {
         struct driverAPI_any *any;

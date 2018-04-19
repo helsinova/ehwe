@@ -47,7 +47,7 @@ void i2c_write(I2C_TypeDef * bus, uint8_t dev_addr, const uint8_t *buffer,
     int ack;
 
     assert(dev_addr < 0x80);
-    assert(DEV(bus)->role == I2C);
+    assert(DEV(bus)->role == ROLE_I2C);
 
     /* Send START condition */
     DD(bus)->start(DDATA(bus));
@@ -70,7 +70,7 @@ void i2c_read(I2C_TypeDef * bus, uint8_t dev_addr, uint8_t *buffer, int len)
     int ack;
 
     assert(dev_addr < 0x80);
-    assert(DEV(bus)->role == I2C);
+    assert(DEV(bus)->role == ROLE_I2C);
 
     /* Send START condition */
     DD(bus)->start(DDATA(bus));

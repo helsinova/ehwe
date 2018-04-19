@@ -22,11 +22,18 @@
 #include <assure.h>
 #include <log.h>
 #include "devices.h"
-#include "buspirate.h"
 #include <string.h>
 #include <stdlib.h>
+#include "devices_config.h"
 
-struct buspirate buspirate;
+#ifdef DEVICE_PARAPORT
+#include <paraport.h>
+#endif
+
+#ifdef DEVICE_BUSPIRATE
+#include <buspirate.h>
+#endif
+
 static regex_t preg;            /* Compiled regular expression for generic
                                    part of device-string parsing */
 
@@ -37,7 +44,7 @@ static regex_t preg;            /* Compiled regular expression for generic
 	"):(" ANYTHING \
 ")"
 
-#define REGEX_NSUB (4+1)
+#define REGEX_NSUB (4+1)        /* Number of parse-groups (see REGEXP_PATT) */
 
 int devices_init()
 {
@@ -119,6 +126,10 @@ devices_parse_err:
     return -1;
 }
 
+/*
+ * For each device-driver:
+ * - Compiles regexp for further matching
+ * - Initialize DD-global variables */
 int devices_init_device(struct device *device)
 {
     int rc = 0;

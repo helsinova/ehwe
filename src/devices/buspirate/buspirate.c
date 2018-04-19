@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "config.h"
+#include "devices_config.h"
 #include "buspirate_config.h"
 #include "local.h"
 #include <sys/types.h>
@@ -262,9 +263,9 @@ int buspirate_parse(const char *devstr, struct device *device)
     ASSURE_E(strcasecmp(device_str, "bp") == 0, goto buspirate_parse_err);
 
     if (strcasecmp(role_str, "spi") == 0) {
-        device->role = SPI;
+        device->role = ROLE_SPI;
     } else if (strcasecmp(role_str, "i2c") == 0) {
-        device->role = I2C;
+        device->role = ROLE_I2C;
     } else {
         LOGE("Buspirate device driver can't handle role: %s\n", role_str);
         goto buspirate_parse_err;
@@ -305,13 +306,13 @@ int buspirate_init_device(struct device *device)
     ASSERT(driver = malloc(sizeof(struct driverAPI_spi)));
     switch (device->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
-        case SPI:
+        case ROLE_SPI:
             memcpy(driver, &bpspi_driver, sizeof(struct driverAPI_spi));
             ddata = bpspi_newddata(NULL);
             break;
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
-        case I2C:
+        case ROLE_I2C:
             memcpy(driver, &bpi2c_driver, sizeof(struct driverAPI_spi));
             ddata = bpi2c_newddata(NULL);
             break;
@@ -338,12 +339,12 @@ int buspirate_init_device(struct device *device)
 
     switch (device->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
-        case SPI:
+        case ROLE_SPI:
             ASSURE(rawMode_toMode(device, ENTER_SPI) == 0);
             break;
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
-        case I2C:
+        case ROLE_I2C:
             ASSURE(rawMode_toMode(device, ENTER_I2C) == 0);
             break;
 #endif
@@ -362,12 +363,12 @@ int buspirate_init_device(struct device *device)
     /* Configure the device to a known state as the state can't be read */
     switch (device->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
-        case SPI:
+        case ROLE_SPI:
             ASSURE(bpspi_configure(ddata) == 0);
             break;
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
-        case I2C:
+        case ROLE_I2C:
             ASSURE(bpi2c_configure(ddata) == 0);
             break;
 #endif
