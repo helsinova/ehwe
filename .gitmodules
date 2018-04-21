@@ -12,8 +12,6 @@
 	url = ssh://siterepo/ehwe_workbench.git
 	branch = i2c_magnetometer
 	ignore = all
-[submodule "wiki/wikidata"]
-	path = wiki/wikidata
-	url = ssh://siterepo/ehwe.wiki.git
-	branch = master
-	ignore = all
+[submodule "wiki"]
+	path = wiki
+	url = ssh://siterepo/wiki-wrapper.git
