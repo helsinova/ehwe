@@ -16,3 +16,8 @@
 	path = wiki
 	url = ssh://siterepo/wiki-wrapper.git
 	branch = master
+[submodule "wikidata"]
+	path = wikidata
+	url = ssh://siterepo/ehwe.wiki.git
+	branch = master
+	ignore = all
