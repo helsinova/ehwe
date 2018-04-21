@@ -2,8 +2,6 @@
 *.o
 *.hi
 *.out
-gitit.log
-gitit-users
 cache/
 BUILD*/
 tags
@@ -14,3 +12,4 @@ CMakeFiles/
 cmake_install.cmake
 config.h
 Makefile
+.gdbinit
