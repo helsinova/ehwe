@@ -6,35 +6,23 @@ development on a normal Linux desktop.
 
 
 Get documentation below. Build-system is CMake-based. Please read
-more about it in the [wiki](wiki/README.md).
+more about it in the [wiki](wikidata/README.md).
 
 Simplified build-instructions are available under [src/README.md](src/README.md).
 
-Cloning with submodules in one go:
-----------------------------------
-
-## Prerequisite:
-
-To avoid "hard-coding" remote-names of submodules, a *symbolic remote name* is
-used instead: ``ssh://siterepo/``
-
-For `Github`: Remap the *symbolic remote name* as follows in `~/.gitconfig`: 
-
-```
-[url "https://github.com/helsinova/"]
-    insteadOf = ssh://siterepo/
-
-```
-
-## Cloning
+## Clonine this project all in one go
 
 To clone the project including it's submodules:
 
 ```bash
-git clone -b master --single-branch --recursive \
-   ssh://siterepo/ehwe.git
+git clone --recursive https://github.com/helsinova/ehwe.git
 ```
+Or for a specific (master) branch only:
 
+```bash
+git clone -b master --single-branch --recursive \
+   https://github.com/helsinova/ehwe.git
+```
 Embedded workbench (src/embedded)
 ---------------------------------
 Your embedded code resides in a git submodule under ``src/embedded``.

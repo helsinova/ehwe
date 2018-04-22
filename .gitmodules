@@ -9,15 +9,15 @@
 	url = https://github.com/mambrus/libmtime.git
 [submodule "src/embedded"]
 	path = src/embedded
-	url = ssh://siterepo/ehwe_workbench.git
+	url = https://github.com/helsinova/ehwe_workbench.git
 	branch = i2c_magnetometer
 	ignore = all
 [submodule "wiki"]
 	path = wiki
-	url = ssh://siterepo/wiki-wrapper.git
+	url = https://github.com/helsinova/wiki-wrapper.git
 	branch = master
 [submodule "wikidata"]
 	path = wikidata
-	url = ssh://siterepo/ehwe.wiki.git
+	url = https://github.com/helsinova/ehwe.wiki.git
 	branch = master
 	ignore = all
