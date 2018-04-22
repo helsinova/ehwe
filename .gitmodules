@@ -10,7 +10,7 @@
 [submodule "src/embedded"]
 	path = src/embedded
 	url = https://github.com/helsinova/ehwe_workbench.git
-	branch = i2c_magnetometer
+	branch = BP_i2c_hmc5883l_3D-magnetometer
 	ignore = all
 [submodule "wiki"]
 	path = wiki
