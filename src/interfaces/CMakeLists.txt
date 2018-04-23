@@ -1,5 +1,7 @@
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}")
+include_directories("${PROJECT_BINARY_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 ################################################################################
 # Configuration options for this module
@@ -29,6 +31,7 @@ if (ENABLE_API_HIGH_LVL)
 	set (LIBINTERFACES_SOURCE
 		${LIBINTERFACES_SOURCE}
 		ehwe.c
+		ehwe_i2c_device.c
 	)
 endif (ENABLE_API_HIGH_LVL)
 
