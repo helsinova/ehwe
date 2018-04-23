@@ -27,6 +27,7 @@
 #include "interfaces.h"
 #include "stm32.h"
 #include "ehwe.h"
+#include "ehwe_i2c_device.h"
 #include "devices.h"
 
 int interfaces_init()
@@ -49,6 +50,9 @@ int interfaces_init_interface(const struct device *device)
 #ifdef ENABLE_API_HIGH_LVL
     ASSURE_E((rc =
               ehwe_init_interface(device)) == 0,
+             goto interfaces_init_interface_err);
+    ASSURE_E((rc =
+              i2c_device_init_interface(device)) == 0,
              goto interfaces_init_interface_err);
 #endif
 

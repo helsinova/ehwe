@@ -27,6 +27,11 @@
  * will change and might require a change of the include (TBD) */
 #include <stm32f10x.h>
 
+struct device;
+
+/* Module initialization */
+int i2c_device_init_interface(const struct device *device);
+
 /* Forward declaration - hide unneeded details*/
 struct i2c_device_struct;
 typedef struct i2c_device_struct *i2c_device_hndl;

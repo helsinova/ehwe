@@ -160,3 +160,9 @@ void i2c_device_write_uint32(i2c_device_hndl i2c_device, uint8_t reg,
 
     i2c_write(i2c_device->bus, i2c_device->addr, buf, sizeof(val) + 1, 1);
 }
+
+/* Does nothing but is needed for linker not to optimize away functions */
+int i2c_device_init_interface(const struct device *device)
+{
+	return 0;
+}
