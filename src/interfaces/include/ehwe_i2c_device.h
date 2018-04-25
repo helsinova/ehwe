@@ -40,6 +40,12 @@ typedef struct i2c_device_struct *i2c_device_hndl;
 i2c_device_hndl i2c_device_open(I2C_TypeDef * bus, uint8_t addr);
 void i2c_device_close(i2c_device_hndl i2c_device);
 
+/* Device access for byte-chunks */
+void i2c_device_read_bytes(i2c_device_hndl i2c_device, uint8_t reg,
+                           uint8_t *buf, uint8_t count);
+void i2c_device_write_bytes(i2c_device_hndl i2c_device, uint8_t reg,
+                           uint8_t *buf, uint8_t count);
+
 /* Register-level access functions for 8,16 & 32-bit access */
 uint8_t i2c_device_read_uint8(i2c_device_hndl, uint8_t reg);
 uint16_t i2c_device_read_uint16(i2c_device_hndl, uint8_t reg);

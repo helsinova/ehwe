@@ -31,8 +31,8 @@
 #include <ehwe_i2c_device.h>
 
 /* Forward declaration of layout for device registers.
-	 Layout differs from IC to IC and is thus unknown to this
-	 abstraction-level
+   Layout differs from IC to IC and is thus unknown to this
+   abstraction-level
  */
 struct devregs;
 
@@ -86,6 +86,27 @@ void i2c_device_close(i2c_device_hndl i2c_device)
     free(i2c_device);
 }
 
+void i2c_device_read_bytes(i2c_device_hndl i2c_device, uint8_t reg,
+                           uint8_t *buf, uint8_t count)
+{
+    /* Send which register to start access, omit STOP */
+    i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
+              reg}, 1, 0);
+
+    /* NOTE: Why is +1 needed? Is it a bug? */
+    i2c_read(i2c_device->bus, i2c_device->addr, buf, count + 1);
+}
+
+void i2c_device_write_bytes(i2c_device_hndl i2c_device, uint8_t reg,
+                            uint8_t *buf, uint8_t count)
+{
+    /* Send which register to start access, omit STOP */
+    i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
+              reg}, 1, 0);
+
+    i2c_write(i2c_device->bus, i2c_device->addr, buf, count, 1);
+}
+
 uint8_t i2c_device_read_uint8(i2c_device_hndl i2c_device, uint8_t reg)
 {
     uint8_t val = 0;
@@ -108,7 +129,7 @@ uint16_t i2c_device_read_uint16(i2c_device_hndl i2c_device, uint8_t reg)
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
               reg}, 1, 0);
 
-    i2c_read(i2c_device->bus, i2c_device->addr, buf, sizeof(val));
+    i2c_read(i2c_device->bus, i2c_device->addr, buf, sizeof(val) + 1);
     val = *(uint16_t *)buf;
 
     return val;
@@ -164,5 +185,5 @@ void i2c_device_write_uint32(i2c_device_hndl i2c_device, uint8_t reg,
 /* Does nothing but is needed for linker not to optimize away functions */
 int i2c_device_init_interface(const struct device *device)
 {
-	return 0;
+    return 0;
 }
