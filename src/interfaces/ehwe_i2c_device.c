@@ -93,8 +93,7 @@ void i2c_device_read_bytes(i2c_device_hndl i2c_device, uint8_t reg,
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
               reg}, 1, 0);
 
-    /* NOTE: Why is +1 needed? Is it a bug? */
-    i2c_read(i2c_device->bus, i2c_device->addr, buf, count + 1);
+    i2c_read(i2c_device->bus, i2c_device->addr, buf, count);
 }
 
 void i2c_device_write_bytes(i2c_device_hndl i2c_device, uint8_t reg,
@@ -123,13 +122,13 @@ uint8_t i2c_device_read_uint8(i2c_device_hndl i2c_device, uint8_t reg)
 uint16_t i2c_device_read_uint16(i2c_device_hndl i2c_device, uint8_t reg)
 {
     uint16_t val = 0;
-    uint8_t buf[2];
+    uint8_t buf[2] = { 0 };
 
     /* Send which register to access, omit STOP */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
               reg}, 1, 0);
 
-    i2c_read(i2c_device->bus, i2c_device->addr, buf, sizeof(val) + 1);
+    i2c_read(i2c_device->bus, i2c_device->addr, buf, sizeof(val));
     val = *(uint16_t *)buf;
 
     return val;
@@ -138,7 +137,7 @@ uint16_t i2c_device_read_uint16(i2c_device_hndl i2c_device, uint8_t reg)
 uint32_t i2c_device_read_uint32(i2c_device_hndl i2c_device, uint8_t reg)
 {
     uint32_t val = 0;
-    uint8_t buf[4];
+    uint8_t buf[4] = { 0 };
 
     /* Send which register to access, omit STOP */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
