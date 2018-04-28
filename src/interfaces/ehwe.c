@@ -1,6 +1,8 @@
 /***************************************************************************
  *   Copyright (C) 2016 by Michael Ambrus                                  *
  *   ambrmi09@gmail.com                                                    *
+ *   Copyright (C) 2018 by Michael Ambrus                                  *
+ *   ambrmi09@helsinova.se                                                 *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -56,8 +58,11 @@ void i2c_write(I2C_TypeDef * bus, uint8_t dev_addr, const uint8_t *buffer,
     ack = DD(bus)->sendByte(DDATA(bus), WRITE_ADDR(dev_addr));
     assert(ack == 1);
 
-    /* Send the rest */
-    DD(bus)->sendData(DDATA(bus), buffer, len);
+    /* Send the rest - if there is any */
+    if (len > 0) {
+        assert(buffer != NULL);
+        DD(bus)->sendData(DDATA(bus), buffer, len);
+    }
 
     if (send_stop) {
         /* Close Communication */
