@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <assert.h>
 
 #include <ehwe.h>
 #include <ehwe_i2c_device.h>
@@ -76,6 +77,8 @@ i2c_device_hndl i2c_device_open(I2C_TypeDef * bus, uint8_t addr)
 /* Destroy i2c-device instance */
 void i2c_device_close(i2c_device_hndl i2c_device)
 {
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+
     if (i2c_device->reg != NULL)
         free(i2c_device->reg);
 
@@ -89,6 +92,9 @@ void i2c_device_close(i2c_device_hndl i2c_device)
 void i2c_device_read_bytes(i2c_device_hndl i2c_device, uint8_t reg,
                            uint8_t *buf, uint8_t count)
 {
+
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+
     /* Send which register to start access, omit STOP */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
               reg}, 1, 0);
@@ -99,6 +105,9 @@ void i2c_device_read_bytes(i2c_device_hndl i2c_device, uint8_t reg,
 void i2c_device_write_bytes(i2c_device_hndl i2c_device, uint8_t reg,
                             uint8_t *buf, uint8_t count)
 {
+
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+
     /* Send which register to start access, omit STOP */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
               reg}, 1, 0);
@@ -109,6 +118,8 @@ void i2c_device_write_bytes(i2c_device_hndl i2c_device, uint8_t reg,
 uint8_t i2c_device_read_uint8(i2c_device_hndl i2c_device, uint8_t reg)
 {
     uint8_t val = 0;
+
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
 
     /* Send which register to access, omit STOP */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
@@ -123,6 +134,8 @@ uint16_t i2c_device_read_uint16(i2c_device_hndl i2c_device, uint8_t reg)
 {
     uint16_t val = 0;
     uint8_t buf[2] = { 0 };
+
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
 
     /* Send which register to access, omit STOP */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
@@ -139,6 +152,8 @@ uint32_t i2c_device_read_uint32(i2c_device_hndl i2c_device, uint8_t reg)
     uint32_t val = 0;
     uint8_t buf[4] = { 0 };
 
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+
     /* Send which register to access, omit STOP */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
               reg}, 1, 0);
@@ -152,6 +167,8 @@ uint32_t i2c_device_read_uint32(i2c_device_hndl i2c_device, uint8_t reg)
 void i2c_device_write_uint8(i2c_device_hndl i2c_device, uint8_t reg,
                             uint8_t val)
 {
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+
     /* Send which register to access directly followed by value */
     i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
               reg, val}, sizeof(val) + 1, 1);
@@ -164,6 +181,8 @@ void i2c_device_write_uint16(i2c_device_hndl i2c_device, uint8_t reg,
     buf[0] = reg;
     *(uint16_t *)(&buf[1]) = val;
 
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+
     assert(sizeof(buf) == 3);
 
     i2c_write(i2c_device->bus, i2c_device->addr, buf, sizeof(val) + 1, 1);
@@ -175,6 +194,8 @@ void i2c_device_write_uint32(i2c_device_hndl i2c_device, uint8_t reg,
     uint8_t buf[sizeof(val) + 1];
     buf[0] = reg;
     *(uint32_t *)(&buf[1]) = val;
+
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
 
     assert(sizeof(buf) == 5);
 
