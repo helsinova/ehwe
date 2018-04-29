@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <assure.h>
 
 #include <ehwe.h>
 #include <ehwe_i2c_device.h>
@@ -105,14 +106,22 @@ void i2c_device_read_bytes(i2c_device_hndl i2c_device, uint8_t reg,
 void i2c_device_write_bytes(i2c_device_hndl i2c_device, uint8_t reg,
                             uint8_t *buf, uint8_t count)
 {
+    uint8_t *tbuf;
 
     assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
 
-    /* Send which register to start access, omit STOP */
-    i2c_write(i2c_device->bus, i2c_device->addr, (uint8_t[]) {
-              reg}, 1, 0);
+    ASSURE(tbuf = malloc(count + 1));
+    memset(tbuf, 0, count + 1);
 
-    i2c_write(i2c_device->bus, i2c_device->addr, buf, count, 1);
+    /* Put both register and payload in new buffer */
+    tbuf[0] = reg;
+    if (buf && count) {
+        memcpy(&tbuf[1], buf, count);
+    }
+
+    i2c_write(i2c_device->bus, i2c_device->addr, tbuf, count + 1, 1);
+
+    free(tbuf);
 }
 
 uint8_t i2c_device_read_uint8(i2c_device_hndl i2c_device, uint8_t reg)
