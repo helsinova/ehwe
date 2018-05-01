@@ -46,6 +46,7 @@ typedef enum {
     DEV_INVALID = 1,            /* Invalid, unknown or parse failure */
     PARAPORT = 100,
     BUSPIRATE = 101,
+    LXI = 102,
 } devid_t;
 
 /* Note: Not all devices can have variations in clock-owners */
@@ -57,7 +58,7 @@ typedef enum {
 } clkownr_t;
 
 // Valid regex-i patterns for devices
-#define DEVICES "PP|BP"
+#define DEVICES "PP|BP|LXI"
 
 // Valid regex-i patterns for "direction"
 #define DIRECTIONS "MASTER|SLAVE"
@@ -69,6 +70,7 @@ struct driverAPI_any;
 /* Forward declared Device specific substructures */
 struct paraport;
 struct buspirate;
+struct lxi;
 
 struct device {
     devid_t devid;
@@ -77,6 +79,7 @@ struct device {
     union {
         struct paraport *paraport;
         struct buspirate *buspirate;
+        struct lxi *lxi;
     };
     union {
         struct driverAPI_any *any;

@@ -1,3 +1,4 @@
 #cmakedefine DEVICE_PARAPORT
 #cmakedefine DEVICE_BUSPIRATE
+#cmakedefine DEVICE_LXI
 #define DEF_MAX_DEVICES @DEF_MAX_DEVICES@

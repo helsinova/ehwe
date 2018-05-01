@@ -14,8 +14,13 @@ set(DEF_MAX_DEVICES
 option(DEVICE_BUSPIRATE
     "Enable device BUSPIRATE." YES)
 
-option(DEVICE_PARAPORT
-    "Enable device PARAPORT (requires special kernel-driver)." NO)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    option(DEVICE_PARAPORT
+        "Enable device PARAPORT (requires special kernel-driver)." NO)
+
+    option(DEVICE_LXI
+        "Enable device LXI - LinuX kernel-module supported bus-Interfaces." YES)
+endif()
 
 
 set(LIBDEVICES_SOURCE
@@ -28,6 +33,14 @@ if (DEVICE_BUSPIRATE)
     set (DEVICES_LIBS ${DEVICES_LIBS} buspirate)
 else()
     message(STATUS "Skipping BUSPIRATE directory")
+endif()
+
+if (DEVICE_LXI)
+    include_directories ("${PROJECT_SOURCE_DIR}/devices/lxi/include")
+    add_subdirectory (lxi)
+    set (DEVICES_LIBS ${DEVICES_LIBS} lxi)
+else()
+	message(STATUS "Skipping LXI directory")
 endif()
 
 if (DEVICE_PARAPORT)

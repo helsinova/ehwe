@@ -34,6 +34,10 @@
 #include <buspirate.h>
 #endif
 
+#ifdef DEVICE_LXI
+#include <lxi.h>
+#endif
+
 static regex_t preg;            /* Compiled regular expression for generic
                                    part of device-string parsing */
 
@@ -118,6 +122,12 @@ int devices_parse(const char *devstr, struct device *device)
                   buspirate_parse(devstr, device)) == 0,
                  goto devices_parse_err);
 #endif
+#ifdef DEVICE_LXI
+    if (strcasecmp(device_str, "lxi") == 0)
+        ASSURE_E((rc =
+                  lxi_parse(devstr, device)) == 0,
+                 goto devices_parse_err);
+#endif
 
     free(devstr_cpy);
     return rc;
@@ -147,6 +157,11 @@ int devices_init_device(struct device *device)
             rc = buspirate_init_device(device);
             break;
 #endif
+#ifdef DEVICE_LXI
+        case LXI:
+            rc = lxi_init_device(device);
+            break;
+#endif
         default:
             LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
     }
@@ -170,6 +185,11 @@ int devices_deinit_device(struct device *device)
 #ifdef DEVICE_BUSPIRATE
         case BUSPIRATE:
             rc = buspirate_deinit_device(device);
+            break;
+#endif
+#ifdef DEVICE_LXI
+        case LXI:
+            rc = lxi_deinit_device(device);
             break;
 #endif
         default:
