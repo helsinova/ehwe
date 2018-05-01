@@ -268,7 +268,7 @@ int lxi_parse(const char *devstr, struct device *device)
     LOGD("    clkownr=%s\n", clkownr_str);
     LOGD("    filename=%s\n", filename_str);
 
-    ASSURE_E(strcasecmp(device_str, "hif") == 0, goto lxi_parse_err);
+    ASSURE_E(strcasecmp(device_str, "lxi") == 0, goto lxi_parse_err);
 
     if (strcasecmp(role_str, "spi") == 0) {
         device->role = ROLE_SPI;
@@ -331,10 +331,6 @@ int lxi_init_device(struct device *device)
     }
     ASSURE((ddata->fd = open(device->lxi->filename, O_RDWR)) != -1);
 
-    /* MAke sure terminal is "good" for BP wrt speed etc, but also LF:s and
-     * what-not:s */
-
-    empty_inbuff(ddata->fd);
     driver->ddata = ddata;
     driver->device = device;
     device->driver.any = driver;

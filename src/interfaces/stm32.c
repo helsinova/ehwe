@@ -128,6 +128,26 @@ int stm32_init_interface(const struct device *device)
             if_init = 1;
             break;
 #endif
+#ifdef DEVICE_LXI
+        case LXI:
+            switch (device->role) {
+                case ROLE_SPI:
+                    ASSERT(device->index > 0
+                           && device->index <= MAX_SPI_INTERFACES);
+                    SPI_stm32_drv[device->index - 1] = device->driver.spi;
+                    break;
+                case ROLE_I2C:
+                    ASSERT(device->index > 0
+                           && device->index <= MAX_I2C_INTERFACES);
+                    I2C_stm32_drv[device->index - 1] = device->driver.i2c;
+                    break;
+                default:
+                    ASSERT("Role not supported for LXI driver" == NULL);
+            }
+
+            if_init = 1;
+            break;
+#endif
         default:
             LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
 

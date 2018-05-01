@@ -100,7 +100,7 @@ uint16_t lxii2c_getStatus(struct ddata *ddata, uint16_t flags)
 
 int lxii2c_configure(struct ddata *ddata)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
+    LOGW("LXI not supported function invoked");
     return 0;
 }
 

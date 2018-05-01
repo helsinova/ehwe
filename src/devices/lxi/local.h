@@ -107,9 +107,6 @@ struct ddata {
 
 struct device;
 
-void log_ioerror(int ecode, log_level llevel);
-void empty_inbuff(int fd);
-
 /***************************************************************************
  * Main driver interfaces
  ***************************************************************************

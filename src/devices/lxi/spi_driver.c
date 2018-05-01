@@ -98,7 +98,7 @@ uint16_t lxispi_getStatus(struct ddata *ddata, uint16_t flags)
 
 int lxispi_configure(struct ddata *ddata)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
+    LOGW("LXI not supported function invoked");
     return 0;
 }
 
