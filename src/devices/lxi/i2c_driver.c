@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <assure.h>
 #include <arpa/inet.h>
+#include <sys/ioctl.h>
 
 struct config_I2C lxi_dflt_config_I2C = {
     .autoAck = ON,
@@ -43,6 +44,13 @@ struct config_I2C lxi_dflt_config_I2C = {
                .raw = 0xC2,
                },
 };
+
+#define TO_LXI_STATE( F ) ((void(*) (void))(lxii2c_ ##F))
+#define RW_ADDR( A ) (A>>1)     /* Convert (back) to 7-bit address */
+
+static void lxii2c_state_free(void)
+{
+}
 
 #define AUTOACK (ddata->config.i2c.autoAck)
 /***************************************************************************
@@ -57,12 +65,54 @@ lxii2c_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
 
 void lxii2c_start(struct ddata *ddata)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(start);
 }
 
 void lxii2c_stop(struct ddata *ddata)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
+    int i;
+
+    if ((ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) ||
+        (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendData))) {
+        /* Simple case. Just send is intended */
+        ASSURE(ddata->lxi_state.i2c.msg[0].addr < 0x80);
+
+        ddata->lxi_state.i2c.packets.msgs = ddata->lxi_state.i2c.msg;
+        ddata->lxi_state.i2c.packets.nmsgs = 1;
+    } else {
+        /* Receive is intended */
+        ASSURE(ddata->lxi_state.i2c.msg[0].addr < 0x80);
+        ASSURE(ddata->lxi_state.i2c.msg[1].addr < 0x80);
+        ASSURE(ddata->lxi_state.i2c.msg[0].addr ==
+               ddata->lxi_state.i2c.msg[1].addr);
+
+        ddata->lxi_state.i2c.packets.msgs = ddata->lxi_state.i2c.msg;
+        ddata->lxi_state.i2c.packets.nmsgs = 2;
+    }
+
+    ASSURE(ioctl(ddata->fd, I2C_RDWR, &ddata->lxi_state.i2c.packets) >= 0);
+
+    /* Epiloge: Reset state */
+    if (ddata->lxi_state.i2c.outbuf) {
+        free(ddata->lxi_state.i2c.outbuf);
+        ddata->lxi_state.i2c.outbuf = NULL;
+    }
+#ifdef NEVER
+    /* Inbuf is delibereratly not freed here as stop is invoked after get-data */
+    if (ddata->lxi_state.i2c.inbuf) {
+        free(ddata->lxi_state.i2c.inbuf);
+        ddata->lxi_state.i2c.inbuf = NULL;
+    }
+#endif                          //NEVER
+
+    for (i = 0; i < 1; i++) {
+        ddata->lxi_state.i2c.msg[0].addr = 0xFF;
+        ddata->lxi_state.i2c.msg[0].len = 0;
+        ddata->lxi_state.i2c.msg[0].buf = NULL;
+        ddata->lxi_state.i2c.msg[0].flags = 0;
+    }
+
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(state_free);
 }
 
 void lxii2c_autoAck(struct ddata *ddata, int state)
@@ -72,25 +122,70 @@ void lxii2c_autoAck(struct ddata *ddata, int state)
     AUTOACK = state;
 }
 
+/* Receive one byte */
 void lxii2c_receiveByte(struct ddata *ddata, uint8_t *data)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(receiveByte);
 }
 
+/* Send one byte */
 int lxii2c_sendByte(struct ddata *ddata, uint8_t data)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
-    return 0;
+    if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
+        ASSURE(ddata->lxi_state.i2c.outbuf);
+        ddata->lxi_state.i2c.msg[0].addr =
+            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
+    }
+
+    if (ddata->lxi_state.i2c.outbuf != NULL) {
+        LOGW("Sending at bus before sesson complete drops previous out-buffer");
+        free(ddata->lxi_state.i2c.outbuf);
+    }
+
+    ddata->lxi_state.i2c.outbuf = malloc(1);
+    ddata->lxi_state.i2c.outbuf[0] = data;
+
+    ddata->lxi_state.i2c.msg[0].flags = 0;
+    ddata->lxi_state.i2c.msg[0].len = 1;
+    ddata->lxi_state.i2c.msg[0].buf = ddata->lxi_state.i2c.outbuf;
+
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(sendByte);
+
+    /* We can't determine if address has been ACKed or not here so we'll fake
+       it. Check is done on stop instead. */
+    return 1;
 }
 
+/* Send chunk */
 void lxii2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
+    if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
+        ASSURE(ddata->lxi_state.i2c.outbuf);
+        ddata->lxi_state.i2c.msg[0].addr =
+            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
+        free(ddata->lxi_state.i2c.outbuf);
+        ddata->lxi_state.i2c.outbuf = NULL;
+    }
+
+    if (ddata->lxi_state.i2c.outbuf != NULL) {
+        LOGW("Sending at bus before sesson complete drops previous out-buffer");
+        free(ddata->lxi_state.i2c.outbuf);
+    }
+
+    ddata->lxi_state.i2c.outbuf = malloc(sz);
+    memcpy(ddata->lxi_state.i2c.outbuf, data, sz);
+
+    ddata->lxi_state.i2c.msg[0].flags = 0;
+    ddata->lxi_state.i2c.msg[0].len = sz;
+    ddata->lxi_state.i2c.msg[0].buf = ddata->lxi_state.i2c.outbuf;
+
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(sendData);
 }
 
+/* Receive one chunk */
 void lxii2c_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
-    ASSURE("Work in progress (WIP)" == NULL);
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(receiveData);
 }
 
 uint16_t lxii2c_getStatus(struct ddata *ddata, uint16_t flags)
@@ -98,9 +193,25 @@ uint16_t lxii2c_getStatus(struct ddata *ddata, uint16_t flags)
     return flags;
 }
 
+/* Init of ddata->linux (states) */
 int lxii2c_configure(struct ddata *ddata)
 {
-    LOGW("LXI not supported function invoked");
+    ddata->lxi_state.i2c.inbuf = NULL;
+    ddata->lxi_state.i2c.outbuf = NULL;
+
+    /* Set to invalid adresses */
+    ddata->lxi_state.i2c.msg[0].addr = 0xFF;
+    ddata->lxi_state.i2c.msg[1].addr = 0xFF;
+
+    /* Nothing to send/receive */
+    ddata->lxi_state.i2c.msg[0].len = 0;
+    ddata->lxi_state.i2c.msg[1].len = 0;
+    ddata->lxi_state.i2c.msg[0].buf = NULL;
+    ddata->lxi_state.i2c.msg[1].buf = NULL;
+
+    /* Indicate no pending session */
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(state_free);
+
     return 0;
 }
 

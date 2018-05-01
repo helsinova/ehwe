@@ -25,6 +25,8 @@
 #include <log.h>
 #include <inttypes.h>
 #include <driver.h>
+#include <linux/i2c.h>
+#include <linux/i2c-dev.h>
 
 #define LOGV_IOERROR( X ) log_ioerror( X , LOG_LEVEL_VERBOSE )
 #define LOGD_IOERROR( X ) log_ioerror( X , LOG_LEVEL_DEBUG )
@@ -38,7 +40,7 @@
 /* End */
 
 #define msleep( X ) \
-	usleep( (X) * 1000 )
+    usleep( (X) * 1000 )
 
 /* SPI HW-interface behaviour & GPIO config. Enable (1) and disable (0) */
 struct confspi_pereph {
@@ -87,6 +89,26 @@ struct config_I2C {
     struct confi2c_speed speed;
 };
 
+/* As Linux API has no ability to control bus-details, we need to wait with
+ * execution while package is built up. Final executor is the function:
+ * lxii2c_stop
+ */
+struct lxi_i2c {
+    unsigned char *inbuf, *outbuf;
+    struct i2c_rdwr_ioctl_data packets;
+    struct i2c_msg msg[2];
+
+    void (*func_0) (void);      /* Just invoked function is used as state.
+                                   Dummy function lxii2c_state_free is used as
+                                   indication that no session is pending
+                                   or initiated yet */
+};
+
+/* TBD */
+struct lxi_spi {
+    int dummy;
+};
+
 /* Convenience-variable pre-set with build-system configuration */
 extern struct config_SPI lxi_dflt_config_SPI;
 
@@ -103,6 +125,13 @@ struct ddata {
         struct driverAPI_spi *spi;
         struct driverAPI_i2c *i2c;
     } driver;
+
+    /* Linux driver accompanying state variables */
+    union {
+        struct lxi_spi spi;
+        struct lxi_i2c i2c;
+    } lxi_state;
+
 };
 
 struct device;
