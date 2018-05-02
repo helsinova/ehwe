@@ -44,6 +44,12 @@
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 
+#define OUT_MSG     0
+#define IN_MSG      1
+
+#define TO_LXI_STATE( F ) ((void(*) (void))(lxii2c_ ##F))
+#define RW_ADDR( A ) (A>>1)     /* Convert (back) to 7-bit address */
+
 struct config_I2C lxi_dflt_config_I2C = {
     .autoAck = ON,
     .speed = {
@@ -54,9 +60,7 @@ struct config_I2C lxi_dflt_config_I2C = {
                },
 };
 
-#define TO_LXI_STATE( F ) ((void(*) (void))(lxii2c_ ##F))
-#define RW_ADDR( A ) (A>>1)     /* Convert (back) to 7-bit address */
-
+/* Dummy function to indicate no-session pending */
 static void lxii2c_state_free(void)
 {
 }
@@ -65,16 +69,18 @@ static void lxii2c_state_free(void)
 /***************************************************************************
  * Main driver interface
  ***************************************************************************/
+void lxii2c_autoAck(struct ddata *ddata, int state)
+{
+    ASSURE("LXI not supported function invoked" == NULL);
+
+    AUTOACK = state;
+}
+
 void
 lxii2c_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
                        int osz, uint8_t *ibuf, int isz)
 {
     ASSURE("Work in progress (WIP)" == NULL);
-}
-
-void lxii2c_start(struct ddata *ddata)
-{
-    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(start);
 }
 
 void lxii2c_stop(struct ddata *ddata)
@@ -84,79 +90,96 @@ void lxii2c_stop(struct ddata *ddata)
     if ((ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) ||
         (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendData))) {
         /* Simple case. Just send is intended */
-        ASSURE(ddata->lxi_state.i2c.msg[0].addr < 0x80);
+        ASSURE(ddata->lxi_state.i2c.msg[OUT_MSG].addr < 0x80);
 
         ddata->lxi_state.i2c.packets.msgs = ddata->lxi_state.i2c.msg;
         ddata->lxi_state.i2c.packets.nmsgs = 1;
     } else if ((ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(receiveByte)) ||
                (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(receiveData))) {
         /* Receive is intended */
-        ASSURE(ddata->lxi_state.i2c.msg[0].addr < 0x80);
-        ASSURE(ddata->lxi_state.i2c.msg[1].addr < 0x80);
-        ASSURE(ddata->lxi_state.i2c.msg[0].addr ==
-               ddata->lxi_state.i2c.msg[1].addr);
+        ASSURE(ddata->lxi_state.i2c.msg[IN_MSG].addr < 0x80);
+        ASSURE(ddata->lxi_state.i2c.msg[OUT_MSG].addr < 0x80);
+        ASSURE(ddata->lxi_state.i2c.msg[IN_MSG].addr ==
+               ddata->lxi_state.i2c.msg[OUT_MSG].addr);
 
         ddata->lxi_state.i2c.packets.msgs = ddata->lxi_state.i2c.msg;
         ddata->lxi_state.i2c.packets.nmsgs = 2;
     }
 
+    /* Invoke i2c-session in kernel */
     ASSURE(ioctl(ddata->fd, I2C_RDWR, &ddata->lxi_state.i2c.packets) >= 0);
 
-    /* Epiloge: Reset state */
+    /* Epilogue: Reset state */
     if (ddata->lxi_state.i2c.outbuf) {
         free(ddata->lxi_state.i2c.outbuf);
         ddata->lxi_state.i2c.outbuf = NULL;
     }
 #ifdef NEVER
-    /* Inbuf is delibereratly not freed here as stop is invoked after get-data */
+    /* Inbuf is deliberately not freed here as stop is invoked after get-data */
     if (ddata->lxi_state.i2c.inbuf) {
         free(ddata->lxi_state.i2c.inbuf);
         ddata->lxi_state.i2c.inbuf = NULL;
     }
 #endif                          //NEVER
-
     for (i = 0; i < 1; i++) {
-        ddata->lxi_state.i2c.msg[0].addr = 0xFF;
-        ddata->lxi_state.i2c.msg[0].len = 0;
-        ddata->lxi_state.i2c.msg[0].buf = NULL;
-        ddata->lxi_state.i2c.msg[0].flags = 0;
+        ddata->lxi_state.i2c.msg[i].addr = 0xFF;
+        ddata->lxi_state.i2c.msg[i].len = 0;
+        ddata->lxi_state.i2c.msg[i].buf = NULL;
+        ddata->lxi_state.i2c.msg[i].flags = 0;
     }
 
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(state_free);
 }
 
-void lxii2c_autoAck(struct ddata *ddata, int state)
+void lxii2c_start(struct ddata *ddata)
 {
-    ASSURE("LXI not supported function invoked" == NULL);
+    if ((ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) ||
+        (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendData))) {
+        /*I.e. if re-start, read is implied next. */
+        ddata->lxi_state.i2c.msg[IN_MSG].addr =
+            ddata->lxi_state.i2c.msg[OUT_MSG].addr;
+    }
 
-    AUTOACK = state;
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(start);
 }
 
 /* Send one byte */
 int lxii2c_sendByte(struct ddata *ddata, uint8_t data)
 {
+    /* Read device-ID detection */
+    if ((ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(start))
+        && (ddata->lxi_state.i2c.msg[OUT_MSG].addr != 0xFF)) {
+        /* This is an device read address. Nothing to do as address is
+           already put in place, except check that address is sane. */
+
+        ASSURE((data & 0x01) && "Full-length read addresses must be odd");
+        ASSURE(RW_ADDR(data) == ddata->lxi_state.i2c.msg[OUT_MSG].addr);
+
+        ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(sendByte);
+        return 1;
+    }
+
     if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
         ASSURE(ddata->lxi_state.i2c.outbuf);
-        ddata->lxi_state.i2c.msg[0].addr =
+        ddata->lxi_state.i2c.msg[OUT_MSG].addr =
             RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
     }
 
     if (ddata->lxi_state.i2c.outbuf != NULL) {
-        LOGW("Sending at bus before sesson complete drops previous out-buffer");
+        LOGW("Sending at bus before session complete drops previous out-buffer");
         free(ddata->lxi_state.i2c.outbuf);
     }
 
     ddata->lxi_state.i2c.outbuf = malloc(1);
     ddata->lxi_state.i2c.outbuf[0] = data;
 
-    ddata->lxi_state.i2c.msg[0].flags = 0;
-    ddata->lxi_state.i2c.msg[0].len = 1;
-    ddata->lxi_state.i2c.msg[0].buf = ddata->lxi_state.i2c.outbuf;
+    ddata->lxi_state.i2c.msg[OUT_MSG].flags = 0;
+    ddata->lxi_state.i2c.msg[OUT_MSG].len = 1;
+    ddata->lxi_state.i2c.msg[OUT_MSG].buf = ddata->lxi_state.i2c.outbuf;
 
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(sendByte);
-
     /* We can't determine if address has been ACKed or not here so we'll fake
-       it. Check is done on stop instead. */
+       it. Check is done on stop (i.e. sequence execution) instead. */
     return 1;
 }
 
@@ -165,23 +188,23 @@ void lxii2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 {
     if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
         ASSURE(ddata->lxi_state.i2c.outbuf);
-        ddata->lxi_state.i2c.msg[0].addr =
+        ddata->lxi_state.i2c.msg[OUT_MSG].addr =
             RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
         free(ddata->lxi_state.i2c.outbuf);
         ddata->lxi_state.i2c.outbuf = NULL;
     }
 
     if (ddata->lxi_state.i2c.outbuf != NULL) {
-        LOGW("Sending at bus before sesson complete drops previous out-buffer");
+        LOGW("Sending at bus before session complete drops previous out-buffer");
         free(ddata->lxi_state.i2c.outbuf);
     }
 
     ddata->lxi_state.i2c.outbuf = malloc(sz);
     memcpy(ddata->lxi_state.i2c.outbuf, data, sz);
 
-    ddata->lxi_state.i2c.msg[0].flags = 0;
-    ddata->lxi_state.i2c.msg[0].len = sz;
-    ddata->lxi_state.i2c.msg[0].buf = ddata->lxi_state.i2c.outbuf;
+    ddata->lxi_state.i2c.msg[OUT_MSG].flags = 0;
+    ddata->lxi_state.i2c.msg[OUT_MSG].len = sz;
+    ddata->lxi_state.i2c.msg[OUT_MSG].buf = ddata->lxi_state.i2c.outbuf;
 
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(sendData);
 }
@@ -189,26 +212,7 @@ void lxii2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
 /* Receive one byte */
 void lxii2c_receiveByte(struct ddata *ddata, uint8_t *data)
 {
-    if (ddata->lxi_state.i2c.inbuf) {
-        free(ddata->lxi_state.i2c.inbuf);
-        ddata->lxi_state.i2c.inbuf = NULL;
-    }
-
-    if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
-        ASSURE(ddata->lxi_state.i2c.outbuf);
-        ddata->lxi_state.i2c.msg[0].addr =
-            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
-        ddata->lxi_state.i2c.msg[1].addr =
-            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
-    }
-
-    ddata->lxi_state.i2c.inbuf = malloc(1);
-
-    ddata->lxi_state.i2c.msg[1].flags = I2C_M_RD;
-    ddata->lxi_state.i2c.msg[1].len = 1;
-    ddata->lxi_state.i2c.msg[1].buf = ddata->lxi_state.i2c.inbuf;
-
-    data = ddata->lxi_state.i2c.msg[1].buf;
+    lxii2c_receiveData(ddata, data, 1);
 
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(receiveByte);
 }
@@ -216,26 +220,18 @@ void lxii2c_receiveByte(struct ddata *ddata, uint8_t *data)
 /* Receive chunk */
 void lxii2c_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
-    if (ddata->lxi_state.i2c.inbuf) {
-        free(ddata->lxi_state.i2c.inbuf);
-        ddata->lxi_state.i2c.inbuf = NULL;
-    }
+    /* Note: This risky as it depends/assumes back-end never OOB:s */
+    ddata->lxi_state.i2c.inbuf = data;
+    ASSURE(ddata->lxi_state.i2c.inbuf); /* Note: Non malloc pointers might slip
+                                           thru. I.e. not fool-proof. */
 
-    if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
-        ASSURE(ddata->lxi_state.i2c.outbuf);
-        ddata->lxi_state.i2c.msg[0].addr =
-            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
-        ddata->lxi_state.i2c.msg[1].addr =
-            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
-    }
+    /* Sanity-check API sequence order */
+    ASSURE(ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte));
 
-    ddata->lxi_state.i2c.inbuf = malloc(sz);
-
-    ddata->lxi_state.i2c.msg[1].flags = I2C_M_RD;
-    ddata->lxi_state.i2c.msg[1].len = sz;
-    ddata->lxi_state.i2c.msg[1].buf = ddata->lxi_state.i2c.inbuf;
-
-    data = ddata->lxi_state.i2c.msg[1].buf;
+    /* All should be OK to proceed. */
+    ddata->lxi_state.i2c.msg[IN_MSG].flags = I2C_M_RD;
+    ddata->lxi_state.i2c.msg[IN_MSG].len = sz;
+    ddata->lxi_state.i2c.msg[IN_MSG].buf = ddata->lxi_state.i2c.inbuf;
 
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(receiveData);
 }
@@ -251,15 +247,15 @@ int lxii2c_configure(struct ddata *ddata)
     ddata->lxi_state.i2c.inbuf = NULL;
     ddata->lxi_state.i2c.outbuf = NULL;
 
-    /* Set to invalid adresses */
-    ddata->lxi_state.i2c.msg[0].addr = 0xFF;
-    ddata->lxi_state.i2c.msg[1].addr = 0xFF;
+    /* Set to invalid addresses */
+    ddata->lxi_state.i2c.msg[IN_MSG].addr = 0xFF;
+    ddata->lxi_state.i2c.msg[OUT_MSG].addr = 0xFF;
 
     /* Nothing to send/receive */
-    ddata->lxi_state.i2c.msg[0].len = 0;
-    ddata->lxi_state.i2c.msg[1].len = 0;
-    ddata->lxi_state.i2c.msg[0].buf = NULL;
-    ddata->lxi_state.i2c.msg[1].buf = NULL;
+    ddata->lxi_state.i2c.msg[IN_MSG].len = 0;
+    ddata->lxi_state.i2c.msg[OUT_MSG].len = 0;
+    ddata->lxi_state.i2c.msg[IN_MSG].buf = NULL;
+    ddata->lxi_state.i2c.msg[OUT_MSG].buf = NULL;
 
     /* Indicate no pending session */
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(state_free);
