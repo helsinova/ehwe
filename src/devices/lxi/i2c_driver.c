@@ -17,6 +17,15 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+/* Note about buffers needed consideration if used multithreaded or with
+ * non-Nordic or EHWE high level API:s (i2c.h / i2c-dev.h):
+ *
+ * - Out-buffer is always deep-copied. I.e. it's consequently malloc and
+ *   freed here.
+ *
+ * - In-buffer and byte result never is. I.e. it's up to the caller to
+ *   handle release of memory.
+ */
 #include "config.h"
 #include "lxi_config.h"
 #include "local.h"
@@ -79,7 +88,8 @@ void lxii2c_stop(struct ddata *ddata)
 
         ddata->lxi_state.i2c.packets.msgs = ddata->lxi_state.i2c.msg;
         ddata->lxi_state.i2c.packets.nmsgs = 1;
-    } else {
+    } else if ((ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(receiveByte)) ||
+               (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(receiveData))) {
         /* Receive is intended */
         ASSURE(ddata->lxi_state.i2c.msg[0].addr < 0x80);
         ASSURE(ddata->lxi_state.i2c.msg[1].addr < 0x80);
@@ -120,12 +130,6 @@ void lxii2c_autoAck(struct ddata *ddata, int state)
     ASSURE("LXI not supported function invoked" == NULL);
 
     AUTOACK = state;
-}
-
-/* Receive one byte */
-void lxii2c_receiveByte(struct ddata *ddata, uint8_t *data)
-{
-    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(receiveByte);
 }
 
 /* Send one byte */
@@ -182,9 +186,57 @@ void lxii2c_sendData(struct ddata *ddata, const uint8_t *data, int sz)
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(sendData);
 }
 
-/* Receive one chunk */
+/* Receive one byte */
+void lxii2c_receiveByte(struct ddata *ddata, uint8_t *data)
+{
+    if (ddata->lxi_state.i2c.inbuf) {
+        free(ddata->lxi_state.i2c.inbuf);
+        ddata->lxi_state.i2c.inbuf = NULL;
+    }
+
+    if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
+        ASSURE(ddata->lxi_state.i2c.outbuf);
+        ddata->lxi_state.i2c.msg[0].addr =
+            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
+        ddata->lxi_state.i2c.msg[1].addr =
+            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
+    }
+
+    ddata->lxi_state.i2c.inbuf = malloc(1);
+
+    ddata->lxi_state.i2c.msg[1].flags = I2C_M_RD;
+    ddata->lxi_state.i2c.msg[1].len = 1;
+    ddata->lxi_state.i2c.msg[1].buf = ddata->lxi_state.i2c.inbuf;
+
+    data = ddata->lxi_state.i2c.msg[1].buf;
+
+    ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(receiveByte);
+}
+
+/* Receive chunk */
 void lxii2c_receiveData(struct ddata *ddata, uint8_t *data, int sz)
 {
+    if (ddata->lxi_state.i2c.inbuf) {
+        free(ddata->lxi_state.i2c.inbuf);
+        ddata->lxi_state.i2c.inbuf = NULL;
+    }
+
+    if (ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(sendByte)) {
+        ASSURE(ddata->lxi_state.i2c.outbuf);
+        ddata->lxi_state.i2c.msg[0].addr =
+            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
+        ddata->lxi_state.i2c.msg[1].addr =
+            RW_ADDR(ddata->lxi_state.i2c.outbuf[0]);
+    }
+
+    ddata->lxi_state.i2c.inbuf = malloc(sz);
+
+    ddata->lxi_state.i2c.msg[1].flags = I2C_M_RD;
+    ddata->lxi_state.i2c.msg[1].len = sz;
+    ddata->lxi_state.i2c.msg[1].buf = ddata->lxi_state.i2c.inbuf;
+
+    data = ddata->lxi_state.i2c.msg[1].buf;
+
     ddata->lxi_state.i2c.func_0 = TO_LXI_STATE(receiveData);
 }
 
