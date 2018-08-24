@@ -34,7 +34,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assure.h>
-#include <serial.h>
+#include <stermio.h>
 
 static regex_t preg;            /* Compiled regular expression for full
                                    device-string parsing */
