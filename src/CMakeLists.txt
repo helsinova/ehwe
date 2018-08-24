@@ -34,9 +34,6 @@ option(ENABLE_LOGGING
 option(ENABLE_SYSLOG
     "Enable log to syslog (Linux/OSX)" OFF)
 
-option(EHWE_DEBUGS_SERIAL
-	"Debug source serial.c with logs as warnings" OFF)
-
 # Init/fini
 option(ENABLE_INITFINI_SHOWEXEC
     "Show init/fini execution using CTORS/DTORS mechanism" OFF)
@@ -76,6 +73,14 @@ set(CMAKE_C_FLAGS "${CMAKE_EXTRA_C_FLAGS} -no-integrated-cpp -Wno-unused-functio
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_EXTRA_C_FLAGS} -g3 -ggdb3 -O0")
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_EXTRA_C_FLAGS} -no-integrated-cpp -Wno-unused-function -O2 -Wall")
 
+################################################################################
+# System & host-libraries detection. Note: This logic to come before CMake
+# source-bound libraries using the information
+################################################################################
+CHECK_INCLUDE_FILES(termio.h HAVE_POSIX_TERMIO)
+if (CYGWIN)
+	set(HAVE_CYGWIN "1")
+endif (CYGWIN)
 
 ################################################################################
 # Libraries (src binding)
@@ -93,6 +98,34 @@ if (ENABLE_LOGGING)
 	set (EXTRA_LIBS ${EXTRA_LIBS} liblog)
 endif (ENABLE_LOGGING)
 
+#-------------------------------------------------------------------------------
+# -Lists-
+#-------------------------------------------------------------------------------
+include_directories ("${PROJECT_SOURCE_DIR}/lib/mlist/include")
+add_subdirectory (lib/mlist)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__mlist_init")
+set (EXTRA_LIBS ${EXTRA_LIBS} libmlist)
+
+#-------------------------------------------------------------------------------
+# -time-
+#-------------------------------------------------------------------------------
+include_directories ("${PROJECT_SOURCE_DIR}/lib/mtime/include")
+add_subdirectory (lib/mtime)
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__mtime_init")
+set (EXTRA_LIBS ${EXTRA_LIBS} libmtime)
+
+#-------------------------------------------------------------------------------
+# -stermio (serial termio helper routines)-
+#-------------------------------------------------------------------------------
+if (HAVE_POSIX_TERMIO)
+	include_directories ("${PROJECT_SOURCE_DIR}/lib/stermio/include")
+	add_subdirectory (lib/stermio)
+	set (EXTRA_LIBS ${EXTRA_LIBS} libstermio)
+endif ()
+
+#-------------------------------------------------------------------------------
+# This projects source-libraries. Must be come AFTER generic libraries that
+# may be conditional. 
 #-------------------------------------------------------------------------------
 # Devices - i.e. the real stuff behind this project
 #-------------------------------------------------------------------------------
@@ -112,30 +145,6 @@ set (EXTRA_LIBS ${EXTRA_LIBS} interfaces)
 #-------------------------------------------------------------------------------
 add_subdirectory (embedded)
 set (EXTRA_LIBS ${EXTRA_LIBS} embedded)
-
-#-------------------------------------------------------------------------------
-# -Lists-
-#-------------------------------------------------------------------------------
-include_directories ("${PROJECT_SOURCE_DIR}/lib/mlist/include")
-add_subdirectory (lib/mlist)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__mlist_init")
-set (EXTRA_LIBS ${EXTRA_LIBS} libmlist)
-
-#-------------------------------------------------------------------------------
-# -time-
-#-------------------------------------------------------------------------------
-include_directories ("${PROJECT_SOURCE_DIR}/lib/mtime/include")
-add_subdirectory (lib/mtime)
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__mtime_init")
-set (EXTRA_LIBS ${EXTRA_LIBS} libmtime)
-
-################################################################################
-# System & host-libraries detection
-################################################################################
-CHECK_INCLUDE_FILES(termio.h HAVE_POSIX_TERMIO)
-if (CYGWIN)
-	set(HAVE_CYGWIN "1")
-endif (CYGWIN)
 
 ################################################################################
 # Project
@@ -161,10 +170,6 @@ set(EHWE_SOURCE
 	opts.c
 	opts_help.c
 )
-
-if (HAVE_POSIX_TERMIO)
-	set (EHWE_SOURCE ${EHWE_SOURCE} serial.c)
-endif ()
 
 install(PROGRAMS ${PROJECT_BINARY_DIR}/src DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 

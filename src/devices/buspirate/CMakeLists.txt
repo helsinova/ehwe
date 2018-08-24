@@ -94,7 +94,6 @@ else()
     message(STATUS "Skipping Bus-pirate i2c support")
 endif()
 
-
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 configure_file (
   "${CMAKE_CURRENT_SOURCE_DIR}/buspirate_config.h.in"
@@ -102,3 +101,7 @@ configure_file (
   )
 
 add_library(buspirate ${LIBBUSPIRATE_SOURCE})
+if (HAVE_POSIX_TERMIO)
+	target_link_libraries(buspirate libstermio)
+endif ()
+

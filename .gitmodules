@@ -21,3 +21,6 @@
 	url = https://github.com/helsinova/ehwe.wiki.git
 	branch = master
 	ignore = all
+[submodule "src/lib/stermio"]
+	path = src/lib/stermio
+	url = git@github.com:helsinova/libstermio.git
