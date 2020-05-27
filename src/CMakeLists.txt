@@ -171,7 +171,7 @@ set(EHWE_SOURCE
 	opts_help.c
 )
 
-install(PROGRAMS ${PROJECT_BINARY_DIR}/src DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+install(PROGRAMS ${CMAKE_BINARY_DIR}/ehwe DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 add_executable(ehwe ${EHWE_SOURCE})
 target_link_libraries (ehwe ${EXTRA_LIBS})
