@@ -328,7 +328,7 @@ int buspirate_init_device(struct device *device)
 #ifdef HAVE_POSIX_TERMIO
 	/* Make sure terminal is "good" for BP wrt speed etc, but also LF:s and
 	 * what-not:s */
-    setserial_term_bp(ddata->fd);
+    stio_bp_terminal(ddata->fd);
 #endif
 
     empty_inbuff(ddata->fd);
@@ -357,7 +357,7 @@ int buspirate_init_device(struct device *device)
     close(ddata->fd);
     ASSURE((ddata->fd = open(device->buspirate->name, O_RDWR)) != -1);
 #ifdef HAVE_POSIX_TERMIO
-    setserial_raw_bp(ddata->fd);
+    stio_bp_raw(ddata->fd);
 #endif
 
     LOGI("Device [%s] is now state-initialized and re-opened blocking r/w\n",
@@ -394,7 +394,7 @@ int buspirate_deinit_device(struct device *device)
     ASSURE((ddata->fd =
             open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
 #ifdef HAVE_POSIX_TERMIO
-    setserial_term_bp(ddata->fd);
+    stio_bp_terminal(ddata->fd);
 #endif
 
     LOGD("Device [%s] re-opened non-blocking r/w\n", device->buspirate->name);
