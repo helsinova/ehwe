@@ -75,6 +75,18 @@ i2c_device_hndl i2c_device_open(I2C_TypeDef * bus, uint8_t addr)
     return i2c_device;
 }
 
+I2C_TypeDef *i2c_device_bus(i2c_device_hndl i2c_device)
+{
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+    return i2c_device->bus;
+}
+
+uint8_t i2c_device_addr(i2c_device_hndl i2c_device)
+{
+    assert(i2c_device != NULL && "Error: Bad i2c-device descriptor");
+    return i2c_device->addr;
+}
+
 /* Destroy i2c-device instance */
 void i2c_device_close(i2c_device_hndl i2c_device)
 {
