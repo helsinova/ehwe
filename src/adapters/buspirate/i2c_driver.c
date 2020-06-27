@@ -64,7 +64,7 @@ typedef enum {
 #define AUTOACK (ddata->config.i2c.autoAck)
 
 /***************************************************************************
- * Main driver interface
+ * Main driver api
  ***************************************************************************/
 void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
                            int osz, uint8_t *ibuf, int isz)
@@ -214,7 +214,7 @@ struct ddata *bpi2c_newddata(struct adapter *adapter)
 }
 
 /***************************************************************************
- * Configuration  interface
+ * Configuration  api
  ***************************************************************************/
 config_etype_t bpi2c_set_speed(int setval, struct ddata * dd)
 {

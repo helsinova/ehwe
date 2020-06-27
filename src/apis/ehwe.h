@@ -17,35 +17,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef interfaces_h
-#define interfaces_h
+#ifndef ehwe_h
+#define ehwe_h
+#include <stdint.h>
 #include <config.h>
+#include <stm32f10x.h>
 
 struct adapter;
 
-typedef enum {
-    IN_UNDEFINED = 0,
-    IN_INVALID = 1,             /* Invalid, unknown or parse failure */
-#ifdef ENABLE_API_STM32
-    STM32 = 101,
-#endif
-} intrfc_t;
+int ehwe_init_api(const struct adapter *adapter);
+void i2c_write(I2C_TypeDef * bus, uint8_t adapter_addr, const uint8_t *buffer,
+               int len, int send_stop);
+void i2c_read(I2C_TypeDef * bus, uint8_t adapter_addr, uint8_t *buffer, int len);
 
-#ifdef ENABLE_API_STM32
-#  include "stm32.h"
-#endif
-
-struct interface {
-    intrfc_t inid;
-    int index;
-    union {
-#ifdef ENABLE_API_STM32
-        struct stm32 stm32;
-#endif
-    };
-};
-
-int interfaces_init();
-int interfaces_init_interface(const struct adapter *adapter);
-
-#endif                          //interfaces_h
+#endif                          //ehwe_h

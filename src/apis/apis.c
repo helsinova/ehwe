@@ -24,13 +24,13 @@
 #include <stdlib.h>
 #include <assure.h>
 #include <config.h>
-#include "interfaces.h"
+#include "apis.h"
 #include "stm32.h"
 #include "ehwe.h"
 #include "ehwe_i2c_device.h"
 #include "adapters.h"
 
-int interfaces_init()
+int apis_init()
 {
     static int is_init = 0;
 
@@ -43,29 +43,29 @@ int interfaces_init()
     return 0;
 }
 
-int interfaces_init_interface(const struct adapter *adapter)
+int apis_init_api(const struct adapter *adapter)
 {
     int rc = 0;
 
 #ifdef ENABLE_API_HIGH_LVL
     ASSURE_E((rc =
-              ehwe_init_interface(adapter)) == 0,
-             goto interfaces_init_interface_err);
+              ehwe_init_api(adapter)) == 0,
+             goto apis_init_api_err);
     ASSURE_E((rc =
-              i2c_device_init_interface(adapter)) == 0,
-             goto interfaces_init_interface_err);
+              i2c_device_init_api(adapter)) == 0,
+             goto apis_init_api_err);
 #endif
 
 #ifdef ENABLE_API_STM32
     ASSURE_E((rc =
-              stm32_init_interface(adapter)) == 0,
-             goto interfaces_init_interface_err);
+              stm32_init_api(adapter)) == 0,
+             goto apis_init_api_err);
 #endif
 
     return 0;
 
-interfaces_init_interface_err:
-    LOGE("Failed initialize interface\n");
+apis_init_api_err:
+    LOGE("Failed initialize api\n");
     return rc;
 }
 
@@ -75,20 +75,20 @@ interfaces_init_interface_err:
 #define __init __attribute__((constructor))
 #define __fini __attribute__((destructor))
 
-void __init __interfaces_init(void)
+void __init __apis_init(void)
 {
     int rc;
 #ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism ====\n");
 #endif
-    if ((rc = interfaces_init())) {
-        fprintf(stderr, "Fatal error: interfaces_init() failed\n");
+    if ((rc = apis_init())) {
+        fprintf(stderr, "Fatal error: apis_init() failed\n");
         exit(rc);
     }
 }
 
-void __fini __interfaces_fini(void)
+void __fini __apis_fini(void)
 {
 #ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"

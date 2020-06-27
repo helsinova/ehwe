@@ -47,7 +47,7 @@ struct config_SPI lxi_dflt_config_SPI = {
 };
 
 /***************************************************************************
- * Main driver interface
+ * Main driver api
  ***************************************************************************/
 void lxispi_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
                             int osz, uint8_t *ibuf, int isz)
@@ -120,7 +120,7 @@ struct ddata *lxispi_newddata(struct adapter *adapter)
 }
 
 /***************************************************************************
- * Configuration  interface
+ * Configuration  api
  ***************************************************************************/
 config_etype_t lxispi_set_speed(int setval, struct ddata * dd)
 {

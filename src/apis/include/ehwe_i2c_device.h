@@ -30,7 +30,7 @@
 struct adapter;
 
 /* Module initialization */
-int i2c_device_init_interface(const struct adapter *device);
+int i2c_device_init_api(const struct adapter *device);
 
 /* Forward declaration - hide unneeded details*/
 struct i2c_device_struct;

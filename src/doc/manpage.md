@@ -336,7 +336,7 @@ Prints the following information about an opened adapter:
  * FPGA size
  * Whether or not the FPGA is loaded
  * USB bus, address, and speed
- * Backend (Denotes which adapter interface code is being used.)
+ * Backend (Denotes which adapter api code is being used.)
  * Instance number
 
 

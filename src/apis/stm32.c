@@ -20,7 +20,7 @@
 #include <sys/types.h>
 #include <log.h>
 #include <adapters_config.h>
-#include "interfaces.h"
+#include "apis.h"
 #include "stm32.h"
 #include <stm32f10x.h>
 #include "adapters.h"
@@ -95,9 +95,9 @@ int stm32_init()
     return 0;
 }
 
-/* Checks bus-interface ability and compare with stm32 API. If OK, accept
+/* Checks bus-api ability and compare with stm32 API. If OK, accept
  * it's driver-struct into corresponding API<->DD array */
-int stm32_init_interface(const struct adapter *adapter)
+int stm32_init_api(const struct adapter *adapter)
 {
     int if_init = 0;
 

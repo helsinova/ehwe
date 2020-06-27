@@ -20,14 +20,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 /*
- * High level interfaces modeled after Nordic's API
+ * High level apis modeled after Nordic's API
  *
  * Note: For many cases you'd want a higher level of control and write your
  * own corresponding high-level functions
  */
 #include <sys/types.h>
 #include <log.h>
-#include "interfaces.h"
+#include "apis.h"
 #include "stm32.h"
 #include <stm32f10x.h>
 #include "adapters.h"
@@ -91,7 +91,7 @@ void i2c_read(I2C_TypeDef * bus, uint8_t adapter_addr, uint8_t *buffer, int len)
     DD(bus)->stop(DDATA(bus));
 }
 
-int ehwe_init_interface(const struct adapter *adapter)
+int ehwe_init_api(const struct adapter *adapter)
 {
 	return 0;
 }

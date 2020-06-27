@@ -26,11 +26,11 @@ struct stm32 {
     int dummy;
 };
 
-/* Forward declaration of 'struct interface' required to avoid mutual header
+/* Forward declaration of 'struct api' required to avoid mutual header
  * inclusion */
-struct interface;
+struct api;
 
 int stm32_init();
-int stm32_init_interface(const struct adapter *adapter);
+int stm32_init_api(const struct adapter *adapter);
 
 #endif                          //stm32_h

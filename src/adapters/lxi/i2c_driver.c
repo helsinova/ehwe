@@ -67,7 +67,7 @@ static void lxii2c_state_free(void)
 
 #define AUTOACK (ddata->config.i2c.autoAck)
 /***************************************************************************
- * Main driver interface
+ * Main driver api
  ***************************************************************************/
 void lxii2c_autoAck(struct ddata *ddata, int state)
 {
@@ -283,7 +283,7 @@ struct ddata *lxii2c_newddata(struct adapter *adapter)
 }
 
 /***************************************************************************
- * Configuration  interface
+ * Configuration  api
  ***************************************************************************/
 config_etype_t lxii2c_set_speed(int setval, struct ddata * dd)
 {

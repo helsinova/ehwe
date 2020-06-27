@@ -35,7 +35,7 @@
 #include "main.h"
 #include <mlist.h>
 #include <adapters.h>
-#include <interfaces.h>
+#include <apis.h>
 #include <stdlib.h>
 
 extern log_level log_filter_level;
@@ -114,7 +114,7 @@ int main(int argc, char **argv)
         ASSURE_E((rc =
                   adapters_init_adapter(CREF(ehwe.adapters))) == 0, goto err2);;
         ASSURE_E((rc =
-                  interfaces_init_interface(CREF(ehwe.adapters))) == 0,
+                  apis_init_api(CREF(ehwe.adapters))) == 0,
                  goto err2);
     }
 #undef LDATA

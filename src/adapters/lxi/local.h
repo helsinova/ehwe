@@ -20,7 +20,7 @@
 #ifndef lxi_local_h
 #define lxi_local_h
 /***************************************************************************
- * Module-local interface
+ * Module-local api
  ***************************************************************************/
 #include <log.h>
 #include <inttypes.h>
@@ -42,14 +42,14 @@
 #define msleep( X ) \
     usleep( (X) * 1000 )
 
-/* SPI HW-interface behaviour & GPIO config. Enable (1) and disable (0) */
+/* SPI HW-api behaviour & GPIO config. Enable (1) and disable (0) */
 struct confspi_pereph {
     union {
         uint8_t raw;
     };
 } __attribute__ ((packed));
 
-/* SPI HW-interface behaviour & GPIO config. Enable (1) and disable (0) */
+/* SPI HW-api behaviour & GPIO config. Enable (1) and disable (0) */
 struct confi2c_pereph {
     union {
         uint8_t raw;
@@ -137,7 +137,7 @@ struct ddata {
 struct adapter;
 
 /***************************************************************************
- * Main driver interfaces
+ * Main driver apis
  ***************************************************************************
  * SPI
  ***************************************************************************/
@@ -169,7 +169,7 @@ struct ddata *lxii2c_newddata(struct adapter *adapter);
 void lxii2c_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                             int outsz, uint8_t *indata, int insz);
 /***************************************************************************
- * Configuration  interface
+ * Configuration  api
  ***************************************************************************
  * SPI
  ***************************************************************************/

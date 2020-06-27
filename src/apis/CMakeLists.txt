@@ -9,9 +9,9 @@ include_directories("${CMAKE_BINARY_DIR}/adapters")
 ################################################################################
 # Normal project options (src defines)
 #-------------------------------------------------------------------------------
-# interface stm32 HAL library
+# api stm32 HAL library
 option(ENABLE_API_STM32
-    "Enable interface stm32." YES)
+    "Enable api stm32." YES)
 
 # NOTE: Enebling this will make some old workbenhes not build
 option(ENABLE_API_HIGH_LVL
@@ -22,7 +22,7 @@ option(ENABLE_API_HIGH_LVL
 #-------------------------------------------------------------------------------
 #Top level common sources
 set(LIBINTERFACES_SOURCE
-	interfaces.c
+	apis.c
 )
 
 #-------------------------------------------------------------------------------
@@ -37,11 +37,11 @@ if (ENABLE_API_HIGH_LVL)
 endif (ENABLE_API_HIGH_LVL)
 
 if (ENABLE_API_STM32)
-	include_directories ("${PROJECT_SOURCE_DIR}/interfaces/include")
+	include_directories ("${PROJECT_SOURCE_DIR}/apis/include")
 	set(LIBINTERFACES_SOURCE
 		${LIBINTERFACES_SOURCE}
 		stm32.c
 	)
 endif (ENABLE_API_STM32)
 
-add_library(interfaces ${LIBINTERFACES_SOURCE})
+add_library(apis ${LIBINTERFACES_SOURCE})

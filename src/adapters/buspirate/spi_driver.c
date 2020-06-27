@@ -67,7 +67,7 @@ typedef enum {
 } bpcmd_spi_t;
 
 /***************************************************************************
- * Main driver interface
+ * Main driver api
  ***************************************************************************/
 void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
                            int osz, uint8_t *ibuf, int isz)
@@ -241,7 +241,7 @@ struct ddata *bpspi_newddata(struct adapter *adapter)
 }
 
 /***************************************************************************
- * Configuration  interface
+ * Configuration  api
  ***************************************************************************/
 config_etype_t bpspi_set_speed(int setval, struct ddata * dd)
 {

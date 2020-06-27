@@ -20,7 +20,7 @@
 #ifndef buspirate_local_h
 #define buspirate_local_h
 /***************************************************************************
- * Module-local interface
+ * Module-local api
  ***************************************************************************/
 #include <log.h>
 #include <inttypes.h>
@@ -254,7 +254,7 @@ int rawMode_enter(struct adapter *);
 int rawMode_toMode(struct adapter *, bpcmd_raw_t bpcmd);
 
 /***************************************************************************
- * Main driver interfaces
+ * Main driver apis
  ***************************************************************************
  * SPI
  ***************************************************************************/
@@ -286,7 +286,7 @@ struct ddata *bpi2c_newddata(struct adapter *adapter);
 void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                            int outsz, uint8_t *indata, int insz);
 /***************************************************************************
- * Configuration  interface
+ * Configuration  api
  ***************************************************************************
  * SPI
  ***************************************************************************/

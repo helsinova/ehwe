@@ -136,9 +136,9 @@ set (EXTRA_LIBS ${EXTRA_LIBS} adapters)
 #-------------------------------------------------------------------------------
 # Interfaces - i.e. the other end of the real stuff behind this project
 #-------------------------------------------------------------------------------
-include_directories ("${PROJECT_SOURCE_DIR}/interfaces")
-add_subdirectory (interfaces)
-set (EXTRA_LIBS ${EXTRA_LIBS} interfaces)
+include_directories ("${PROJECT_SOURCE_DIR}/apis")
+add_subdirectory (apis)
+set (EXTRA_LIBS ${EXTRA_LIBS} apis)
 
 #-------------------------------------------------------------------------------
 # Embedded code
