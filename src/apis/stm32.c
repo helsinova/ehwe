@@ -128,6 +128,23 @@ int stm32_init_api(const struct adapter *adapter)
             if_init = 1;
             break;
 #endif
+#ifdef ADAPTER_HIF
+        case HIF:
+            switch (adapter->role) {
+                case ROLE_SPI:
+                    ASSERT(adapter->index > 0
+                           && adapter->index <= MAX_SPI_ADAPTERS);
+                    SPI_stm32_drv[adapter->index - 1] = adapter->driver.spi;
+                    break;
+                case ROLE_I2C:
+                    ASSERT(adapter->index > 0
+                           && adapter->index <= MAX_I2C_ADAPTERS);
+                    I2C_stm32_drv[adapter->index - 1] = adapter->driver.i2c;
+                    break;
+                default:
+                    ASSERT("Role not supported for HIF driver" == NULL);
+			}
+#endif
 #ifdef ADAPTER_LXI
         case LXI:
             switch (adapter->role) {

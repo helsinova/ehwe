@@ -93,5 +93,5 @@ void i2c_read(I2C_TypeDef * bus, uint8_t adapter_addr, uint8_t *buffer, int len)
 
 int ehwe_init_api(const struct adapter *adapter)
 {
-	return 0;
+    return 0;
 }

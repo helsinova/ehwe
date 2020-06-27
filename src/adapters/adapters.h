@@ -46,7 +46,8 @@ typedef enum {
     DEV_INVALID = 1,            /* Invalid, unknown or parse failure */
     PARAPORT = 100,
     BUSPIRATE = 101,
-    LXI = 102,
+    HIF = 102,
+    LXI = 103,
 } devid_t;
 
 /* Note: Not all adapters can have variations in clock-owners */
@@ -58,7 +59,7 @@ typedef enum {
 } clkownr_t;
 
 // Valid regex-i patterns for adapters
-#define ADAPTERS "PP|BP|LXI"
+#define ADAPTERS "PP|BP|HIF|LXI"
 
 // Valid regex-i patterns for "direction"
 #define DIRECTIONS "MASTER|SLAVE"
@@ -70,6 +71,7 @@ struct driverAPI_any;
 /* Forward declared Adapter specific substructures */
 struct paraport;
 struct buspirate;
+struct ftdi_mpsse;
 struct lxi;
 
 struct adapter {
@@ -79,6 +81,7 @@ struct adapter {
     union {
         struct paraport *paraport;
         struct buspirate *buspirate;
+        struct ftdi_mpsse *ftdi_mpsse;
         struct lxi *lxi;
     };
     union {

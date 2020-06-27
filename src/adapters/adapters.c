@@ -34,6 +34,10 @@
 #include <buspirate.h>
 #endif
 
+#ifdef ADAPTER_HIF
+#include <ehwe_hif.h>
+#endif
+
 #ifdef ADAPTER_LXI
 #include <lxi.h>
 #endif
@@ -128,6 +132,12 @@ int adapters_parse(const char *adapterstr, struct adapter *adapter)
                   lxi_parse(adapterstr, adapter)) == 0,
                  goto adapters_parse_err);
 #endif
+#ifdef ADAPTER_HIF
+    if (strcasecmp(adapter_str, "hif") == 0)
+        ASSURE_E((rc =
+                  ftdi_mpsse_parse(adapterstr, adapter)) == 0,
+                 goto adapters_parse_err);
+#endif
 
     free(adapterstr_cpy);
     return rc;
@@ -162,6 +172,11 @@ int adapters_init_adapter(struct adapter *adapter)
             rc = lxi_init_adapter(adapter);
             break;
 #endif
+#ifdef DEVICE_HIF
+        case HIF:
+            rc = ftdi_mpsse_init_device(device);
+            break;
+#endif
         default:
             LOGE("Unsupported adapter [%d] in [%s]\n", adapter->devid, __func__);
     }
@@ -190,6 +205,11 @@ int adapters_deinit_adapter(struct adapter *adapter)
 #ifdef ADAPTER_LXI
         case LXI:
             rc = lxi_deinit_adapter(adapter);
+            break;
+#endif
+#ifdef DEVICE_HIF
+        case HIF:
+            rc = ftdi_mpsse_deinit_device(device);
             break;
 #endif
         default:

@@ -1,4 +1,5 @@
 #cmakedefine ADAPTER_PARAPORT
 #cmakedefine ADAPTER_BUSPIRATE
 #cmakedefine ADAPTER_LXI
+#cmakedefine ADAPTER_HIF
 #define DEF_MAX_ADAPTERS @DEF_MAX_ADAPTERS@

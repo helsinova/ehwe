@@ -12,6 +12,8 @@ set(DEF_MAX_ADAPTERS
     CACHE STRING
     "Maximum number of adapters")
 
+# Options enabling/disabling adaptor support
+# ------------------------------------------------------------------------------
 option(ADAPTER_BUSPIRATE
     "Enable device BUSPIRATE." YES)
 
@@ -23,6 +25,12 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
         "Enable device LXI - LinuX kernel-module supported bus-Interfaces." YES)
 endif()
 
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/hif")
+	option(ADAPTER_HIF "Support HIF adapter" ON)
+else()
+	option(ADAPTER_HIF "Support HIF adapter" OFF)
+endif()
+# ------------------------------------------------------------------------------
 
 set(LIBADAPTERS_SOURCE
     adapters.c
@@ -51,6 +59,14 @@ if (ADAPTER_PARAPORT)
     )
 else()
     message(STATUS "Skipping PARAPORT build")
+endif()
+
+if (ADAPTER_HIF)
+    include_directories ("${CMAKE_CURRENT_SOURCE_DIR}/hif/include")
+    add_subdirectory (hif)
+	set (ADAPTERS_LIBS ${ADAPTERS_LIBS} hif)
+else()
+	message(STATUS "Skipping HIF support")
 endif()
 
 configure_file (
