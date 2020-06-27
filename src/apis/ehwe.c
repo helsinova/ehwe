@@ -26,7 +26,7 @@
  * own corresponding high-level functions
  */
 #include <sys/types.h>
-#include <log.h>
+#include <liblog/log.h>
 #include "apis.h"
 #include "stm32.h"
 #include <stm32f10x.h>
@@ -34,7 +34,7 @@
 #include "driver.h"
 #include <string.h>
 #include <stdlib.h>
-#include <assure.h>
+#include <liblog/assure.h>
 #include "../adapters/buspirate/local.h"
 
 #define DDATA( B ) (B->ddata)

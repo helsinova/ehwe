@@ -27,7 +27,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <assure.h>
+#include <liblog/assure.h>
 
 #include <ehwe.h>
 #include <ehwe_i2c_device.h>

@@ -27,14 +27,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <log.h>
+#include <liblog/log.h>
 #include <adapters.h>
 #include <driver.h>
 #include <buspirate.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assure.h>
-#include <stermio.h>
+#include <liblog/assure.h>
+#include <stermio/stermio.h>
 
 static regex_t preg;            /* Compiled regular expression for full
                                    adapter-string parsing */

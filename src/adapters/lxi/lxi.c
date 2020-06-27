@@ -26,13 +26,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <log.h>
+#include <liblog/log.h>
 #include <adapters.h>
 #include <driver.h>
 #include <lxi.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assure.h>
+#include <liblog/assure.h>
 #include "local.h"
 
 static regex_t preg;            /* Compiled regular expression for full

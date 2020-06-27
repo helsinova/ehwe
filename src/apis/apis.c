@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include <sys/types.h>
 #include <regex.h>
-#include <log.h>
+#include <liblog/log.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assure.h>
+#include <liblog/assure.h>
 #include <config.h>
 #include "apis.h"
 #include "stm32.h"

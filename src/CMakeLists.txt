@@ -95,7 +95,7 @@ if (ENABLE_LOGGING)
     include_directories ("${PROJECT_SOURCE_DIR}/lib/log/include")
     add_subdirectory (lib/log)
 	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--undefined=__liblog_init")
-	set (EXTRA_LIBS ${EXTRA_LIBS} liblog)
+	set (EXTRA_LIBS ${EXTRA_LIBS} log)
 endif (ENABLE_LOGGING)
 
 #-------------------------------------------------------------------------------
@@ -120,7 +120,7 @@ set (EXTRA_LIBS ${EXTRA_LIBS} libmtime)
 if (HAVE_POSIX_TERMIO)
 	include_directories ("${PROJECT_SOURCE_DIR}/lib/stermio/include")
 	add_subdirectory (lib/stermio)
-	set (EXTRA_LIBS ${EXTRA_LIBS} libstermio)
+	set (EXTRA_LIBS ${EXTRA_LIBS} stermio)
 endif ()
 
 #-------------------------------------------------------------------------------

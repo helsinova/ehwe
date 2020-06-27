@@ -26,13 +26,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <log.h>
+#include <liblog/log.h>
 #include <adapters.h>
 #include <driver.h>
 #include <buspirate.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assure.h>
+#include <liblog/assure.h>
 #include <arpa/inet.h>
 
 struct config_I2C bp_dflt_config_I2C = {

@@ -103,6 +103,6 @@ configure_file (
 
 add_library(buspirate ${LIBBUSPIRATE_SOURCE})
 if (HAVE_POSIX_TERMIO)
-	target_link_libraries(buspirate libstermio)
+	target_link_libraries(buspirate stermio)
 endif ()
 

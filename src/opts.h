@@ -25,7 +25,7 @@
 #include <limits.h>
 #include <sys/types.h>
 
-#include <log.h>
+#include <liblog/log.h>
 #include <mlist.h>
 #include "config.h"
 #include "main.h"

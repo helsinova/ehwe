@@ -19,8 +19,8 @@
  ***************************************************************************/
 #include <sys/types.h>
 #include <regex.h>
-#include <assure.h>
-#include <log.h>
+#include <liblog/assure.h>
+#include <liblog/log.h>
 #include "adapters.h"
 #include <string.h>
 #include <stdlib.h>

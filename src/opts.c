@@ -34,8 +34,8 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "assure.h"
-#include <log.h>
+#include "liblog/assure.h"
+#include <liblog/log.h>
 #include "opts.h"
 #include "doc.h"
 

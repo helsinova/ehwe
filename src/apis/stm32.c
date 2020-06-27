@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include <sys/types.h>
-#include <log.h>
+#include <liblog/log.h>
 #include <adapters_config.h>
 #include "apis.h"
 #include "stm32.h"
@@ -27,7 +27,7 @@
 #include "driver.h"
 #include <string.h>
 #include <stdlib.h>
-#include <assure.h>
+#include <liblog/assure.h>
 
 SPI_TypeDef *SPI_stm32_drv[MAX_SPI_ADAPTERS];
 I2C_TypeDef *I2C_stm32_drv[MAX_I2C_ADAPTERS];

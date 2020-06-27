@@ -28,8 +28,8 @@
 //#undef NDEBUG
 #define NDEBUG
 #include <assert.h>
-#include "assure.h"
-#include <log.h>
+#include "liblog/assure.h"
+#include <liblog/log.h>
 #include <mtime.h>
 #include "opts.h"
 #include "main.h"
