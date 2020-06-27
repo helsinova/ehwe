@@ -134,7 +134,7 @@ struct ddata {
 
 };
 
-struct device;
+struct adapter;
 
 /***************************************************************************
  * Main driver interfaces
@@ -146,7 +146,7 @@ void lxispi_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 void lxispi_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 uint16_t lxispi_getStatus(struct ddata *ddata, uint16_t flags);
 int lxispi_configure(struct ddata *ddata);
-struct ddata *lxispi_newddata(struct device *device);
+struct ddata *lxispi_newddata(struct adapter *adapter);
 /* High level */
 void lxispi_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                             int outsz, uint8_t *indata, int insz);
@@ -164,7 +164,7 @@ void lxii2c_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 void lxii2c_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 uint16_t lxii2c_getStatus(struct ddata *ddata, uint16_t flags);
 int lxii2c_configure(struct ddata *ddata);
-struct ddata *lxii2c_newddata(struct device *device);
+struct ddata *lxii2c_newddata(struct adapter *adapter);
 /* High level */
 void lxii2c_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                             int outsz, uint8_t *indata, int insz);

@@ -30,32 +30,32 @@
 #include "interfaces.h"
 #include "stm32.h"
 #include <stm32f10x.h>
-#include "devices.h"
+#include "adapters.h"
 #include "driver.h"
 #include <string.h>
 #include <stdlib.h>
 #include <assure.h>
-#include "../devices/buspirate/local.h"
+#include "../adapters/buspirate/local.h"
 
 #define DDATA( B ) (B->ddata)
 #define DD( B ) (DDATA(B)->driver.i2c)
-#define DEV( B ) (DD(B)->device)
+#define DEV( B ) (DD(B)->adapter)
 #define WRITE_ADDR( A ) (A<<1)
 #define READ_ADDR( A ) ((A<<1) | 0x01)
 
-void i2c_write(I2C_TypeDef * bus, uint8_t dev_addr, const uint8_t *buffer,
+void i2c_write(I2C_TypeDef * bus, uint8_t adapter_addr, const uint8_t *buffer,
                int len, int send_stop)
 {
     int ack;
 
-    assert(dev_addr < 0x80);
+    assert(adapter_addr < 0x80);
     assert(DEV(bus)->role == ROLE_I2C);
 
     /* Send START condition */
     DD(bus)->start(DDATA(bus));
 
-    /* Send device address for write */
-    ack = DD(bus)->sendByte(DDATA(bus), WRITE_ADDR(dev_addr));
+    /* Send adapter address for write */
+    ack = DD(bus)->sendByte(DDATA(bus), WRITE_ADDR(adapter_addr));
     assert(ack == 1);
 
     /* Send the rest - if there is any */
@@ -70,18 +70,18 @@ void i2c_write(I2C_TypeDef * bus, uint8_t dev_addr, const uint8_t *buffer,
     }
 }
 
-void i2c_read(I2C_TypeDef * bus, uint8_t dev_addr, uint8_t *buffer, int len)
+void i2c_read(I2C_TypeDef * bus, uint8_t adapter_addr, uint8_t *buffer, int len)
 {
     int ack;
 
-    assert(dev_addr < 0x80);
+    assert(adapter_addr < 0x80);
     assert(DEV(bus)->role == ROLE_I2C);
 
     /* Send START condition */
     DD(bus)->start(DDATA(bus));
 
     /* Send IC address for read */
-    ack = DD(bus)->sendByte(DDATA(bus), READ_ADDR(dev_addr));
+    ack = DD(bus)->sendByte(DDATA(bus), READ_ADDR(adapter_addr));
     assert(ack == 1);
 
     /* Read all but the last with auto ACK */
@@ -91,7 +91,7 @@ void i2c_read(I2C_TypeDef * bus, uint8_t dev_addr, uint8_t *buffer, int len)
     DD(bus)->stop(DDATA(bus));
 }
 
-int ehwe_init_interface(const struct device *device)
+int ehwe_init_interface(const struct adapter *adapter)
 {
 	return 0;
 }

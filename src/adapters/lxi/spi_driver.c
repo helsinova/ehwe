@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <log.h>
-#include <devices.h>
+#include <adapters.h>
 #include <driver.h>
 #include <string.h>
 #include <stdlib.h>
@@ -102,16 +102,16 @@ int lxispi_configure(struct ddata *ddata)
     return 0;
 }
 
-/* Create a new device/driver-data object for external manipulation without
- * interfering with current one. If arg "device" is not NULL it will be a
+/* Create a new adapter/driver-data object for external manipulation without
+ * interfering with current one. If arg "adapter" is not NULL it will be a
  * copy of current, else it's will be pre-set with build-system defaults. */
-struct ddata *lxispi_newddata(struct device *device)
+struct ddata *lxispi_newddata(struct adapter *adapter)
 {
     struct ddata *ddata;
     ASSERT(ddata = malloc(sizeof(struct ddata)));
 
-    if (device != NULL)
-        return (struct ddata *)memcpy(ddata, device->driver.any->ddata,
+    if (adapter != NULL)
+        return (struct ddata *)memcpy(ddata, adapter->driver.any->ddata,
                                       sizeof(struct ddata));
 
     memcpy(&(ddata->config.spi), &lxi_dflt_config_SPI,

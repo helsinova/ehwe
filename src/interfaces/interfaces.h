@@ -21,7 +21,7 @@
 #define interfaces_h
 #include <config.h>
 
-struct device;
+struct adapter;
 
 typedef enum {
     IN_UNDEFINED = 0,
@@ -46,6 +46,6 @@ struct interface {
 };
 
 int interfaces_init();
-int interfaces_init_interface(const struct device *device);
+int interfaces_init_interface(const struct adapter *adapter);
 
 #endif                          //interfaces_h

@@ -2,7 +2,7 @@ include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}")
 include_directories("${PROJECT_BINARY_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include")
-include_directories("${CMAKE_BINARY_DIR}/devices")
+include_directories("${CMAKE_BINARY_DIR}/adapters")
 
 ################################################################################
 # Configuration options for this module

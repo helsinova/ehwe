@@ -30,3 +30,4 @@ let $KDBG_GEOMETRY = "-geometry 1035x1385+1523--2"
 
 "nmap <silent> <leader>d :!emb.openocd.cmd.exp halt; kdbg $KDBG_GEOMETRY "-r :3333" "ehwe" &<CR>
 nmap <silent> <leader>d :!kdbg $KDBG_GEOMETRY "ehwe" &<CR>
+:set foldlevelstart=99

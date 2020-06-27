@@ -224,7 +224,7 @@ void i2c_device_write_uint32(i2c_device_hndl i2c_device, uint8_t reg,
 }
 
 /* Does nothing but is needed for linker not to optimize away functions */
-int i2c_device_init_interface(const struct device *device)
+int i2c_device_init_interface(const struct adapter *device)
 {
     return 0;
 }

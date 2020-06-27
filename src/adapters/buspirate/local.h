@@ -246,12 +246,12 @@ struct ddata {
     } driver;
 };
 
-struct device;
+struct adapter;
 
 void log_ioerror(int ecode, log_level llevel);
 void empty_inbuff(int fd);
-int rawMode_enter(struct device *);
-int rawMode_toMode(struct device *, bpcmd_raw_t bpcmd);
+int rawMode_enter(struct adapter *);
+int rawMode_toMode(struct adapter *, bpcmd_raw_t bpcmd);
 
 /***************************************************************************
  * Main driver interfaces
@@ -263,7 +263,7 @@ void bpspi_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 void bpspi_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 uint16_t bpspi_getStatus(struct ddata *ddata, uint16_t flags);
 int bpspi_configure(struct ddata *ddata);
-struct ddata *bpspi_newddata(struct device *device);
+struct ddata *bpspi_newddata(struct adapter *adapter);
 /* High level */
 void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                            int outsz, uint8_t *indata, int insz);
@@ -281,7 +281,7 @@ void bpi2c_receiveData(struct ddata *ddata, uint8_t *data, int sz);
 void bpi2c_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 uint16_t bpi2c_getStatus(struct ddata *ddata, uint16_t flags);
 int bpi2c_configure(struct ddata *ddata);
-struct ddata *bpi2c_newddata(struct device *device);
+struct ddata *bpi2c_newddata(struct adapter *adapter);
 /* High level */
 void bpi2c_sendrecieveData(struct ddata *ddata, const uint8_t *outbuf,
                            int outsz, uint8_t *indata, int insz);

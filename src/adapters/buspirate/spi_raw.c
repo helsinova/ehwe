@@ -19,54 +19,19 @@
  ***************************************************************************/
 #include <sys/types.h>
 #include <regex.h>
-#include "devices.h"
-#include "paraport.h"
-
-/*
- * Refined parsing of devstring to complete paraport dev_struct
- *
- * */
-int paraport_parse(const char *devstr, struct device *device)
-{
-    /* Parse the first part to be able to get the vitals out */
-
-    LOGE("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
-         device->devid);
-    return -1;
-}
-
-int paraport_init_device(struct device *device)
-{
-    LOGE("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
-         device->devid);
-    return -1;
-}
-
-int paraport_deinit_device(struct device *device)
-{
-    LOGE("Unfinished function [%s] (TBD) for device ID [%d]\n", __func__,
-         device->devid);
-    return -1;
-}
+#include <stdint.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <log.h>
+#include <adapters.h>
+#include <driver.h>
+#include <buspirate.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assure.h>
+#include "local.h"
 
 /***************************************************************************
- * INIT/FINI mechanism
+ * Driver interface SPI
  ***************************************************************************/
-#define __init __attribute__((constructor))
-#define __fini __attribute__((destructor))
-
-void __init __paraport_init(void)
-{
-#ifdef ENABLE_INITFINI_SHOWEXEC
-    fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
-            ">>> using CTORS/DTORS mechanism ====\n");
-#endif
-}
-
-void __fini __paraport_fini(void)
-{
-#ifdef ENABLE_INITFINI_SHOWEXEC
-    fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"
-            ">>> using CTORS/DTORS mechanism\n");
-#endif
-}

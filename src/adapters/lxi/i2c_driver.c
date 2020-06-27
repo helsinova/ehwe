@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <log.h>
-#include <devices.h>
+#include <adapters.h>
 #include <driver.h>
 #include <string.h>
 #include <stdlib.h>
@@ -146,10 +146,10 @@ void lxii2c_start(struct ddata *ddata)
 /* Send one byte */
 int lxii2c_sendByte(struct ddata *ddata, uint8_t data)
 {
-    /* Read device-ID detection */
+    /* Read adapter-ID detection */
     if ((ddata->lxi_state.i2c.func_0 == TO_LXI_STATE(start))
         && (ddata->lxi_state.i2c.msg[OUT_MSG].addr != 0xFF)) {
-        /* This is an device read address. Nothing to do as address is
+        /* This is an adapter read address. Nothing to do as address is
            already put in place, except check that address is sane. */
 
         ASSURE((data & 0x01) && "Full-length read addresses must be odd");
@@ -263,17 +263,17 @@ int lxii2c_configure(struct ddata *ddata)
     return 0;
 }
 
-/* Create a new device/driver-data object for external manipulation without
- * interfering with current one. If arg "device" is not NULL it will be a
+/* Create a new adapter/driver-data object for external manipulation without
+ * interfering with current one. If arg "adapter" is not NULL it will be a
  * copy of current, else it's will be pre-set with build-system defaults. */
-struct ddata *lxii2c_newddata(struct device *device)
+struct ddata *lxii2c_newddata(struct adapter *adapter)
 {
     struct ddata *ddata = NULL;
 
     ASSERT(ddata = malloc(sizeof(struct ddata)));
 
-    if (device != NULL)
-        return (struct ddata *)memcpy(ddata, device->driver.any->ddata,
+    if (adapter != NULL)
+        return (struct ddata *)memcpy(ddata, adapter->driver.any->ddata,
                                       sizeof(struct ddata));
 
     memcpy(&(ddata->config.i2c), &lxi_dflt_config_I2C,

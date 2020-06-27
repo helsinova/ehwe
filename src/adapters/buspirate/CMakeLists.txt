@@ -1,6 +1,6 @@
 include_directories("${PROJECT_BINARY_DIR}")
 include_directories("${PROJECT_SOURCE_DIR}")
-include_directories("${CMAKE_BINARY_DIR}/devices")
+include_directories("${CMAKE_BINARY_DIR}/adapters")
 
 option(BUSPIRATE_ENABLE_SPI
     "Enable SPI for BUSPIRATE." YES)

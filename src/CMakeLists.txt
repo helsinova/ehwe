@@ -127,11 +127,11 @@ endif ()
 # This projects source-libraries. Must be come AFTER generic libraries that
 # may be conditional. 
 #-------------------------------------------------------------------------------
-# Devices - i.e. the real stuff behind this project
+# Adapters - i.e. the real stuff behind this project
 #-------------------------------------------------------------------------------
-include_directories ("${PROJECT_SOURCE_DIR}/devices")
-add_subdirectory (devices)
-set (EXTRA_LIBS ${EXTRA_LIBS} devices)
+include_directories ("${PROJECT_SOURCE_DIR}/adapters")
+add_subdirectory (adapters)
+set (EXTRA_LIBS ${EXTRA_LIBS} adapters)
 
 #-------------------------------------------------------------------------------
 # Interfaces - i.e. the other end of the real stuff behind this project

@@ -80,7 +80,7 @@ static int opts_parse_opt(const char *cmd,
             break;
         case 'd':
             _req_opt('d')->cnt++;
-            ASSURE(mlist_add_last(opts->dev_strs, &arg));
+            ASSURE(mlist_add_last(opts->adapter_strs, &arg));
             break;
         case 'D':
             _req_opt('D')->cnt++;

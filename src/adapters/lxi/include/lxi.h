@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2016 by Michael Ambrus                                  *
- *   ambrmi09@gmail.com                                                    *
+ *   Copyright (C) 2018 by Michael Ambrus                                  *
+ *   michael@helsinova.se                                                  *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,21 +17,16 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#include <sys/types.h>
-#include <regex.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <log.h>
-#include <devices.h>
-#include <driver.h>
-#include <buspirate.h>
-#include <string.h>
-#include <stdlib.h>
-#include <assure.h>
-#include "local.h"
+#ifndef lxi_h
+#define lxi_h
 
-/***************************************************************************
- * Driver interface SPI
- ***************************************************************************/
+struct lxi {
+    clkownr_t clckownr;
+    char *filename;             /* Local hosts adapter name/path */
+};
+
+int lxi_parse(const char *adapterstr, struct adapter *adapter);
+int lxi_init_adapter(struct adapter *adapter);
+int lxi_deinit_adapter(struct adapter *adapter);
+
+#endif                          //lxi_h

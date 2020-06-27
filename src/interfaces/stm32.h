@@ -31,6 +31,6 @@ struct stm32 {
 struct interface;
 
 int stm32_init();
-int stm32_init_interface(const struct device *device);
+int stm32_init_interface(const struct adapter *adapter);
 
 #endif                          //stm32_h

@@ -17,30 +17,21 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef buspirate_h
-#define buspirate_h
+#include <sys/types.h>
+#include <regex.h>
+#include <stdint.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <log.h>
+#include <adapters.h>
+#include <driver.h>
+#include <buspirate.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assure.h>
+#include "local.h"
+
 /***************************************************************************
- * Public interface
+ * Driver interface I2C
  ***************************************************************************/
-
-struct buspirate {
-    clkownr_t clckownr;
-    char *name;                 /* Local hosts device name/path */
-};
-
-/* Valid regex-i role patterns for buspirate */
-#define BP_ROLES "SPI|I2C"
-
-/* Valid regex-i clock-owner patterns for buspirate */
-#define BP_CLKOWNER "MASTER|SLAVE"
-
-/* Forward declaration of 'struct device' required to avoid mutual header
- * inclusion */
-struct device;
-
-int buspirate_init();
-int buspirate_parse(const char *devstr, struct device *device);
-int buspirate_init_device(struct device *device);
-int buspirate_deinit_device(struct device *device);
-
-#endif                          //buspirate_h

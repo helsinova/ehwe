@@ -25,7 +25,7 @@ struct paraport {
     /* TBD */
 };
 
-int paraport_parse(const char *devstr, struct device *device);
+int paraport_parse(const char *adapterstr, struct device *device);
 int paraport_init_device(struct device *device);
 int paraport_deinit_device(struct device *device);
 

@@ -28,7 +28,7 @@
 #include "stm32.h"
 #include "ehwe.h"
 #include "ehwe_i2c_device.h"
-#include "devices.h"
+#include "adapters.h"
 
 int interfaces_init()
 {
@@ -43,22 +43,22 @@ int interfaces_init()
     return 0;
 }
 
-int interfaces_init_interface(const struct device *device)
+int interfaces_init_interface(const struct adapter *adapter)
 {
     int rc = 0;
 
 #ifdef ENABLE_API_HIGH_LVL
     ASSURE_E((rc =
-              ehwe_init_interface(device)) == 0,
+              ehwe_init_interface(adapter)) == 0,
              goto interfaces_init_interface_err);
     ASSURE_E((rc =
-              i2c_device_init_interface(device)) == 0,
+              i2c_device_init_interface(adapter)) == 0,
              goto interfaces_init_interface_err);
 #endif
 
 #ifdef ENABLE_API_STM32
     ASSURE_E((rc =
-              stm32_init_interface(device)) == 0,
+              stm32_init_interface(adapter)) == 0,
              goto interfaces_init_interface_err);
 #endif
 

@@ -1,0 +1,4 @@
+#cmakedefine ADAPTER_PARAPORT
+#cmakedefine ADAPTER_BUSPIRATE
+#cmakedefine ADAPTER_LXI
+#define DEF_MAX_ADAPTERS @DEF_MAX_ADAPTERS@

@@ -25,7 +25,7 @@
 /* Process instance global variables */
 struct ehwe {
     struct opts *opts;
-    handle_t devices;           /* Devices list. */
+    handle_t adapters;           /* Adapters list. */
 };
 
 void ehwe_exit(int status);

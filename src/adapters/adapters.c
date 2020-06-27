@@ -21,36 +21,36 @@
 #include <regex.h>
 #include <assure.h>
 #include <log.h>
-#include "devices.h"
+#include "adapters.h"
 #include <string.h>
 #include <stdlib.h>
-#include "devices_config.h"
+#include "adapters_config.h"
 
-#ifdef DEVICE_PARAPORT
+#ifdef ADAPTER_PARAPORT
 #include <paraport.h>
 #endif
 
-#ifdef DEVICE_BUSPIRATE
+#ifdef ADAPTER_BUSPIRATE
 #include <buspirate.h>
 #endif
 
-#ifdef DEVICE_LXI
+#ifdef ADAPTER_LXI
 #include <lxi.h>
 #endif
 
 static regex_t preg;            /* Compiled regular expression for generic
-                                   part of device-string parsing */
+                                   part of adapter-string parsing */
 
 #define REGEX_PATT \
 	"^(" ROLES \
 	"):(" INDEX \
-	"):(" DEVICES \
+	"):(" ADAPTERS \
 	"):(" ANYTHING \
 ")"
 
 #define REGEX_NSUB (4+1)        /* Number of parse-groups (see REGEXP_PATT) */
 
-int devices_init()
+int adapters_init()
 {
     int rc;
     char err_str[REXP_ESTRSZ];
@@ -72,128 +72,128 @@ int devices_init()
 }
 
 /*
- * Takes devstr and makes initial parsing to detect which driver it should
+ * Takes adapterstr and makes initial parsing to detect which driver it should
  * send each description to for further refinement. Result is a struct
- * device,
+ * adapter,
  *
  * */
-int devices_parse(const char *devstr, struct device *device)
+int adapters_parse(const char *adapterstr, struct adapter *adapter)
 {
     int rc = 0, i;
     char err_str[REXP_ESTRSZ];
     regmatch_t mtch_idxs[REGEX_NSUB];
-    char *devstr_cpy = strdup(devstr);
+    char *adapterstr_cpy = strdup(adapterstr);
     char *role_str;
     char *index_str;
-    char *device_str;
+    char *adapter_str;
 
-    device->devid = DEV_INVALID;
+    adapter->devid = DEV_INVALID;
 
-    rc = regexec(&preg, devstr_cpy, REGEX_NSUB, mtch_idxs, 0);
+    rc = regexec(&preg, adapterstr_cpy, REGEX_NSUB, mtch_idxs, 0);
     if (rc) {
         regerror(rc, &preg, err_str, REXP_ESTRSZ);
         LOGE("Regexec match error: %s\n", err_str);
-        free(devstr_cpy);
+        free(adapterstr_cpy);
         return rc;
     }
     /* Add string terminators in substrings */
     for (i = 1; i < REGEX_NSUB; i++) {
-        ASSURE_E(mtch_idxs[i].rm_so != -1, goto devices_parse_err);
-        devstr_cpy[mtch_idxs[i].rm_eo] = 0;
+        ASSURE_E(mtch_idxs[i].rm_so != -1, goto adapters_parse_err);
+        adapterstr_cpy[mtch_idxs[i].rm_eo] = 0;
     }
 
-    role_str = &devstr_cpy[mtch_idxs[1].rm_so];
-    index_str = &devstr_cpy[mtch_idxs[2].rm_so];
-    device_str = &devstr_cpy[mtch_idxs[3].rm_so];
+    role_str = &adapterstr_cpy[mtch_idxs[1].rm_so];
+    index_str = &adapterstr_cpy[mtch_idxs[2].rm_so];
+    adapter_str = &adapterstr_cpy[mtch_idxs[3].rm_so];
 
-    LOGD("  First level device-string parsing:\n");
+    LOGD("  First level adapter-string parsing:\n");
     LOGD("    role=%s\n", role_str);
     LOGD("    index=%s\n", index_str);
-    LOGD("    device=%s\n", device_str);
+    LOGD("    adapter=%s\n", adapter_str);
 
-#ifdef DEVICE_PARAPORT
-    if (strcasecmp(device_str, "pp") == 0)
+#ifdef ADAPTER_PARAPORT
+    if (strcasecmp(adapter_str, "pp") == 0)
         ASSURE_E((rc =
-                  paraport_parse(devstr, device)) == 0, goto devices_parse_err);
+                  paraport_parse(adapterstr, adapter)) == 0, goto adapters_parse_err);
 #endif
-#ifdef DEVICE_BUSPIRATE
-    if (strcasecmp(device_str, "bp") == 0)
+#ifdef ADAPTER_BUSPIRATE
+    if (strcasecmp(adapter_str, "bp") == 0)
         ASSURE_E((rc =
-                  buspirate_parse(devstr, device)) == 0,
-                 goto devices_parse_err);
+                  buspirate_parse(adapterstr, adapter)) == 0,
+                 goto adapters_parse_err);
 #endif
-#ifdef DEVICE_LXI
-    if (strcasecmp(device_str, "lxi") == 0)
+#ifdef ADAPTER_LXI
+    if (strcasecmp(adapter_str, "lxi") == 0)
         ASSURE_E((rc =
-                  lxi_parse(devstr, device)) == 0,
-                 goto devices_parse_err);
+                  lxi_parse(adapterstr, adapter)) == 0,
+                 goto adapters_parse_err);
 #endif
 
-    free(devstr_cpy);
+    free(adapterstr_cpy);
     return rc;
-devices_parse_err:
-    free(devstr_cpy);
+adapters_parse_err:
+    free(adapterstr_cpy);
     return -1;
 }
 
 /*
- * For each device-driver:
+ * For each adapter-driver:
  * - Compiles regexp for further matching
  * - Initialize DD-global variables */
-int devices_init_device(struct device *device)
+int adapters_init_adapter(struct adapter *adapter)
 {
     int rc = 0;
 
-    ASSURE(device);
-    LOGD("{%d,%d,%d}\n", device->devid, device->role, device->index);
-    switch (device->devid) {
-#ifdef DEVICE_PARAPORT
+    ASSURE(adapter);
+    LOGD("{%d,%d,%d}\n", adapter->devid, adapter->role, adapter->index);
+    switch (adapter->devid) {
+#ifdef ADAPTER_PARAPORT
         case PARAPORT:
-            rc = paraport_init_device(device);
+            rc = paraport_init_adapter(adapter);
             break;
 #endif
-#ifdef DEVICE_BUSPIRATE
+#ifdef ADAPTER_BUSPIRATE
         case BUSPIRATE:
-            rc = buspirate_init_device(device);
+            rc = buspirate_init_adapter(adapter);
             break;
 #endif
-#ifdef DEVICE_LXI
+#ifdef ADAPTER_LXI
         case LXI:
-            rc = lxi_init_device(device);
+            rc = lxi_init_adapter(adapter);
             break;
 #endif
         default:
-            LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
+            LOGE("Unsupported adapter [%d] in [%s]\n", adapter->devid, __func__);
     }
 
     return rc;
 }
 
-int devices_deinit_device(struct device *device)
+int adapters_deinit_adapter(struct adapter *adapter)
 {
     int rc = 0;
 
-    ASSERT(device);
-    ASSERT(device->driver.any);
-    LOGD("{%d,%d,%d}\n", device->devid, device->role, device->index);
-    switch (device->devid) {
-#ifdef DEVICE_PARAPORT
+    ASSERT(adapter);
+    ASSERT(adapter->driver.any);
+    LOGD("{%d,%d,%d}\n", adapter->devid, adapter->role, adapter->index);
+    switch (adapter->devid) {
+#ifdef ADAPTER_PARAPORT
         case PARAPORT:
-            rc = paraport_deinit_device(device);
+            rc = paraport_deinit_adapter(adapter);
             break;
 #endif
-#ifdef DEVICE_BUSPIRATE
+#ifdef ADAPTER_BUSPIRATE
         case BUSPIRATE:
-            rc = buspirate_deinit_device(device);
+            rc = buspirate_deinit_adapter(adapter);
             break;
 #endif
-#ifdef DEVICE_LXI
+#ifdef ADAPTER_LXI
         case LXI:
-            rc = lxi_deinit_device(device);
+            rc = lxi_deinit_adapter(adapter);
             break;
 #endif
         default:
-            LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
+            LOGE("Unsupported adapter [%d] in [%s]\n", adapter->devid, __func__);
     }
     return rc;
 }
@@ -204,20 +204,20 @@ int devices_deinit_device(struct device *device)
 #define __init __attribute__((constructor))
 #define __fini __attribute__((destructor))
 
-void __init __devices_init(void)
+void __init __adapters_init(void)
 {
     int rc;
 #ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _init in [" __FILE__ "]\n"
             ">>> using CTORS/DTORS mechanism ====\n");
 #endif
-    if ((rc = devices_init())) {
-        fprintf(stderr, "Fatal error: devices_init() failed\n");
+    if ((rc = adapters_init())) {
+        fprintf(stderr, "Fatal error: adapters_init() failed\n");
         exit(rc);
     }
 }
 
-void __fini __devices_fini(void)
+void __fini __adapters_fini(void)
 {
 #ifdef ENABLE_INITFINI_SHOWEXEC
     fprintf(stderr, ">>> Running module _fini in [" __FILE__ "]\n"

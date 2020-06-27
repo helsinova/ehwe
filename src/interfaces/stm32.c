@@ -19,11 +19,11 @@
  ***************************************************************************/
 #include <sys/types.h>
 #include <log.h>
-#include <devices_config.h>
+#include <adapters_config.h>
 #include "interfaces.h"
 #include "stm32.h"
 #include <stm32f10x.h>
-#include "devices.h"
+#include "adapters.h"
 #include "driver.h"
 #include <string.h>
 #include <stdlib.h>
@@ -97,29 +97,29 @@ int stm32_init()
 
 /* Checks bus-interface ability and compare with stm32 API. If OK, accept
  * it's driver-struct into corresponding API<->DD array */
-int stm32_init_interface(const struct device *device)
+int stm32_init_interface(const struct adapter *adapter)
 {
     int if_init = 0;
 
-    switch (device->devid) {
-#ifdef DEVICE_PARAPORT
+    switch (adapter->devid) {
+#ifdef ADAPTER_PARAPORT
         case PARAPORT:
             ASSERT("PARAPORT is TBD" == NULL);
             if_init = 1;
             break;
 #endif
-#ifdef DEVICE_BUSPIRATE
+#ifdef ADAPTER_BUSPIRATE
         case BUSPIRATE:
-            switch (device->role) {
+            switch (adapter->role) {
                 case ROLE_SPI:
-                    ASSERT(device->index > 0
-                           && device->index <= MAX_SPI_INTERFACES);
-                    SPI_stm32_drv[device->index - 1] = device->driver.spi;
+                    ASSERT(adapter->index > 0
+                           && adapter->index <= MAX_SPI_INTERFACES);
+                    SPI_stm32_drv[adapter->index - 1] = adapter->driver.spi;
                     break;
                 case ROLE_I2C:
-                    ASSERT(device->index > 0
-                           && device->index <= MAX_I2C_INTERFACES);
-                    I2C_stm32_drv[device->index - 1] = device->driver.i2c;
+                    ASSERT(adapter->index > 0
+                           && adapter->index <= MAX_I2C_INTERFACES);
+                    I2C_stm32_drv[adapter->index - 1] = adapter->driver.i2c;
                     break;
                 default:
                     ASSERT("Role not supported for BUSPIRATE driver" == NULL);
@@ -128,18 +128,18 @@ int stm32_init_interface(const struct device *device)
             if_init = 1;
             break;
 #endif
-#ifdef DEVICE_LXI
+#ifdef ADAPTER_LXI
         case LXI:
-            switch (device->role) {
+            switch (adapter->role) {
                 case ROLE_SPI:
-                    ASSERT(device->index > 0
-                           && device->index <= MAX_SPI_INTERFACES);
-                    SPI_stm32_drv[device->index - 1] = device->driver.spi;
+                    ASSERT(adapter->index > 0
+                           && adapter->index <= MAX_SPI_INTERFACES);
+                    SPI_stm32_drv[adapter->index - 1] = adapter->driver.spi;
                     break;
                 case ROLE_I2C:
-                    ASSERT(device->index > 0
-                           && device->index <= MAX_I2C_INTERFACES);
-                    I2C_stm32_drv[device->index - 1] = device->driver.i2c;
+                    ASSERT(adapter->index > 0
+                           && adapter->index <= MAX_I2C_INTERFACES);
+                    I2C_stm32_drv[adapter->index - 1] = adapter->driver.i2c;
                     break;
                 default:
                     ASSERT("Role not supported for LXI driver" == NULL);
@@ -149,7 +149,7 @@ int stm32_init_interface(const struct device *device)
             break;
 #endif
         default:
-            LOGE("Unsupported device [%d] in [%s]\n", device->devid, __func__);
+            LOGE("Unsupported adapter [%d] in [%s]\n", adapter->devid, __func__);
 
     }
     ASSERT(if_init);
@@ -256,10 +256,10 @@ void I2C_AcknowledgeConfig(I2C_TypeDef * I2Cx, FunctionalState NewState)
 }
 
 /**
-  * @brief  Transmits the address byte to select the slave device.
+  * @brief  Transmits the address byte to select the slave adapter.
   * @param  I2Cx: where x can be 1 or 2 to select the I2C peripheral.
   * @param  Address: specifies the slave address which will be transmitted
-  * @param  I2C_Direction: specifies whether the I2C device will be a
+  * @param  I2C_Direction: specifies whether the I2C adapter will be a
   *   Transmitter or a Receiver. This parameter can be one of the following values
   *     @arg I2C_Direction_Transmitter: Transmitter mode
   *     @arg I2C_Direction_Receiver: Receiver mode

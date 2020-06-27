@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "config.h"
-#include "devices_config.h"
+#include "adapters_config.h"
 #include "buspirate_config.h"
 #include "local.h"
 #include <sys/types.h>
@@ -28,7 +28,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <log.h>
-#include <devices.h>
+#include <adapters.h>
 #include <driver.h>
 #include <buspirate.h>
 #include <string.h>
@@ -37,12 +37,12 @@
 #include <stermio.h>
 
 static regex_t preg;            /* Compiled regular expression for full
-                                   device-string parsing */
+                                   adapter-string parsing */
 
 #define REGEX_PATT \
   "^(" BP_ROLES \
   "):(" INDEX \
-  "):(" DEVICES \
+  "):(" ADAPTERS \
   "):(" BP_CLKOWNER \
   "):(" FILENAME \
 ")"
@@ -216,95 +216,95 @@ int buspirate_init()
 }
 
 /*
- * Refined parsing of devstring to complete buspirate dev_struct
+ * Refined parsing of adapterstring to complete buspirate adapter_struct
  *
  * */
-int buspirate_parse(const char *devstr, struct device *device)
+int buspirate_parse(const char *adapterstr, struct adapter *adapter)
 {
     int rc, i;
     char err_str[REXP_ESTRSZ];
     regmatch_t mtch_idxs[REGEX_NSUB];
-    char *devstr_cpy = strdup(devstr);
+    char *adapterstr_cpy = strdup(adapterstr);
     char *role_str;
     char *index_str;
-    char *device_str;
+    char *adapter_str;
     char *clkownr_str;
     char *filename_str;
 
-    device->role = ROLE_INVALID;
-    device->devid = DEV_INVALID;
+    adapter->role = ROLE_INVALID;
+    adapter->devid = DEV_INVALID;
 
-    rc = regexec(&preg, devstr_cpy, REGEX_NSUB, mtch_idxs, 0);
+    rc = regexec(&preg, adapterstr_cpy, REGEX_NSUB, mtch_idxs, 0);
     if (rc) {
         regerror(rc, &preg, err_str, REXP_ESTRSZ);
         LOGE("Regexec match error: %s\n", err_str);
-        free(devstr_cpy);
+        free(adapterstr_cpy);
         return rc;
     }
     /* Add string terminators in substrings */
     for (i = 1; i < REGEX_NSUB; i++) {
         ASSURE_E(mtch_idxs[i].rm_so != -1, goto buspirate_parse_err);
-        devstr_cpy[mtch_idxs[i].rm_eo] = 0;
+        adapterstr_cpy[mtch_idxs[i].rm_eo] = 0;
     }
 
-    role_str = &devstr_cpy[mtch_idxs[1].rm_so];
-    index_str = &devstr_cpy[mtch_idxs[2].rm_so];
-    device_str = &devstr_cpy[mtch_idxs[3].rm_so];
-    clkownr_str = &devstr_cpy[mtch_idxs[4].rm_so];
-    filename_str = &devstr_cpy[mtch_idxs[5].rm_so];
+    role_str = &adapterstr_cpy[mtch_idxs[1].rm_so];
+    index_str = &adapterstr_cpy[mtch_idxs[2].rm_so];
+    adapter_str = &adapterstr_cpy[mtch_idxs[3].rm_so];
+    clkownr_str = &adapterstr_cpy[mtch_idxs[4].rm_so];
+    filename_str = &adapterstr_cpy[mtch_idxs[5].rm_so];
 
-    LOGD("  Second level device-string parsing (by %s):\n", __func__);
+    LOGD("  Second level adapter-string parsing (by %s):\n", __func__);
     LOGD("    role=%s\n", role_str);
     LOGD("    index=%s\n", index_str);
-    LOGD("    device=%s\n", device_str);
+    LOGD("    adapter=%s\n", adapter_str);
     LOGD("    clkownr=%s\n", clkownr_str);
     LOGD("    filename=%s\n", filename_str);
 
-    ASSURE_E(strcasecmp(device_str, "bp") == 0, goto buspirate_parse_err);
+    ASSURE_E(strcasecmp(adapter_str, "bp") == 0, goto buspirate_parse_err);
 
     if (strcasecmp(role_str, "spi") == 0) {
-        device->role = ROLE_SPI;
+        adapter->role = ROLE_SPI;
     } else if (strcasecmp(role_str, "i2c") == 0) {
-        device->role = ROLE_I2C;
+        adapter->role = ROLE_I2C;
     } else {
-        LOGE("Buspirate device driver can't handle role: %s\n", role_str);
+        LOGE("Buspirate adapter driver can't handle role: %s\n", role_str);
         goto buspirate_parse_err;
     }
 
-    device->index = atoi(index_str);
-    device->devid = BUSPIRATE;
-    device->buspirate = malloc(sizeof(struct buspirate));
+    adapter->index = atoi(index_str);
+    adapter->devid = BUSPIRATE;
+    adapter->buspirate = malloc(sizeof(struct buspirate));
 
     if (strcasecmp(clkownr_str, "master") == 0) {
-        device->buspirate->clckownr = MASTER;
+        adapter->buspirate->clckownr = MASTER;
     } else if (strcasecmp(clkownr_str, "slave") == 0) {
-        device->buspirate->clckownr = SLAVE;
+        adapter->buspirate->clckownr = SLAVE;
     } else {
-        LOGE("Buspirate device driver can't handle clkownr: %s\n", clkownr_str);
+        LOGE("Buspirate adapter driver can't handle clkownr: %s\n", clkownr_str);
         goto buspirate_parse_err;
     }
 
     /* Avoid need to strdup by using original which happens to terminate
      * correctly as well. Ignore const as this string belongs to
      * environment with process-long lifetime */
-    device->buspirate->name = (char *)(&devstr[mtch_idxs[5].rm_so]);
+    adapter->buspirate->name = (char *)(&adapterstr[mtch_idxs[5].rm_so]);
 
-    free(devstr_cpy);
+    free(adapterstr_cpy);
     return 0;
 buspirate_parse_err:
-    free(devstr_cpy);
+    free(adapterstr_cpy);
     return -1;
 }
 
-int buspirate_init_device(struct device *device)
+int buspirate_init_adapter(struct adapter *adapter)
 {
     struct driverAPI_any *driver;
     struct ddata *ddata;
 
-    LOGI("BP: Initializing device ID [%d]\n", device->devid);
+    LOGI("BP: Initializing adapter ID [%d]\n", adapter->devid);
 
     ASSERT(driver = malloc(sizeof(struct driverAPI_spi)));
-    switch (device->role) {
+    switch (adapter->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
         case ROLE_SPI:
             memcpy(driver, &bpspi_driver, sizeof(struct driverAPI_spi));
@@ -318,12 +318,12 @@ int buspirate_init_device(struct device *device)
             break;
 #endif
         default:
-            LOGE("Role [%d] is not supported by Bus-Pirate\n", device->role);
+            LOGE("Role [%d] is not supported by Bus-Pirate\n", adapter->role);
             return -1;
     }
 
     ASSURE((ddata->fd =
-            open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
+            open(adapter->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
 
 #ifdef HAVE_POSIX_TERMIO
 	/* Make sure terminal is "good" for BP wrt speed etc, but also LF:s and
@@ -333,39 +333,39 @@ int buspirate_init_device(struct device *device)
 
     empty_inbuff(ddata->fd);
     driver->ddata = ddata;
-    driver->device = device;
-    device->driver.any = driver;
+    driver->adapter = adapter;
+    adapter->driver.any = driver;
     ddata->driver.any = driver;
 
-    ASSURE(rawMode_enter(device) == 0);
+    ASSURE(rawMode_enter(adapter) == 0);
 
-    switch (device->role) {
+    switch (adapter->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
         case ROLE_SPI:
-            ASSURE(rawMode_toMode(device, ENTER_SPI) == 0);
+            ASSURE(rawMode_toMode(adapter, ENTER_SPI) == 0);
             break;
 #endif
 #ifdef BUSPIRATE_ENABLE_I2C
         case ROLE_I2C:
-            ASSURE(rawMode_toMode(device, ENTER_I2C) == 0);
+            ASSURE(rawMode_toMode(adapter, ENTER_I2C) == 0);
             break;
 #endif
         default:
-            LOGE("Device BusPirate can't handle role %d (yet)\n", device->role);
-            ASSURE("Bad device->role" == 0);
+            LOGE("Adapter BusPirate can't handle role %d (yet)\n", adapter->role);
+            ASSURE("Bad adapter->role" == 0);
     }
     close(ddata->fd);
-    ASSURE((ddata->fd = open(device->buspirate->name, O_RDWR)) != -1);
+    ASSURE((ddata->fd = open(adapter->buspirate->name, O_RDWR)) != -1);
 #ifdef HAVE_POSIX_TERMIO
     stio_bp_raw(ddata->fd);
 #endif
 
-    LOGI("Device [%s] is now state-initialized and re-opened blocking r/w\n",
-         device->buspirate->name);
+    LOGI("Adapter [%s] is now state-initialized and re-opened blocking r/w\n",
+         adapter->buspirate->name);
     //setserial_bp(ddata->fd);
 
-    /* Configure the device to a known state as the state can't be read */
-    switch (device->role) {
+    /* Configure the adapter to a known state as the state can't be read */
+    switch (adapter->role) {
 #ifdef BUSPIRATE_ENABLE_SPI
         case ROLE_SPI:
             ASSURE(bpspi_configure(ddata) == 0);
@@ -377,34 +377,34 @@ int buspirate_init_device(struct device *device)
             break;
 #endif
         default:
-            LOGE("Device BusPirate can't handle role %d (yet)\n", device->role);
-            ASSURE("Bad device->role" == 0);
+            LOGE("Adapter BusPirate can't handle role %d (yet)\n", adapter->role);
+            ASSURE("Bad adapter->role" == 0);
     }
 
     return 0;
 }
 
-int buspirate_deinit_device(struct device *device)
+int buspirate_deinit_adapter(struct adapter *adapter)
 {
-    struct driverAPI_any *driver = device->driver.any;
+    struct driverAPI_any *driver = adapter->driver.any;
     struct ddata *ddata = driver->ddata;
-    struct buspirate *buspirate = device->buspirate;
+    struct buspirate *buspirate = adapter->buspirate;
 
     close(ddata->fd);
     ASSURE((ddata->fd =
-            open(device->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
+            open(adapter->buspirate->name, O_RDWR | O_NONBLOCK)) != -1);
 #ifdef HAVE_POSIX_TERMIO
     stio_bp_terminal(ddata->fd);
 #endif
 
-    LOGD("Device [%s] re-opened non-blocking r/w\n", device->buspirate->name);
+    LOGD("Adapter [%s] re-opened non-blocking r/w\n", adapter->buspirate->name);
 
-    LOGI("BP: Destroying device ID [%d]\n", device->devid);
+    LOGI("BP: Destroying adapter ID [%d]\n", adapter->devid);
     empty_inbuff(ddata->fd);
-    ASSURE(rawMode_toMode(device, ENTER_RESET) == 0);
+    ASSURE(rawMode_toMode(adapter, ENTER_RESET) == 0);
     msleep(1);
     empty_inbuff(ddata->fd);
-    ASSURE(rawMode_toMode(device, RESET_BUSPIRATE) == 0);
+    ASSURE(rawMode_toMode(adapter, RESET_BUSPIRATE) == 0);
     msleep(100);
 
     close(ddata->fd);
@@ -412,8 +412,8 @@ int buspirate_deinit_device(struct device *device)
     free(driver);
     free(buspirate);
 
-    device->driver.any = NULL;
-    device->buspirate = NULL;
+    adapter->driver.any = NULL;
+    adapter->buspirate = NULL;
     return 0;
 }
 

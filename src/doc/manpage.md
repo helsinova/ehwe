@@ -19,57 +19,57 @@ Options are categorized in:
 
 ### Mandatory options
 
-#### -d STR, --device STR
+#### -d STR, --adapter STR
 
-Specifies local device(s) to use. STR describes the host-device to be used.
-Format is specific to each supported host-device. This option can be given
+Specifies local adapter(s) to use. STR describes the host-adapter to be used.
+Format is specific to each supported host-adapter. This option can be given
 multiple times.
 
-STR contains a description of how a local device should act in the emulation
+STR contains a description of how a local adapter should act in the emulation
 and arguments for it. It's general format is as follows:
 
 ARG1:ARG2:ARG3:ARG4....:ARGN
 
-It's partly device specific, the first 4 arguments belong to ehwe and the rest
-to the device-drive according to the following meaning:
+It's partly adapter specific, the first 4 arguments belong to ehwe and the rest
+to the adapter-drive according to the following meaning:
 
-ROLE:NUMBER:DEVICE:DIRECTION:`<device_arguments>`
+ROLE:NUMBER:ADAPTER:DIRECTION:`<adapter_arguments>`
 
-`<device_arguments>`-part follows the same layout but number of arguments and
-their meaning is up to the device-driver.
+`<adapter_arguments>`-part follows the same layout but number of arguments and
+their meaning is up to the adapter-driver.
 
 The first three arguments are mandatory and have the following defined meaning:
 
-* **role:** What kind of bus-device this local device should be. I.e.:
+* **role:** What kind of bus-adapter this local adapter should be. I.e.:
     * i2c
     * spi
-* **number:** Which device number the API should bind to this device. I.e.:
+* **number:** Which adapter number the API should bind to this adapter. I.e.:
     * `spi1()`
     * `spi2()`
     * `spiN()`
-* **device:** The hosts understanding of what the device is called:
+* **adapter:** The hosts understanding of what the adapter is called:
     * bp - Bus Pirate
     * pp - Parallel port. I.e. old-school Centronix printer-port
-* **direction:** For devices that can have have a direction, otherwise empty:
+* **direction:** For adapters that can have have a direction, otherwise empty:
     * master
     * slave
 
-**Note** That all local devices can't take all the roles or can be
-restricted/limited in some way, for example **pp** host-device may not be able
-to be a bus-slave when having the role as an i2c-device.
+**Note** That all local adapters can't take all the roles or can be
+restricted/limited in some way, for example **pp** host-adapter may not be able
+to be a bus-slave when having the role as an i2c-adapter.
 
 
 ### Terminal control options
 
-These options apply to device-drives that are ttys (i.e. serial) and when
+These options apply to adapter-drives that are ttys (i.e. serial) and when
 system defaults are not good.
 
 On some host-systems (Cygwin) the `stty` command is either not available or
 driver changes are reset to some default as soon as the process for the
 command exits.
 
-Options will apply only to device-drivers that are real tty:s or the program
-will exit with an error. Devices will be modified only if also used by
+Options will apply only to adapter-drivers that are real tty:s or the program
+will exit with an error. Adapters will be modified only if also used by
 `ehwe`, i.e. mentioned in any mandatory -d specification. All other
 mentioning will be ignored.
 
@@ -79,12 +79,12 @@ command.
 
 #### The *DEV:* part
 
-`DEV` is a string naming which device to apply settings on. For example:
+`DEV` is a string naming which adapter to apply settings on. For example:
 
 `/dev/ttyS1`
 
 `DEV` can also be a regular expression for applying the **same setting** to
-**multiple** device-drivers.
+**multiple** adapter-drivers.
 
 #### Termio struct
 
@@ -126,7 +126,7 @@ VREPRINT VSTART VSTATUS VSTOP VSUSP VSWTCH  VTIME VWERASE
 
 #### -T DEV:STR, --termio DEV:STR
 
-Specifies termios settings to be applied *AS IS* for (a) device-driver(s).
+Specifies termios settings to be applied *AS IS* for (a) adapter-driver(s).
 
 An identifier to be `set` is given by it's name
 
@@ -137,12 +137,12 @@ Use this option to set a tty **exactly** as specified . I.e. `STR` might be
 quite long and no good/sane assumptions are made.
 
 You may want to use the `-y` option prior using this option on a system (or
-device-driver) which is known to be good.
+adapter-driver) which is known to be good.
 
 #### -t DEV:STR, --termio DEV:STR
 
 Specifies termios settings to be *"appended"* on already existing termios
-settings for (a) device-driver(s). This option is similar to the `-T` option,
+settings for (a) adapter-driver(s). This option is similar to the `-T` option,
 except that already existing termios flags which are not mentioned are left
 untouched.
 
@@ -282,12 +282,12 @@ flash_init_cal
 Usage: `flash_init_cal <fpga_size> <vctcxo_trim> [<output_file>]`
 
 Create and write a new calibration data region to the currently opened
-device, or to a file. Be sure to back up calibration data prior to running
+adapter, or to a file. Be sure to back up calibration data prior to running
 this command. (See the `flash_backup` command.)
 
  * `<fpga_size>`
 
-    Either 40 or 115, depending on the device model.
+    Either 40 or 115, depending on the adapter model.
 
  * `<vctcxo_trim>`
 
@@ -296,7 +296,7 @@ this command. (See the `flash_backup` command.)
  * `<output_file>`
 
     File to write calibration data to. When this argument is provided, no
-    data will be written to the device's flash.
+    data will be written to the adapter's flash.
 
 
 flash_restore
@@ -329,14 +329,14 @@ info
 
 Usage: `info`
 
-Prints the following information about an opened device:
+Prints the following information about an opened adapter:
 
  * Serial number
  * VCTCXO DAC calibration value
  * FPGA size
  * Whether or not the FPGA is loaded
  * USB bus, address, and speed
- * Backend (Denotes which device interface code is being used.)
+ * Backend (Denotes which adapter interface code is being used.)
  * Instance number
 
 
@@ -434,23 +434,23 @@ mimo
 
 Usage: `mimo [master | slave]`
 
-Modify device MIMO operation.
+Modify adapter MIMO operation.
 
 
 open
 ----
 
-Usage: `open [device identifiers]`
+Usage: `open [adapter identifiers]`
 
-Open the specified device for use with successive commands. Any previously
-opened device will be closed.
+Open the specified adapter for use with successive commands. Any previously
+opened adapter will be closed.
 
-The general form of the device identifier string is:
+The general form of the adapter identifier string is:
 
-`<backend>:[device=<bus>:<addr>] [instance=<n>] [serial=<serial>]`
+`<backend>:[adapter=<bus>:<addr>] [instance=<n>] [serial=<serial>]`
 
 See the `bladerf_open()` documentation in libbladeRF for the complete
-device specifier format.
+adapter specifier format.
 
 
 peek
@@ -458,7 +458,7 @@ peek
 
 Usage: `peek <dac|lms|si> <address> [num_addresses]`
 
-The peek command can read any of the devices hanging off the FPGA which
+The peek command can read any of the adapters hanging off the FPGA which
 includes the LMS6002D transceiver, VCTCXO trim DAC or the Si5338 clock
 generator chip.
 
@@ -467,7 +467,7 @@ another peek is performed for that many addresses.
 
 Valid Address Ranges:
 
-     Device Address Range
+     Adapter Address Range
 ----------- ----------------
 `dac`       0 to 255
 `lms`       0 to 127
@@ -483,13 +483,13 @@ poke
 
 Usage: `poke <dac|lms|si> <address> <data>`
 
-The poke command can write any of the devices hanging off the FPGA which
+The poke command can write any of the adapters hanging off the FPGA which
 includes the LMS6002D transceiver, VCTCXO trim DAC or the Si5338 clock
 generator chip.
 
 Valid Address Ranges:
 
-     Device Address Range
+     Adapter Address Range
 ----------- ----------------
 `dac`       0 to 255
 `lms`       0 to 127
@@ -541,13 +541,13 @@ probe
 
 Usage: `probe [strict]`
 
-Search for attached bladeRF device and print a list of results.
+Search for attached bladeRF adapter and print a list of results.
 
-Without specifying `strict`, the lack of any available devices is not considered
+Without specifying `strict`, the lack of any available adapters is not considered
 an error.
 
 When provided the optional `strict` argument, this command will treat the
-situation where no devices are found as an error, causing scripts or
+situation where no adapters are found as an error, causing scripts or
 lists of commands provided via the `-e` command line argument to terminate
 immediately.
 
@@ -565,17 +565,17 @@ recover
 
 Usage: `recover [<bus> <address> <firmware file>]`
 
-Load firmware onto a device running in bootloader mode, or list all devices
+Load firmware onto a adapter running in bootloader mode, or list all adapters
 currently in bootloader mode.
 
 With no arguments, this command lists the USB bus and address for FX3-based
-devices running in bootloader mode.
+adapters running in bootloader mode.
 
 When provided a bus, address, and path to a firmware file, the specified
-device will be loaded with and begin executing the provided firmware.
+adapter will be loaded with and begin executing the provided firmware.
 
-In most cases, after successfully loading firmware into the device's RAM,
-users should open the device with the "`open`" command, and write the
+In most cases, after successfully loading firmware into the adapter's RAM,
+users should open the adapter with the "`open`" command, and write the
 firmware to flash via "`load fx3 <firmware file>`"
 
 
@@ -802,4 +802,4 @@ version
 
 Usage: `version`
 
-Prints version information for host software and the current device.
+Prints version information for host software and the current adapter.

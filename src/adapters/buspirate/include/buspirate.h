@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2018 by Michael Ambrus                                  *
- *   michael@helsinova.se                                                  *
+ *   Copyright (C) 2016 by Michael Ambrus                                  *
+ *   ambrmi09@gmail.com                                                    *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,16 +17,30 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef lxi_h
-#define lxi_h
+#ifndef buspirate_h
+#define buspirate_h
+/***************************************************************************
+ * Public interface
+ ***************************************************************************/
 
-struct lxi {
+struct buspirate {
     clkownr_t clckownr;
-    char *filename;             /* Local hosts device name/path */
+    char *name;                 /* Local hosts adapter name/path */
 };
 
-int lxi_parse(const char *devstr, struct device *device);
-int lxi_init_device(struct device *device);
-int lxi_deinit_device(struct device *device);
+/* Valid regex-i role patterns for buspirate */
+#define BP_ROLES "SPI|I2C"
 
-#endif                          //lxi_h
+/* Valid regex-i clock-owner patterns for buspirate */
+#define BP_CLKOWNER "MASTER|SLAVE"
+
+/* Forward declaration of 'struct adapter' required to avoid mutual header
+ * inclusion */
+struct adapter;
+
+int buspirate_init();
+int buspirate_parse(const char *adapterstr, struct adapter *adapter);
+int buspirate_init_adapter(struct adapter *adapter);
+int buspirate_deinit_adapter(struct adapter *adapter);
+
+#endif                          //buspirate_h

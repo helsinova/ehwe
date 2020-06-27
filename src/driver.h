@@ -22,7 +22,7 @@
 
 #include <stdint.h>
 
-struct device;
+struct adapter;
 struct ddata;
 
 typedef enum {
@@ -36,8 +36,8 @@ typedef enum {
 /* Driver abstract type common to all drivers */
 struct driverAPI_any {
     /*------------ Data -----------*/
-    struct device *device;      /* Belongs to this device */
-    struct ddata *ddata;        /* Device specific Driver-Data */
+    struct adapter *adapter;      /* Belongs to this adapter */
+    struct ddata *ddata;        /* Adapter specific Driver-Data */
 };
 
 struct configAPI_spi {
@@ -71,8 +71,8 @@ struct configAPI_spi {
 
 struct driverAPI_spi {
     /*------------ Data -----------*/
-    struct device *device;      /* Belongs to this device */
-    struct ddata *ddata;        /* Device specific Driver-Data */
+    struct adapter *adapter;      /* Belongs to this adapter */
+    struct ddata *ddata;        /* Adapter specific Driver-Data */
 
     /*---------- Methods ----------*/
     void (*sendData) (struct ddata * ddata, const uint8_t *data, int sz);
@@ -96,12 +96,12 @@ struct driverAPI_spi {
     int (*actuate_config) (struct ddata * ddata);   /* Actuate configuration */
 
     /* Allocate and return a pointer with a copy* of driver specific
-       driver-data unless device is NULL, in which case content is built-in
+       driver-data unless adapter is NULL, in which case content is built-in
        defaults
      */
-    struct ddata *(*newddata) (struct device * device);
+    struct ddata *(*newddata) (struct adapter * adapter);
 
-    /* Standardized functions for configuring device and/or driver.
+    /* Standardized functions for configuring adapter and/or driver.
        Functions may be NULL or only partly filled-in depending if driver
        allows run-rime configuration or not. Behavior, such as in order what
        should be done, is also mandated by implementation
@@ -132,8 +132,8 @@ struct configAPI_i2c {
 
 struct driverAPI_i2c {
     /*------------ Data -----------*/
-    struct device *device;      /* Belongs to this device */
-    struct ddata *ddata;        /* Device specific Driver-Data */
+    struct adapter *adapter;      /* Belongs to this adapter */
+    struct ddata *ddata;        /* Adapter specific Driver-Data */
 
     /*---------- Methods ----------*/
     void (*receiveByte) (struct ddata * ddata, uint8_t *data);
@@ -160,12 +160,12 @@ struct driverAPI_i2c {
     int (*actuate_config) (struct ddata * ddata);   /* Actuate configuration */
 
     /* Allocate and return a pointer with a copy* of driver specific
-       driver-data unless device is NULL, in which case content is built-in
+       driver-data unless adapter is NULL, in which case content is built-in
        defaults
      */
-    struct ddata *(*newddata) (struct device * device);
+    struct ddata *(*newddata) (struct adapter * adapter);
 
-    /* Standardized functions for configuring device and/or driver.
+    /* Standardized functions for configuring adapter and/or driver.
        Functions may be NULL or only partly filled-in depending if driver
        allows run-rime configuration or not. Behavior, such as in order what
        should be done, is also mandated by implementation

@@ -17,8 +17,8 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef devices_h
-#define devices_h
+#ifndef adapters_h
+#define adapters_h
 #include <config.h>
 
 #define REXP_ESTRSZ 80
@@ -49,7 +49,7 @@ typedef enum {
     LXI = 102,
 } devid_t;
 
-/* Note: Not all devices can have variations in clock-owners */
+/* Note: Not all adapters can have variations in clock-owners */
 typedef enum {
     CLKOWNR_UNDEFINED = 0,
     CLKOWNR_INVALID = 1,        /* Invalid, unknown or parse failure */
@@ -57,8 +57,8 @@ typedef enum {
     SLAVE = 101
 } clkownr_t;
 
-// Valid regex-i patterns for devices
-#define DEVICES "PP|BP|LXI"
+// Valid regex-i patterns for adapters
+#define ADAPTERS "PP|BP|LXI"
 
 // Valid regex-i patterns for "direction"
 #define DIRECTIONS "MASTER|SLAVE"
@@ -67,12 +67,12 @@ struct driverAPI_spi;
 struct driverAPI_i2c;
 struct driverAPI_any;
 
-/* Forward declared Device specific substructures */
+/* Forward declared Adapter specific substructures */
 struct paraport;
 struct buspirate;
 struct lxi;
 
-struct device {
+struct adapter {
     devid_t devid;
     role_t role;
     int index;
@@ -88,9 +88,9 @@ struct device {
     } driver;
 };
 
-int devices_init();
-int devices_parse(const char *devstr, struct device *device);
-int devices_init_device(struct device *device);
-int devices_deinit_device(struct device *device);
+int adapters_init();
+int adapters_parse(const char *adapterstr, struct adapter *adapter);
+int adapters_init_adapter(struct adapter *adapter);
+int adapters_deinit_adapter(struct adapter *adapter);
 
-#endif                          //devices_h
+#endif                          //adapters_h

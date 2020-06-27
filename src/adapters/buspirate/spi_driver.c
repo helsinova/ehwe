@@ -27,7 +27,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <log.h>
-#include <devices.h>
+#include <adapters.h>
 #include <driver.h>
 #include <buspirate.h>
 #include <string.h>
@@ -99,7 +99,7 @@ void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
     //ASSERT(tmp[0] == 0x00);
 
     ASSURE_E((ret = write(ddata->fd, obuf, osz)) >= -1, LOGE_IOERROR(errno));
-    LOGD("BP: %d bytes written to device\n", ret);
+    LOGD("BP: %d bytes written to adapter\n", ret);
     ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
     //n_sent=ntohs(*(int16_t*)(tmp));
     //LOGD("BP: %d bytes written SPI\n", n_sent);
@@ -107,7 +107,7 @@ void bpspi_sendrecieveData(struct ddata *ddata, const uint8_t *obuf,
 
     if (isz > 0) {
         ASSURE_E((ret = read(ddata->fd, ibuf, isz)) != -1, LOGE_IOERROR(errno));
-        LOGD("BP: %d bytes read from device\n", ret);
+        LOGD("BP: %d bytes read from adapter\n", ret);
     }
 }
 
@@ -136,13 +136,13 @@ void bpspi_sendrecieveData_ncs(struct ddata *ddata, const uint8_t *obuf,
     ASSURE_E(write(ddata->fd, &nsz_receive, 2) != -1, LOGE_IOERROR(errno));
 
     ASSURE_E((ret = write(ddata->fd, obuf, osz)) >= -1, LOGE_IOERROR(errno));
-    LOGD("BP: %d bytes written to device\n", ret);
+    LOGD("BP: %d bytes written to adapter\n", ret);
     ASSURE_E(read(ddata->fd, tmp, 1) != -1, LOGE_IOERROR(errno));
     ASSERT(tmp[0] == 0x01);
 
     if (isz > 0) {
         ASSURE_E((ret = read(ddata->fd, ibuf, isz)) != -1, LOGE_IOERROR(errno));
-        LOGD("BP: %d bytes read from device\n", ret);
+        LOGD("BP: %d bytes read from adapter\n", ret);
     }
 }
 
@@ -223,16 +223,16 @@ int bpspi_configure(struct ddata *ddata)
     return 0;
 }
 
-/* Create a new device/driver-data object for external manipulation without
- * interfering with current one. If arg "device" is not NULL it will be a
+/* Create a new adapter/driver-data object for external manipulation without
+ * interfering with current one. If arg "adapter" is not NULL it will be a
  * copy of current, else it's will be pre-set with build-system defaults. */
-struct ddata *bpspi_newddata(struct device *device)
+struct ddata *bpspi_newddata(struct adapter *adapter)
 {
     struct ddata *ddata;
     ASSERT(ddata = malloc(sizeof(struct ddata)));
 
-    if (device != NULL)
-        return (struct ddata *)memcpy(ddata, device->driver.any->ddata,
+    if (adapter != NULL)
+        return (struct ddata *)memcpy(ddata, adapter->driver.any->ddata,
                                       sizeof(struct ddata));
 
     memcpy(&(ddata->config.spi), &bp_dflt_config_SPI,

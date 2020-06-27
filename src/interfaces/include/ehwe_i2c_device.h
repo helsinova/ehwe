@@ -27,10 +27,10 @@
  * will change and might require a change of the include (TBD) */
 #include <stm32f10x.h>
 
-struct device;
+struct adapter;
 
 /* Module initialization */
-int i2c_device_init_interface(const struct device *device);
+int i2c_device_init_interface(const struct adapter *device);
 
 /* Forward declaration - hide unneeded details*/
 struct i2c_device_struct;
@@ -43,7 +43,7 @@ void i2c_device_close(i2c_device_hndl i2c_device);
 I2C_TypeDef *i2c_device_bus(i2c_device_hndl i2c_device);
 uint8_t i2c_device_addr(i2c_device_hndl i2c_device);
 
-/* Device access for byte-chunks */
+/* Adapter access for byte-chunks */
 void i2c_device_read_bytes(i2c_device_hndl i2c_device, uint8_t reg,
                            uint8_t *buf, uint8_t count);
 void i2c_device_write_bytes(i2c_device_hndl i2c_device, uint8_t reg,

@@ -34,7 +34,7 @@
 #include "opts.h"
 #include "main.h"
 #include <mlist.h>
-#include <devices.h>
+#include <adapters.h>
 #include <interfaces.h>
 #include <stdlib.h>
 
@@ -69,8 +69,8 @@ int main(int argc, char **argv)
     char **new_argv = argv;
     LOGI("\"ehwe\" version v%s \n", VERSION);
 
-    /* Storage for device-specification strings */
-    ASSURE((rc = mlist_opencreate(sizeof(char *), NULL, &opts.dev_strs)) == 0);
+    /* Storage for adapter-specification strings */
+    ASSURE((rc = mlist_opencreate(sizeof(char *), NULL, &opts.adapter_strs)) == 0);
 
     opts_init();
     /* /begin/ zeroing of opt vars */
@@ -81,40 +81,40 @@ int main(int argc, char **argv)
     ASSURE_E(opts_check(&opts) == OPT_OK, goto err);
     LOGI("Option passed rule-check OK\n", rc);
 
-    /* Storage for device-specification strings */
+    /* Storage for adapter-specification strings */
     ASSURE((rc =
-            mlist_opencreate(sizeof(struct device), NULL, &ehwe.devices)) == 0);
+            mlist_opencreate(sizeof(struct adapter), NULL, &ehwe.adapters)) == 0);
 
-    /* Convert device strings to devices */
-    LOGD("List of device definition strings:\n");
+    /* Convert adapter strings to adapters */
+    LOGD("List of adapter definition strings:\n");
 #undef LDATA
 #define LDATA char *
-    ITERATE(opts.dev_strs) {
-        struct device device;
+    ITERATE(opts.adapter_strs) {
+        struct adapter adapter;
 
-        LOGD("  %s\n", CDATA(opts.dev_strs));
-        if (devices_parse(CDATA(opts.dev_strs), &device) != 0) {
-            LOGE("Bad device option (-d): [%s] \n", CDATA(opts.dev_strs));
-            mlist_close(ehwe.devices);
+        LOGD("  %s\n", CDATA(opts.adapter_strs));
+        if (adapters_parse(CDATA(opts.adapter_strs), &adapter) != 0) {
+            LOGE("Bad adapter option (-d): [%s] \n", CDATA(opts.adapter_strs));
+            mlist_close(ehwe.adapters);
             goto err;
         }
         /* OK to add stack-variable as deep-copy to new location occurs. */
-        ASSURE(mlist_add_last(ehwe.devices, &device));
+        ASSURE(mlist_add_last(ehwe.adapters, &adapter));
     }
 #undef LDATA
 
-    /* Close storage of device-specification strings */
-    //ASSURE((rc = mlist_close(opts.dev_strs)) == 0);
+    /* Close storage of adapter-specification strings */
+    //ASSURE((rc = mlist_close(opts.adapter_strs)) == 0);
 
-    LOGD("Initialing devices:\n");
+    LOGD("Initialing adapters:\n");
 #undef LDATA
-#define LDATA struct device
-    ITERATE(ehwe.devices) {
-        LOGD("  %d\n", CDATA(ehwe.devices).devid);
+#define LDATA struct adapter
+    ITERATE(ehwe.adapters) {
+        LOGD("  %d\n", CDATA(ehwe.adapters).devid);
         ASSURE_E((rc =
-                  devices_init_device(CREF(ehwe.devices))) == 0, goto err2);;
+                  adapters_init_adapter(CREF(ehwe.adapters))) == 0, goto err2);;
         ASSURE_E((rc =
-                  interfaces_init_interface(CREF(ehwe.devices))) == 0,
+                  interfaces_init_interface(CREF(ehwe.adapters))) == 0,
                  goto err2);
     }
 #undef LDATA
@@ -124,27 +124,27 @@ int main(int argc, char **argv)
     rc = embedded_main(new_argc, new_argv);
     LOGI("Workbench ended\n");
 
-    LOGD("De-initializing devices:\n");
-#define LDATA struct device
-    ITERATE(ehwe.devices) {
-        LOGD("  %d\n", CDATA(ehwe.devices).devid);
+    LOGD("De-initializing adapters:\n");
+#define LDATA struct adapter
+    ITERATE(ehwe.adapters) {
+        LOGD("  %d\n", CDATA(ehwe.adapters).devid);
         ASSURE_E((rc =
-                  devices_deinit_device(CREF(ehwe.devices))) == 0, goto err2);;
+                  adapters_deinit_adapter(CREF(ehwe.adapters))) == 0, goto err2);;
     }
 #undef LDATA
-    /* Close storage of device-list. OK as all of payload is also freed,
-     * as long struct device does not contain any 2:nd depth-level heap
+    /* Close storage of adapter-list. OK as all of payload is also freed,
+     * as long struct adapter does not contain any 2:nd depth-level heap
      * variable. */
-    ASSURE((rc = mlist_close(ehwe.devices)) == 0);
+    ASSURE((rc = mlist_close(ehwe.adapters)) == 0);
 
     ehwe_exit(rc);
 err2:
     LOGE("Current rc: %d\n", rc);
-    ASSURE((rc = mlist_close(ehwe.devices)) == 0);
+    ASSURE((rc = mlist_close(ehwe.adapters)) == 0);
     ehwe_exit(1);
 err:
     LOGE("Current rc: %d\n", rc);
-    ASSURE((rc = mlist_close(opts.dev_strs)) == 0);
+    ASSURE((rc = mlist_close(opts.adapter_strs)) == 0);
     ehwe_exit(1);
     /* GCC, please shut up! */
     return 0;

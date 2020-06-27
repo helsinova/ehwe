@@ -23,11 +23,11 @@
 #include <config.h>
 #include <stm32f10x.h>
 
-struct device;
+struct adapter;
 
-int ehwe_init_interface(const struct device *device);
-void i2c_write(I2C_TypeDef * bus, uint8_t dev_addr, const uint8_t *buffer,
+int ehwe_init_interface(const struct adapter *adapter);
+void i2c_write(I2C_TypeDef * bus, uint8_t adapter_addr, const uint8_t *buffer,
                int len, int send_stop);
-void i2c_read(I2C_TypeDef * bus, uint8_t dev_addr, uint8_t *buffer, int len);
+void i2c_read(I2C_TypeDef * bus, uint8_t adapter_addr, uint8_t *buffer, int len);
 
 #endif                          //ehwe_h

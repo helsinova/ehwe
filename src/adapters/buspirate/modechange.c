@@ -24,7 +24,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <log.h>
-#include <devices.h>
+#include <adapters.h>
 #include <driver.h>
 #include <buspirate.h>
 #include <string.h>
@@ -57,7 +57,7 @@ struct cmdrply_s cmdrply[] = {
                                 /* Time in uS for BusPirate to process a
                                  * command. Machine constant.*/
 #define US_CHAR_TIME 100        /* Time in uS to propagate one character
-                                 * over the serial device. Note: Baud-rate
+                                 * over the serial adapter. Note: Baud-rate
                                  * dependent. TBD: detect baud-rate to
                                  * release this dependency, current constant
                                  * assumes 9K6 bps
@@ -106,7 +106,7 @@ static int read_2err(int fd, char *rbuff, int len)
    previous command is already in in-buffer (resulting in that current
    response will be the pending previous one).
 
-  NOTE: **ONLY** to be used when device is in non-blocking. Add check for
+  NOTE: **ONLY** to be used when adapter is in non-blocking. Add check for
   this (TBD)
  */
 void empty_inbuff(int fd)
@@ -144,7 +144,7 @@ static unsigned int lookup_cmd(char *rply)
 }
 
 /***************************************************************************
- * Bus-pirate device functions
+ * Bus-pirate adapter functions
  * Inspired from:
  * http://dangerousprototypes.com/docs/Bus_Pirate:_Entering_binary_mode
  ***************************************************************************/
@@ -176,14 +176,14 @@ void log_ioerror(int ecode, log_level llevel)
 }
 
 /* Enter binary mode from normal console-mode */
-int rawMode_enter(struct device *device)
+int rawMode_enter(struct adapter *adapter)
 {
     int ret, slen, i, corr_cmd;
     char tmp[BUF_SZ] = { '\0' };
     char *expRply = NULL;
     int done = 0;
     int tries = 0;
-    struct ddata *ddata = device->driver.any->ddata;
+    struct ddata *ddata = adapter->driver.any->ddata;
     int *fd = &ddata->fd;
 
     LOGI("BusPirate entering binary mode...\n");
@@ -191,7 +191,7 @@ int rawMode_enter(struct device *device)
     slen = strlen(expRply);
 
     if (*fd == -1) {
-        LOGE("Device isn't open\n");
+        LOGE("Adapter isn't open\n");
         return -1;
     }
 
@@ -241,12 +241,12 @@ int rawMode_enter(struct device *device)
     return 0;
 }
 
-int rawMode_toMode(struct device *device, bpcmd_raw_t bpcmd)
+int rawMode_toMode(struct adapter *adapter, bpcmd_raw_t bpcmd)
 {
     int ret, slen, corr_cmd, tries = 0;
     char tmp[BUF_SZ] = { '\0' };
     char *expRply = NULL;
-    struct ddata *ddata = device->driver.any->ddata;
+    struct ddata *ddata = adapter->driver.any->ddata;
     int *fd = &ddata->fd;
 
     LOGI("BusPirate entering mode %d\n", bpcmd);
