@@ -28,16 +28,24 @@
  * TBD: SPI and I2C are mutually exclusive. I.e. shared resources. Implement
  * logic to handle that sum does not exceed shared number of shared
  * resources */
-#define MAX_SPI_INTERFACES 3
-#define MAX_I2C_INTERFACES 3
+#define MAX_SPI_ADAPTERS 3
+#define MAX_I2C_ADAPTERS 3
 
 struct driverAPI_spi;
 struct driverAPI_i2c;
+
+/* Note: These to typedefs are defined and named as they are to follow
+ * STM32F10x_StdPeriph. I.e. API look the same including argument type names
+ * even though internally these are vastly different.
+ *
+ * Unless using STM32F10x_StdPerip explicitly, these types should not be
+ * used neither in application code. Internally these types are written-out
+ * explicitly in all ehwe code */
 typedef struct driverAPI_spi SPI_TypeDef;
 typedef struct driverAPI_i2c I2C_TypeDef;
 
-extern SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
-extern I2C_TypeDef *I2C_stm32_drv[MAX_I2C_INTERFACES];
+extern SPI_TypeDef *SPI_stm32_drv[MAX_SPI_ADAPTERS];
+extern I2C_TypeDef *I2C_stm32_drv[MAX_I2C_ADAPTERS];
 
 #define SPI1 (SPI_stm32_drv[0])
 #define SPI2 (SPI_stm32_drv[1])

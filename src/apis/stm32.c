@@ -29,8 +29,8 @@
 #include <stdlib.h>
 #include <assure.h>
 
-SPI_TypeDef *SPI_stm32_drv[MAX_SPI_INTERFACES];
-I2C_TypeDef *I2C_stm32_drv[MAX_I2C_INTERFACES];
+SPI_TypeDef *SPI_stm32_drv[MAX_SPI_ADAPTERS];
+I2C_TypeDef *I2C_stm32_drv[MAX_I2C_ADAPTERS];
 
 static void nod_sendData(struct ddata *ddata, const uint8_t *data, int sz);
 static void nod_receiveData(struct ddata *ddata, uint8_t *data, int sz);
@@ -85,10 +85,10 @@ int stm32_init()
         return 0;
     }
     is_init = 1;
-    for (i = 0; i < MAX_SPI_INTERFACES; i++) {
+    for (i = 0; i < MAX_SPI_ADAPTERS; i++) {
         SPI_stm32_drv[i] = &nodriverAPI_spi;
     }
-    for (i = 0; i < MAX_I2C_INTERFACES; i++) {
+    for (i = 0; i < MAX_I2C_ADAPTERS; i++) {
         I2C_stm32_drv[i] = &nodriverAPI_i2c;
     }
 
@@ -113,12 +113,12 @@ int stm32_init_api(const struct adapter *adapter)
             switch (adapter->role) {
                 case ROLE_SPI:
                     ASSERT(adapter->index > 0
-                           && adapter->index <= MAX_SPI_INTERFACES);
+                           && adapter->index <= MAX_SPI_ADAPTERS);
                     SPI_stm32_drv[adapter->index - 1] = adapter->driver.spi;
                     break;
                 case ROLE_I2C:
                     ASSERT(adapter->index > 0
-                           && adapter->index <= MAX_I2C_INTERFACES);
+                           && adapter->index <= MAX_I2C_ADAPTERS);
                     I2C_stm32_drv[adapter->index - 1] = adapter->driver.i2c;
                     break;
                 default:
@@ -133,12 +133,12 @@ int stm32_init_api(const struct adapter *adapter)
             switch (adapter->role) {
                 case ROLE_SPI:
                     ASSERT(adapter->index > 0
-                           && adapter->index <= MAX_SPI_INTERFACES);
+                           && adapter->index <= MAX_SPI_ADAPTERS);
                     SPI_stm32_drv[adapter->index - 1] = adapter->driver.spi;
                     break;
                 case ROLE_I2C:
                     ASSERT(adapter->index > 0
-                           && adapter->index <= MAX_I2C_INTERFACES);
+                           && adapter->index <= MAX_I2C_ADAPTERS);
                     I2C_stm32_drv[adapter->index - 1] = adapter->driver.i2c;
                     break;
                 default:
